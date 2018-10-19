@@ -1,11 +1,11 @@
 # Computer Graphics 203.3710, Winter 2018/2019
 ## Students Team data
 
-Name: 'Your real name'  
-Student Number: 'Your student number'
+Name: Basel Zarka  
+Student Number: 313440570
 
-Name: 'Your real name'  
-Student Number: 'Your student number'
+Name: Eli Abboud
+Student Number: 315475889
 
 ### Lecturer
 *Roi Poranne*
