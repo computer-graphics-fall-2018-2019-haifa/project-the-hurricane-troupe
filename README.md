@@ -4,7 +4,7 @@
 Name: Basel Zarka
 Student Number: 313440570
 
-Name: Eli Abb
+Name: Eli Abboud
 Student Number: 315475889
 
 ### Lecturer
