@@ -33,7 +33,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 int main(int argc, char **argv)
 {
 	// Create GLFW window
-	int windowWidth = 1280, windowHeight = 720;
+	int windowWidth = 4080, windowHeight = 4720;
 	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Mesh Viewer");
 	if (!window)
 	{
@@ -64,8 +64,10 @@ int main(int argc, char **argv)
 		StartFrame();
 
 		// Here we build the menus for the next frame. Feel free to pass more arguments to this function call
-		DrawImguiMenus(io, scene);
-
+		//DrawImguiMenus(io, scene);
+		
+		//renderer.drawLine(4, 4, 2, 1, glm::vec3(1.0f, 0.0f, 0.0f));
+		
 		// Render the next frame
 		RenderFrame(window, scene, renderer, io);
     }

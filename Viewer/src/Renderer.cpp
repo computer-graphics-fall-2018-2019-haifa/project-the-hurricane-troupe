@@ -212,3 +212,100 @@ void Renderer::SwapBuffers()
 	// Finally renders the data.
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
+
+void Renderer::plotLineHigh(int x1, int y1, int x2, int y2, const glm::vec3& color) {
+	int deltaX = x2 - x1;
+	int deltaY = y2 - y1;
+	int xi = 1;
+	if (deltaX < 0) {
+		xi = -1;
+		deltaX = -deltaX;
+	}
+	int d = 2 * deltaX - deltaY;
+	int x = x1;
+	int y = y1;
+	while (y < y2) {
+		putPixel(x, y, color);
+		if (d > 0) {
+			x = x + xi;
+			d = d - 2 * deltaY;
+		}
+		d = d + 2 * deltaX;
+		++y;
+	}
+}
+
+void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& color) {
+	int deltaX = x2 - x1;
+	int deltaY = y2 - y1;
+	int yi = 1;
+	if (deltaY < 0) {
+		yi = -1;
+		deltaY = -deltaY;
+	}
+	int d = 2 * deltaY - deltaX;
+	int x = x1;
+	int y = y1;
+	while (x < x2) {
+		putPixel(x, y, color);
+		if (d > 0) {
+			y = y + yi;
+			d = d - 2 * deltaX;
+		}
+		d = d + 2 * deltaY;
+		++x;
+	}
+}
+
+void Renderer::drawLine(int x1, int y1, int x2, int y2, const glm::vec3& color) {
+	/*double a = (double)(y2 - y1) / (double)(x2 - x1);
+	double c = y1 + a * x1;
+	if (0.0 < a && a < 1.0) {
+		int x = x1;
+		int y = y1;
+		int e = -1;
+		while (x < x2) {
+			e = 2 * a*x + 2 * c - 2 * y - 1;
+			if (e > 0) {
+				++y;
+				e -= 2;
+			}
+			putPixel(x, y, color);
+			++x;
+			e += 2 * a;
+		}
+	}
+	else if (a >= 1)
+	{
+		int x = y1;
+		int y = x1;
+		int e = -1;
+		while (x < x2) {
+			e = 2 * a*y + 2 * c - 2 * x - 1;
+			if (e > 0) {
+				++x;
+				e -= 2;
+			}
+			putPixel(y, x, color);
+			++y;
+			e += 2 * a;
+		}
+	}*/
+
+	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
+		if (x1 > x2) {
+			plotLineLow(x2, y2, x1, y1, color);
+		}
+		else {
+			plotLineLow(x1, y1, x2, y2, color);
+		}
+	}
+	else {
+		if (y1 > y2) {
+			plotLineHigh(x2, y2, x1, y1, color);
+		}
+		else {
+			plotLineHigh(x1, y1, x2, y2, color);
+		}
+	}
+}
