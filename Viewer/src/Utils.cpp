@@ -24,6 +24,7 @@ MeshModel Utils::LoadMeshModel(const std::string& filePath)
 	std::vector<Face> faces;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> textures;
 	std::ifstream ifile(filePath.c_str());
 
 	// while not end of file
@@ -46,11 +47,11 @@ MeshModel Utils::LoadMeshModel(const std::string& filePath)
 		}
 		else if (lineType == "vn")
 		{
-			// Add the required code here...
+			normals.push_back(Utils::Vec3fFromStream(issLine));
 		}
 		else if (lineType == "vt")
 		{
-			// Texture coordinates
+			textures.push_back(Utils::Vec2fFromStream(issLine));
 		}
 		else if (lineType == "f")
 		{
@@ -66,6 +67,7 @@ MeshModel Utils::LoadMeshModel(const std::string& filePath)
 		}
 	}
 
+	/*TODO: Add textures to return*/
 	return MeshModel(faces, vertices, normals, Utils::GetFileName(filePath));
 }
 

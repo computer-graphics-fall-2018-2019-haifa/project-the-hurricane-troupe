@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 		StartFrame();
 
 		// Here we build the menus for the next frame. Feel free to pass more arguments to this function call
-		//DrawImguiMenus(io, scene);
+		DrawImguiMenus(io, scene);
 		
 		//renderer.drawLine(4, 4, 2, 1, glm::vec3(1.0f, 0.0f, 0.0f));
 		

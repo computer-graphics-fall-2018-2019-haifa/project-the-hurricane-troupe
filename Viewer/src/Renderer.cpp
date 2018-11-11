@@ -80,7 +80,7 @@ void Renderer::Render(const Scene& scene)
 	//#############################################
 
 	// Draw a chess board in the middle of the screen
-	for (int i = 100; i < viewportWidth - 100; i++)
+	/*for (int i = 100; i < viewportWidth - 100; i++)
 	{
 		for (int j = 100; j < viewportHeight - 100; j++)
 		{
@@ -97,7 +97,8 @@ void Renderer::Render(const Scene& scene)
 				putPixel(i, j, glm::vec3(1, 0, 0));
 			}
 		}
-	}
+	}*/
+	scene.drawModels();
 }
 
 //##############################
@@ -258,39 +259,6 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 }
 
 void Renderer::drawLine(int x1, int y1, int x2, int y2, const glm::vec3& color) {
-	/*double a = (double)(y2 - y1) / (double)(x2 - x1);
-	double c = y1 + a * x1;
-	if (0.0 < a && a < 1.0) {
-		int x = x1;
-		int y = y1;
-		int e = -1;
-		while (x < x2) {
-			e = 2 * a*x + 2 * c - 2 * y - 1;
-			if (e > 0) {
-				++y;
-				e -= 2;
-			}
-			putPixel(x, y, color);
-			++x;
-			e += 2 * a;
-		}
-	}
-	else if (a >= 1)
-	{
-		int x = y1;
-		int y = x1;
-		int e = -1;
-		while (x < x2) {
-			e = 2 * a*y + 2 * c - 2 * x - 1;
-			if (e > 0) {
-				++x;
-				e -= 2;
-			}
-			putPixel(y, x, color);
-			++y;
-			e += 2 * a;
-		}
-	}*/
 
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
 		if (x1 > x2) {

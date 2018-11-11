@@ -7,6 +7,7 @@
 #include <memory>
 #include "MeshModel.h"
 #include "Camera.h"
+#include "Renderer.h"
 
 /*
  * Scene class.
@@ -36,4 +37,5 @@ public:
 	const int GetActiveModelIndex() const;
 
 	// Add more methods as needed...
+	const void drawModels(const Renderer& renderer) const;
 };

@@ -15,6 +15,7 @@ private:
 	std::vector<Face> faces;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> textures;
 	glm::mat4x4 worldTransform;
 	glm::vec4 color;
 	std::string modelName;

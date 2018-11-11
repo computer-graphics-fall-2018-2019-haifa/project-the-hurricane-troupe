@@ -56,3 +56,11 @@ const int Scene::GetActiveModelIndex() const
 {
 	return activeModelIndex;
 }
+
+const void Scene::drawModels(const Renderer& renderer) const {
+	
+	for (int i = 0; i < models.size; ++i) {
+		(models[i])
+		renderer.drawLine();
+	}
+}
