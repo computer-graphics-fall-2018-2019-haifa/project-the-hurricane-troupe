@@ -41,7 +41,7 @@ void Renderer::createBuffers(int viewportWidth, int viewportHeight)
 		delete[] colorBuffer;
 	}
 
-	colorBuffer = new float[3* viewportWidth * viewportHeight];
+	colorBuffer = new float[3 * viewportWidth * viewportHeight];
 	for (int x = 0; x < viewportWidth; x++)
 	{
 		for (int y = 0; y < viewportHeight; y++)
@@ -98,7 +98,7 @@ void Renderer::Render(const Scene& scene)
 			}
 		}
 	}*/
-	scene.drawModels();
+	drawModels(scene);
 }
 
 //##############################
@@ -129,7 +129,7 @@ void Renderer::initOpenGLRendering()
 	//	     | \ | <--- The exture is drawn over two triangles that stretch over the screen.
 	//	     |__\|
 	// (-1,-1)    (1,-1)
-	const GLfloat vtc[]={
+	const GLfloat vtc[] = {
 		-1, -1,
 		 1, -1,
 		-1,  1,
@@ -138,19 +138,19 @@ void Renderer::initOpenGLRendering()
 		 1,  1
 	};
 
-	const GLfloat tex[]={
+	const GLfloat tex[] = {
 		0,0,
 		1,0,
 		0,1,
 		0,1,
 		1,0,
-		1,1};
+		1,1 };
 
 	// Makes this buffer the current one.
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
 	// This is the opengl way for doing malloc on the gpu. 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vtc)+sizeof(tex), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vtc) + sizeof(tex), NULL, GL_STATIC_DRAW);
 
 	// memcopy vtc to buffer[0,sizeof(vtc)-1]
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vtc), vtc);
@@ -159,25 +159,25 @@ void Renderer::initOpenGLRendering()
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vtc), sizeof(tex), tex);
 
 	// Loads and compiles a sheder.
-	GLuint program = InitShader( "vshader.glsl", "fshader.glsl" );
+	GLuint program = InitShader("vshader.glsl", "fshader.glsl");
 
 	// Make this program the current one.
 	glUseProgram(program);
 
 	// Tells the shader where to look for the vertex position data, and the data dimensions.
-	GLint  vPosition = glGetAttribLocation( program, "vPosition" );
-	glEnableVertexAttribArray( vPosition );
-	glVertexAttribPointer( vPosition,2,GL_FLOAT,GL_FALSE,0,0 );
+	GLint  vPosition = glGetAttribLocation(program, "vPosition");
+	glEnableVertexAttribArray(vPosition);
+	glVertexAttribPointer(vPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 	// Same for texture coordinates data.
-	GLint  vTexCoord = glGetAttribLocation( program, "vTexCoord" );
-	glEnableVertexAttribArray( vTexCoord );
-	glVertexAttribPointer( vTexCoord,2,GL_FLOAT,GL_FALSE,0,(GLvoid *)sizeof(vtc) );
+	GLint  vTexCoord = glGetAttribLocation(program, "vTexCoord");
+	glEnableVertexAttribArray(vTexCoord);
+	glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid *)sizeof(vtc));
 
 	//glProgramUniform1i( program, glGetUniformLocation(program, "texture"), 0 );
 
 	// Tells the shader to use GL_TEXTURE0 as the texture id.
-	glUniform1i(glGetUniformLocation(program, "texture"),0);
+	glUniform1i(glGetUniformLocation(program, "texture"), 0);
 }
 
 void Renderer::createOpenGLBuffer()
@@ -276,4 +276,33 @@ void Renderer::drawLine(int x1, int y1, int x2, int y2, const glm::vec3& color) 
 			plotLineHigh(x1, y1, x2, y2, color);
 		}
 	}
+}
+
+
+
+
+void Renderer::drawModels(const Scene& scene) {
+	unsigned int size = scene.GetModelCount();
+	for (unsigned int i = 0; i < size; ++i) {
+
+		std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
+		std::vector<glm::vec2> textures = models[i]->getTextures();
+		std::vector<glm::vec3> normals = models[i]->getNormals();
+		std::vector<glm::vec3> vertices = models[i]->getVertices();
+		std::vector<Face> faces = models[i]->getFaces();
+		for each (Face face in faces)
+		{
+			int v1 = face.GetVertexIndex(0);
+			int x1 = vertices[v1].x + 500, y1 = vertices[v1].y + 500;
+			int v2 = face.GetVertexIndex(1);
+			int x2 = vertices[v2].x + 500, y2 = vertices[v2].y + 500;
+			int v3 = face.GetVertexIndex(2);
+			int x3 = vertices[v3].x + 500, y3 = vertices[v3].y + 500;
+
+			drawLine(x1, y1, x2, y2, glm::vec3(1.0f, 0.0f, 0.0f));
+			drawLine(x1, y1, x3, y3, glm::vec3(1.0f, 0.0f, 0.0f));
+			drawLine(x2, y2, x3, y3, glm::vec3(1.0f, 0.0f, 0.0f));
+			drawLine(0, 0, 0, 1000, glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+		}
 }
