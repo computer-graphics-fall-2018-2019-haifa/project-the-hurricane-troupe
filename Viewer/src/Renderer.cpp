@@ -79,8 +79,13 @@ void Renderer::Render(const Scene& scene)
 	//## Here you should render the scene.       ##
 	//#############################################
 
+	drawModels(scene);
+}
+
+void Renderer::drawChess()  {
 	// Draw a chess board in the middle of the screen
-	/*for (int i = 100; i < viewportWidth - 100; i++)
+	/**/
+	for (int i = 100; i < viewportWidth - 100; i++)
 	{
 		for (int j = 100; j < viewportHeight - 100; j++)
 		{
@@ -97,8 +102,8 @@ void Renderer::Render(const Scene& scene)
 				putPixel(i, j, glm::vec3(1, 0, 0));
 			}
 		}
-	}*/
-	drawModels(scene);
+	}
+
 }
 
 //##############################

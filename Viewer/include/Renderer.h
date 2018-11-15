@@ -41,5 +41,6 @@ public:
 	void drawLine(int x1, int y1, int x2, int y2, const glm::vec3& color);
 
 	void drawModels(const Scene& scene);
+	void drawChess();
 	// Add more methods/functionality as needed...
 };
