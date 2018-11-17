@@ -35,6 +35,7 @@ public:
 	void SetActiveModelIndex(int index);
 	const int GetActiveModelIndex() const;
 	std::vector<std::shared_ptr<MeshModel>> getSceneModels() const;
+	Camera getActiveCamera() const;
 	// Add more methods as needed...
 
 };

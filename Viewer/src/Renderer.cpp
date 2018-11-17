@@ -287,8 +287,9 @@ void Renderer::drawLine(int x1, int y1, int x2, int y2, const glm::vec3& color) 
 
 
 void Renderer::drawModels(const Scene& scene) {
-	unsigned int size = scene.GetModelCount();
-	for (unsigned int i = 0; i < size; ++i) {
+	Camera activeCam = scene.getActiveCamera();
+	unsigned int modelAmount = scene.GetModelCount();
+	for (unsigned int i = 0; i < modelAmount; ++i) {
 
 		std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 		std::vector<glm::vec2> textures = models[i]->getTextures();
@@ -304,10 +305,15 @@ void Renderer::drawModels(const Scene& scene) {
 			int v3 = face.GetVertexIndex(2);
 			int x3 = vertices[v3].x + 500, y3 = vertices[v3].y + 500;
 
+			//TODO: Get new P1,P2 for each line with accordance to the cam direction
+			activeCam.setProjection(true);
+			glm::mat4x4 camViewTransformInverse = activeCam.getViewTransformationInverse();
+			//m = get object transform 
+			//t = camViewTransformInverse*m
+
 			drawLine(x1, y1, x2, y2, glm::vec3(1.0f, 0.0f, 0.0f));
 			drawLine(x1, y1, x3, y3, glm::vec3(1.0f, 0.0f, 0.0f));
 			drawLine(x2, y2, x3, y3, glm::vec3(1.0f, 0.0f, 0.0f));
-			drawLine(0, 0, 0, 1000, glm::vec3(1.0f, 0.0f, 0.0f));
 			}
 		}
 }

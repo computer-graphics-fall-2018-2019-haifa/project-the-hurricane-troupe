@@ -44,7 +44,7 @@ Face::~Face()
 
 const int Face::GetVertexIndex(int index)
 {
-	return vertexIndices[index];
+	return vertexIndices[index]-1;
 }
 
 const int Face::GetNormalIndex(int index)

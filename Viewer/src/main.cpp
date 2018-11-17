@@ -57,9 +57,6 @@ int main(int argc, char **argv)
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
 
-	Camera mainCam = Camera(glm::vec4(0, 0, 0, 0), glm::vec4(4, 4, 4, 4), glm::vec4(4, 4, 4, 4));
-	scene.AddCamera(mainCam);
-
 	// This is the main game loop..
     while (!glfwWindowShouldClose(window))
     {
@@ -142,7 +139,9 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 
 	// Clear the frame buffer
 	renderer.ClearColorBuffer(GetClearColor());
-
+	
+	Camera mainCam = Camera(glm::vec4(0, 0, 0, 0), glm::vec4(4, 4, 4, 4), glm::vec4(4, 4, 4, 4));
+	scene.AddCamera(mainCam);
 	// Render the scene
 	renderer.Render(scene);
 

@@ -33,25 +33,47 @@ void Camera::SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const gl
 	viewTransformation = c * translationMatrix;
 }
 
-void Camera::SetOrthographicProjection(
-	const float height,
-	const float aspectRatio,
-	const float near,
-	const float far)
+void Camera::SetOrthographicProjection(const float left, const float right, const float bottom, const float top, const float near, const float far)
 {
-
+	glm::mat4x4 C
+	{ 2.0 / (right - left)		,	0						,		0					,	-1.0*((right + left) / (right - left)),
+		0						,	2.0 / (top - bottom)	,		0					,	-1.0*((top + bottom) / (top - bottom)),
+		0						,	0						,		2.0 / (near - far)	,	-1.0*((far + near) / (far - near)),
+		0						,	0						,		0					,	1,
+	};
+	projectionTransformation = C;
 }
 
-void Camera::SetPerspectiveProjection(
-	const float fovy,
-	const float aspectRatio,
-	const float near,
-	const float far)
+void Camera::SetPerspectiveProjection(const float left, const float right, const float bottom, const float top, const float near, const float far)
 {
-	 
+	glm::mat4x4 C
+	{ (2.0 * near) / (right - left)		,	0								,		(right + left) / (right - left)		,	0,
+		0								,	(2.0 * near) / (top - bottom)	,		 (top + bottom) / (top - bottom)	,	0,
+		0								,	0								,		-1 * (far + near) / (far - near)	,	-1 * ((2 * far * near) / (far - near)),
+		0								,	0								,	    -1									,	0,
+	};
+	projectionTransformation = C;
 }
+
+void Camera::setProjection(bool orthographic, const float left, const float right, const float bottom, const float top, const float near, const float far)
+{
+
+	if (orthographic) {
+		SetOrthographicProjection(left, right, bottom, top, near, far);
+	}
+	else {
+		SetPerspectiveProjection(left, right, bottom, top, near, far);
+	}
+}
+
+
 
 void Camera::SetZoom(const float zoom)
 {
 
+}
+
+glm::mat4x4 Camera::getViewTransformationInverse() const
+{
+	return glm::inverse(viewTransformation);
 }

@@ -24,19 +24,21 @@ public:
 
 	void SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up);
 
+
 	void SetOrthographicProjection(
-		const float height,
-		const float aspectRatio,
+		const float left,
+		const float right,
+		const float bottom,
+		const float top,
 		const float near,
 		const float far);
 
-	void SetPerspectiveProjection(
-		const float fovy,
-		const float aspect,
-		const float near,
-		const float far);
+	void SetPerspectiveProjection(const float left, const float right, const float bottom, const float top, const float near, const float far);
+
+	void setProjection(bool orthographic, const float left = 0.0, const float right = 700.0, const float bottom = 0.0, const float top = 1000.0, const float near = 5.0, const float far = 450.0);
 
 	void SetZoom(const float zoom);
 
+	glm::mat4x4 getViewTransformationInverse() const;
 	// Add more methods/functionality as needed...
 };
