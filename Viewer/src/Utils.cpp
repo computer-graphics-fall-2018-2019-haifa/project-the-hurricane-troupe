@@ -71,6 +71,16 @@ MeshModel Utils::LoadMeshModel(const std::string& filePath)
 	return MeshModel(faces, vertices, normals, Utils::GetFileName(filePath));
 }
 
+glm::mat4x4 Utils::IdentityMat()
+{
+	return glm::mat4x4({
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+		});
+}
+
 std::string Utils::GetFileName(const std::string& filePath)
 {
 	if (filePath.empty()) {

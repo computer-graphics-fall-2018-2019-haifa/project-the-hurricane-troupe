@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "InitShader.h"
+#include "Utils.h"
 #include "MeshModel.h"
 #include <imgui/imgui.h>
 #include <vector>
@@ -296,24 +297,35 @@ void Renderer::drawModels(const Scene& scene) {
 		std::vector<glm::vec3> normals = models[i]->getNormals();
 		std::vector<glm::vec3> vertices = models[i]->getVertices();
 		std::vector<Face> faces = models[i]->getFaces();
+		glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 		for each (Face face in faces)
 		{
 			int v1 = face.GetVertexIndex(0);
-			int x1 = vertices[v1].x + 500, y1 = vertices[v1].y + 500;
+			float x1 = vertices[v1].x , y1 = vertices[v1].y, z1 = vertices[v1].z;
 			int v2 = face.GetVertexIndex(1);
-			int x2 = vertices[v2].x + 500, y2 = vertices[v2].y + 500;
+			float x2 = vertices[v2].x , y2 = vertices[v2].y , z2 = vertices[v2].z;
 			int v3 = face.GetVertexIndex(2);
-			int x3 = vertices[v3].x + 500, y3 = vertices[v3].y + 500;
+			float x3 = vertices[v3].x, y3 = vertices[v3].y , z3 = vertices[v3].z;
+
+			glm::vec4 w1(x1, y1, z1, 1);
+			glm::vec4 w2(x2, y2, z2, 1);
+			glm::vec4 w3(x3, y3, z3, 1);
 
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
 			activeCam.setProjection(true);
-			glm::mat4x4 camViewTransformInverse = activeCam.getViewTransformationInverse();
-			//m = get object transform 
-			//t = camViewTransformInverse*m
-
-			drawLine(x1, y1, x2, y2, glm::vec3(1.0f, 0.0f, 0.0f));
-			drawLine(x1, y1, x3, y3, glm::vec3(1.0f, 0.0f, 0.0f));
-			drawLine(x2, y2, x3, y3, glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::mat4x4 projectionTransform(activeCam.getProjectionTransformation());
+			glm::mat4x4 camViewTransformInverse(activeCam.getViewTransformationInverse());
+			glm::mat4x4 worldTransform = models[i]->GetWorldTransformation();
+			glm::mat4x4 objectTransform = camViewTransformInverse* worldTransform;// *camViewTransformInverse; //*projectionTransform * camViewTransformInverse; //* objectTransform;
+			glm::vec4 newVertexIndices1(objectTransform*w1);
+			glm::vec4 newVertexIndices2(objectTransform*w2);
+			glm::vec4 newVertexIndices3(objectTransform*w3);
+			int newX1 = newVertexIndices1[0], newY1 = newVertexIndices1[1];
+			int newX2 = newVertexIndices2[0], newY2 = newVertexIndices2[1];
+			int newX3 = newVertexIndices3[0], newY3 = newVertexIndices3[1];
+			drawLine(newVertexIndices1[0], newVertexIndices1[1], newVertexIndices2[0], newVertexIndices2[1], redColor);
+			drawLine(newVertexIndices1[0], newVertexIndices1[1], newVertexIndices3[0], newVertexIndices3[1], redColor);
+			drawLine(newVertexIndices3[0], newVertexIndices3[1], newVertexIndices2[0], newVertexIndices2[1], redColor);
 			}
 		}
 }

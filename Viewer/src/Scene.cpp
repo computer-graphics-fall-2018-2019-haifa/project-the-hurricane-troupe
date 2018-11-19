@@ -36,10 +36,9 @@ const int Scene::GetCameraCount() const
 void Scene::SetActiveCameraIndex(int index)
 {
 	// implementation suggestion...
-	if (index >= 0 && index < cameras.size())
-	{
-		activeCameraIndex = index;
-	}
+	if (index < 0 || index > cameras.size()) return;
+	
+	activeCameraIndex = index;
 }
 
 const int Scene::GetActiveCameraIndex() const
@@ -52,7 +51,7 @@ void Scene::SetActiveModelIndex(int index)
 	if (index < 0 || index >= models.size()) return;
 	// implementation suggestion...
 	activeModelIndex = index;
-	cameras[index].SetPerspectiveProjection(0.0, 700.0, 0.0, 1000.0, 5.0, 1000.0);
+	cameras[index].setProjection(true);
 }
 
 const int Scene::GetActiveModelIndex() const

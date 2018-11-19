@@ -13,6 +13,7 @@ public:
 	static glm::vec3 Vec3fFromStream(std::istream& issLine);
 	static glm::vec2 Vec2fFromStream(std::istream& issLine);
 	static MeshModel LoadMeshModel(const std::string& filePath);
+	static glm::mat4x4 IdentityMat();
 
 	// Add here more static utility functions...
 	// For example:

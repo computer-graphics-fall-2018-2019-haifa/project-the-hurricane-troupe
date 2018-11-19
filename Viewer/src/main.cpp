@@ -56,7 +56,9 @@ int main(int argc, char **argv)
 
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
-
+	Camera mainCam = Camera(glm::vec4(0, 0, 5, 0), glm::vec4(0, 0, 0, 0), glm::vec4(0, 1, 0, 0));
+	scene.AddCamera(mainCam);
+	scene.SetActiveCameraIndex(0);
 	// This is the main game loop..
     while (!glfwWindowShouldClose(window))
     {
@@ -65,8 +67,6 @@ int main(int argc, char **argv)
 
 		// Here we build the menus for the next frame. Feel free to pass more arguments to this function call
 		DrawImguiMenus(io, scene);
-		
-		//renderer.drawLine(4, 4, 2, 1, glm::vec3(1.0f, 0.0f, 0.0f));
 		
 		// Render the next frame
 		RenderFrame(window, scene, renderer, io);
@@ -140,8 +140,7 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	// Clear the frame buffer
 	renderer.ClearColorBuffer(GetClearColor());
 	
-	Camera mainCam = Camera(glm::vec4(0, 0, 0, 0), glm::vec4(4, 4, 4, 4), glm::vec4(4, 4, 4, 4));
-	scene.AddCamera(mainCam);
+
 	// Render the scene
 	renderer.Render(scene);
 
