@@ -8,7 +8,7 @@
 
 void MeshModel::updateWorldTransformation() {
 	glm::mat4x4 translateToOrigin = Utils::IdentityMat() - translateTransform + Utils::IdentityMat();
-	worldTransform = translateToOrigin*rotateTransform*scaleTransform*translateTransform;
+	worldTransform = translateToOrigin* rotateTransform.getRotationMatrix()*scaleTransform*translateTransform;
 }
 
 MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
@@ -18,10 +18,11 @@ MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3
 	//textures(textures),
 	normals(normals)
 {
-	//translate
-	scale(1.0f, 1.0f, 1.0f);
-	//rotate
-	worldTransform = scaleTransform;
+	//initialization code only
+	translate(); //no translation
+	scale(); //no scale
+	rotateTransform = RotationMatrix(); //no rotation
+	updateWorldTransformation();
 }
 
 MeshModel::~MeshModel() {}
@@ -66,5 +67,43 @@ void MeshModel::scale(float xAxis = 1.0f, float yAxis = 1.0f, float zAxis = 1.0f
 		0.0f,		0.0f,		zAxis,		0.0f,
 		0.0f,		0.0f,		0.0f,		1.0f
 	});
+	updateWorldTransformation();
+}
+
+void MeshModel::translate(const float * const newX, const float * const newY, const float * const newZ)
+{
+	//TODO: Continue to implement translate... the initialization is incorrect.
+	float x = *newX, y = *newY, z = *newZ;
+	if (newX != nullptr) {
+		x = *newX;
+	}
+	if (newY != nullptr) {
+		y = *newY;
+	}
+	if (newZ != nullptr) {
+		z = *newZ;
+	}
+
+	translateTransform = ;
+	updateWorldTransformation();
+}
+
+void MeshModel::rotate(std::set<AxisAngleRotation> axisSet)
+{
+	for each (AxisAngleRotation info in axisSet)
+	{
+		float angle = info.angle;
+		switch (info.axis) {
+		case Axis::XAXIS:
+			rotateTransform.setXRotation(angle);
+			break;
+		case Axis::YAXIS:
+			rotateTransform.setYRotation(angle);
+			break;
+		case Axis::ZAXIS:
+			rotateTransform.setZRotation(angle);
+			break;
+		}
+	}
 	updateWorldTransformation();
 }

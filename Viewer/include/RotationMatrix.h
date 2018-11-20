@@ -4,6 +4,7 @@
 /*
 ***** IMPORTANT: THIS IS NOT IN ANY WAY TESTED! Make sure it works! (matrix gotten from lectures + wikipedia)
 */
+
 class RotationMatrix
 {
 private:
