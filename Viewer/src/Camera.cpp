@@ -6,16 +6,8 @@
 
 Camera::Camera(const glm::vec4& eye, const glm::vec4& at, const glm::vec4& up) :
 	zoom(1.0),
-	viewTransformation({   1, 0, 0, 0,
-						  0, 1, 0, 0,
-						  0, 0, 1, 0,
-						  0, 0, 0, 1 }),
-	projectionTransformation(
-						  { 1, 0, 0, 0,
-							0, 1, 0, 0,
-							0, 0, 1, 0,
-							0, 0, 0, 1 })
-
+	viewTransformation(Utils::IdentityMat()),
+	projectionTransformation(Utils::IdentityMat())
 {
 	SetCameraLookAt(eye, at, up);
 }
@@ -29,18 +21,18 @@ void Camera::SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const gl
 	glm::vec3 z = normalize(eye - at);
 	glm::vec3 x = normalize(glm::cross(up, z));
 	glm::vec3 y = normalize(glm::cross(x, z));
-	glm::vec4 z4(z[0], z[1], z[2], 0);
-	glm::vec4 x4(x[0], x[1], x[2], 0);
-	glm::vec4 y4(y[0], y[1], y[2], 0);
-	glm::vec4 t(0, 0, 0, 1);
-	glm::mat4 c = glm::mat4(x4, y4, z4, t);
-	glm::mat4x4 translationMatrix
-	{ 1	,	0	,	0	,	    eye[0],
-		0	,	1	,	0	,	eye[1],
-		0	,	0	,	1	,	eye[2],
-		0	,	0	,	0	,	1 };
+	glm::vec4 x4 = glm::vec4(x[0], x[1], x[2], 0);
+	glm::vec4 y4 = glm::vec4(y[0], y[1], y[2], 0);
+	glm::vec4 z4 = glm::vec4(z[0], z[1], z[2], 0);
+	glm::vec4 t = glm::vec4(0, 0, 0, 1);
+	glm::mat4 c = glm::mat4x4(x4, y4, z4, t);
+	glm::mat4x4 translationMatrix = glm::mat4x4(
+	{	1	,	0	,	0	,	-eye[0],
+		0	,	1	,	0	,	-eye[1],
+		0	,	0	,	1	,	-eye[2],
+		0	,	0	,	0	,	1 });
 
-	viewTransformation = c * glm::transpose(translationMatrix);
+	viewTransformation = c * translationMatrix;
 }
 
 void Camera::SetOrthographicProjection(const float left, const float right, const float bottom, const float top, const float near, const float far)

@@ -2,6 +2,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include "MeshModel.h"
+#include "Utils.h"
 
 /*
  * Camera class. This class takes care of all the camera transformations and manipulations.

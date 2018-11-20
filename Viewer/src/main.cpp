@@ -56,7 +56,11 @@ int main(int argc, char **argv)
 
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
-	Camera mainCam = Camera(glm::vec4(0, 0, 5, 0), glm::vec4(0, 0, 0, 0), glm::vec4(0, 1, 0, 0));
+	Camera mainCam = Camera(
+		glm::vec4(0, 0, -20, 0),
+		glm::vec4(0, 0, 0, 0),
+		glm::vec4(0, 1, 0, 0)
+	);
 	scene.AddCamera(mainCam);
 	scene.SetActiveCameraIndex(0);
 	// This is the main game loop..

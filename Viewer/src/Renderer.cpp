@@ -288,16 +288,15 @@ void Renderer::drawLine(int x1, int y1, int x2, int y2, const glm::vec3& color) 
 
 
 void Renderer::drawModels(const Scene& scene) {
+	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
-	unsigned int modelAmount = scene.GetModelCount();
-	for (unsigned int i = 0; i < modelAmount; ++i) {
-
-		std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
-		std::vector<glm::vec2> textures = models[i]->getTextures();
-		std::vector<glm::vec3> normals = models[i]->getNormals();
-		std::vector<glm::vec3> vertices = models[i]->getVertices();
-		std::vector<Face> faces = models[i]->getFaces();
-		glm::vec3 redColor(1.0f, 0.0f, 0.0f);
+	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
+	for each (std::shared_ptr<MeshModel> model in models)
+	{
+		std::vector<glm::vec2> textures = model->getTextures();
+		std::vector<glm::vec3> normals = model->getNormals();
+		std::vector<glm::vec3> vertices = model->getVertices();
+		std::vector<Face> faces = model->getFaces();
 		for each (Face face in faces)
 		{
 			int v1 = face.GetVertexIndex(0);
@@ -306,20 +305,29 @@ void Renderer::drawModels(const Scene& scene) {
 			float x2 = vertices[v2].x , y2 = vertices[v2].y , z2 = vertices[v2].z;
 			int v3 = face.GetVertexIndex(2);
 			float x3 = vertices[v3].x, y3 = vertices[v3].y , z3 = vertices[v3].z;
+			
+			//TODO: Remove next line after scaling is done correctly. (Simply moves the dolphin object more upwards)
+			x1 += 500;x2 += 500;x3 += 500;y1 += 500;y2 += 500;y3 += 500;z1 += 500;z2 += 500;z3 += 500;
 
-			glm::vec4 w1(x1, y1, z1, 1);
-			glm::vec4 w2(x2, y2, z2, 1);
-			glm::vec4 w3(x3, y3, z3, 1);
+			glm::vec4 w1 = glm::vec4(x1, y1, z1, 0);
+			glm::vec4 w2 = glm::vec4(x2, y2, z2, 0);
+			glm::vec4 w3 = glm::vec4(x3, y3, z3, 0);
 
+			//glm::mat4x4 projectionTransform(activeCam.getProjectionTransformation());
+			//glm::mat4x4 camViewTransformInverse(activeCam.getViewTransformationInverse());
+			//glm::mat4x4 worldTransform = models[i]->GetWorldTransformation();
+			//glm::mat4x4 objectTransform = camViewTransformInverse* worldTransform;// *camViewTransformInverse; //*projectionTransform * camViewTransformInverse; //* objectTransform;
+			
+
+			//activeCam.setProjection(true);
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
+			//float scalingFactor = 1.0;
+			//model->scale(scalingFactor,scalingFactor,scalingFactor);
 			activeCam.setProjection(true);
-			glm::mat4x4 projectionTransform(activeCam.getProjectionTransformation());
-			glm::mat4x4 camViewTransformInverse(activeCam.getViewTransformationInverse());
-			glm::mat4x4 worldTransform = models[i]->GetWorldTransformation();
-			glm::mat4x4 objectTransform = camViewTransformInverse* worldTransform;// *camViewTransformInverse; //*projectionTransform * camViewTransformInverse; //* objectTransform;
-			glm::vec4 newVertexIndices1(objectTransform*w1);
-			glm::vec4 newVertexIndices2(objectTransform*w2);
-			glm::vec4 newVertexIndices3(objectTransform*w3);
+			glm::mat4x4 objectTransform = Utils::IdentityMat();//model->GetWorldTransformation();
+			glm::vec4 newVertexIndices1 = glm::vec4(objectTransform*w1);
+			glm::vec4 newVertexIndices2 = glm::vec4(objectTransform*w2);
+			glm::vec4 newVertexIndices3 = glm::vec4(objectTransform*w3);
 			int newX1 = newVertexIndices1[0], newY1 = newVertexIndices1[1];
 			int newX2 = newVertexIndices2[0], newY2 = newVertexIndices2[1];
 			int newX3 = newVertexIndices3[0], newY3 = newVertexIndices3[1];
