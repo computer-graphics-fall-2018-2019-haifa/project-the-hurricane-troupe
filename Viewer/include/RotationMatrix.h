@@ -36,7 +36,7 @@ public:
 	/* remove all rotations on object.*/
 	void resetToOrginalRotation();
 	/* returns the rotationTransformation generated from the rotations over the X,Y,Z rotations specified.*/
-	glm::mat4x4 getRotatateTransform() const;
+	glm::mat4x4 getTransform() const;
 	~RotationMatrix();
 };
 

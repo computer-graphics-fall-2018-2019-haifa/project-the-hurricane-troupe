@@ -8,7 +8,7 @@
 
 void MeshModel::updateWorldTransformation() {
 	glm::mat4x4 translateToOrigin = Utils::IdentityMat() - translateTransform + Utils::IdentityMat();
-	worldTransform = translateToOrigin* rotateTransform.getRotatateTransform()*scaleTransform*translateTransform;
+	worldTransform = translateToOrigin * (rotateTransform.getTransform() * scaleTransform * translateTransform);
 }
 
 MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
@@ -81,25 +81,25 @@ void MeshModel::move(const float * const newX, const float * const newY, const f
 	translate(newX, newY, newZ);
 }
 
-void MeshModel::translate(const float * const newX, const float * const newY, const float * const newZ)
+void MeshModel::translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {
 	float x = 0, y = 0, z = 0;
-	if (newX != nullptr) {
-		x = *newX;
+	if (xAddition != nullptr) {
+		x = *xAddition;
 	}
-	if (newY != nullptr) {
-		y = *newY;
+	if (yAddition != nullptr) {
+		y = *yAddition;
 	}
-	if (newZ != nullptr) {
-		z = *newZ;
+	if (zAddition != nullptr) {
+		z = *zAddition;
 	}
 
-	translateTransform = glm::mat4x4({
+	translateTransform = glm::transpose(glm::mat4x4({
 		1,		0,		0,		x,
 		0,		1,		0,		y,
 		0,		0,		1,		z,
 		0,		0,		0,		1
-		});
+		}));
 	updateWorldTransformation();
 }
 

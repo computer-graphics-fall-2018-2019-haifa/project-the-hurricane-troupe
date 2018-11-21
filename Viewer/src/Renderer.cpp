@@ -308,11 +308,11 @@ void Renderer::drawModels(const Scene& scene) {
 			float x3 = vertices[v3].x, y3 = vertices[v3].y , z3 = vertices[v3].z;
 			
 			//TODO: Remove next line after scaling is done correctly. (Simply moves the dolphin object more upwards)
-			x1 += 500;x2 += 500;x3 += 500;y1 += 500;y2 += 500;y3 += 500;z1 += 500;z2 += 500;z3 += 500;
+			//x1 += 500;x2 += 500;x3 += 500;y1 += 500;y2 += 500;y3 += 500;z1 += 500;z2 += 500;z3 += 500;
 
-			glm::vec4 w1 = glm::vec4(x1, y1, z1, 0);
-			glm::vec4 w2 = glm::vec4(x2, y2, z2, 0);
-			glm::vec4 w3 = glm::vec4(x3, y3, z3, 0);
+			glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
+			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
+			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
 
 			//glm::mat4x4 projectionTransform(activeCam.getProjectionTransformation());
 			//glm::mat4x4 camViewTransformInverse(activeCam.getViewTransformationInverse());
@@ -324,11 +324,13 @@ void Renderer::drawModels(const Scene& scene) {
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
 			//float scalingFactor = 1.0;
 			//model->scale(scalingFactor,scalingFactor,scalingFactor);
-			activeCam.setProjection(true);
-			glm::mat4x4 objectTransform = Utils::IdentityMat();//model->GetWorldTransformation();
-			glm::vec4 newVertexIndices1 = glm::vec4(objectTransform*w1);
-			glm::vec4 newVertexIndices2 = glm::vec4(objectTransform*w2);
-			glm::vec4 newVertexIndices3 = glm::vec4(objectTransform*w3);
+			//activeCam.setProjection(true);
+			float addition = 500.0f;
+			model->move(&addition, &addition, &addition);
+			glm::mat4x4 modelTransform = model->GetWorldTransformation();
+			glm::vec4 newVertexIndices1 = modelTransform * w1;
+			glm::vec4 newVertexIndices2 = modelTransform * w2;
+			glm::vec4 newVertexIndices3 = modelTransform * w3;
 
 
 			glm::vec2 p1 = glm::vec2(newVertexIndices1[0], newVertexIndices1[1]);
