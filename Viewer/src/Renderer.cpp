@@ -264,8 +264,9 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 	}
 }
 
-void Renderer::drawLine(int x1, int y1, int x2, int y2, const glm::vec3& color) {
-
+void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color) {
+	int x1 = point1[0], y1 = point1[1];
+	int x2 = point2[0], y2 = point2[1];
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
 		if (x1 > x2) {
 			plotLineLow(x2, y2, x1, y1, color);
@@ -328,12 +329,15 @@ void Renderer::drawModels(const Scene& scene) {
 			glm::vec4 newVertexIndices1 = glm::vec4(objectTransform*w1);
 			glm::vec4 newVertexIndices2 = glm::vec4(objectTransform*w2);
 			glm::vec4 newVertexIndices3 = glm::vec4(objectTransform*w3);
-			int newX1 = newVertexIndices1[0], newY1 = newVertexIndices1[1];
-			int newX2 = newVertexIndices2[0], newY2 = newVertexIndices2[1];
-			int newX3 = newVertexIndices3[0], newY3 = newVertexIndices3[1];
-			drawLine(newVertexIndices1[0], newVertexIndices1[1], newVertexIndices2[0], newVertexIndices2[1], redColor);
-			drawLine(newVertexIndices1[0], newVertexIndices1[1], newVertexIndices3[0], newVertexIndices3[1], redColor);
-			drawLine(newVertexIndices3[0], newVertexIndices3[1], newVertexIndices2[0], newVertexIndices2[1], redColor);
+
+
+			glm::vec2 p1 = glm::vec2(newVertexIndices1[0], newVertexIndices1[1]);
+			glm::vec2 p2 = glm::vec2(newVertexIndices2[0], newVertexIndices2[1]);
+			glm::vec2 p3 = glm::vec2(newVertexIndices3[0], newVertexIndices3[1]);
+
+			drawLine(p1, p2, redColor);
+			drawLine(p1, p3, redColor);
+			drawLine(p2, p3, redColor);
 			}
 		}
 }

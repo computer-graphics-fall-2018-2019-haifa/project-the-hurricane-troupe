@@ -79,7 +79,7 @@ void RotationMatrix::resetToOrginalRotation() {
 	resetXRotation();
 }
 
-glm::mat4x4 RotationMatrix::getRotationMatrix() const {
+glm::mat4x4 RotationMatrix::getRotatateTransform() const {
 	return rotationTransformation;
 }
 

@@ -8,7 +8,7 @@
 
 void MeshModel::updateWorldTransformation() {
 	glm::mat4x4 translateToOrigin = Utils::IdentityMat() - translateTransform + Utils::IdentityMat();
-	worldTransform = translateToOrigin* rotateTransform.getRotationMatrix()*scaleTransform*translateTransform;
+	worldTransform = translateToOrigin* rotateTransform.getRotatateTransform()*scaleTransform*translateTransform;
 }
 
 MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
@@ -60,7 +60,7 @@ std::vector<Face> MeshModel::getFaces() {
 	return faces;
 }
 
-void MeshModel::scale(float xAxis = 1.0f, float yAxis = 1.0f, float zAxis = 1.0f) {
+void MeshModel::scale(float xAxis, float yAxis, float zAxis) {
 	scaleTransform = glm::mat4x4({
 		xAxis,		0.0f,		0.0f,		0.0f,
 		0.0f,		yAxis,		0.0f,		0.0f,
@@ -70,10 +70,20 @@ void MeshModel::scale(float xAxis = 1.0f, float yAxis = 1.0f, float zAxis = 1.0f
 	updateWorldTransformation();
 }
 
+//void MeshModel::setPosition(const float * const newX, const float * const newY, const float * const newZ)
+//{
+//	 move to origin
+//	 set to newX,newY,newZ
+//}
+
+void MeshModel::move(const float * const newX, const float * const newY, const float * const newZ)
+{
+	translate(newX, newY, newZ);
+}
+
 void MeshModel::translate(const float * const newX, const float * const newY, const float * const newZ)
 {
-	//TODO: Continue to implement translate... the initialization is incorrect.
-	float x = *newX, y = *newY, z = *newZ;
+	float x = 0, y = 0, z = 0;
 	if (newX != nullptr) {
 		x = *newX;
 	}
@@ -84,13 +94,18 @@ void MeshModel::translate(const float * const newX, const float * const newY, co
 		z = *newZ;
 	}
 
-	translateTransform = ;
+	translateTransform = glm::mat4x4({
+		1,		0,		0,		x,
+		0,		1,		0,		y,
+		0,		0,		1,		z,
+		0,		0,		0,		1
+		});
 	updateWorldTransformation();
 }
 
-void MeshModel::rotate(std::set<AxisAngleRotation> axisSet)
+void MeshModel::rotate(const std::set<PairOfAxisAngle>& axisAngleSet)
 {
-	for each (AxisAngleRotation info in axisSet)
+	for each (PairOfAxisAngle info in axisAngleSet)
 	{
 		float angle = info.angle;
 		switch (info.axis) {

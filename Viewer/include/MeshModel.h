@@ -21,7 +21,7 @@ enum class Axis {
 typedef struct _AxisAngleRotation {
 	Axis axis;
 	float angle;
-} AxisAngleRotation;
+} PairOfAxisAngle;
 
 class MeshModel
 {
@@ -37,6 +37,7 @@ private:
 	glm::mat4x4 scaleTransform;
 	glm::mat4x4 worldTransform;
 	void updateWorldTransformation();
+	void translate(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
 public:
 
 	MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName = "");
@@ -53,8 +54,18 @@ public:
 	std::vector<glm::vec3> getVertices();
 	std::vector<Face> getFaces();
 	// Add more methods/functionality as needed...
+	//void setPosition(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
+
+	/* scales model in the following way:
+		-> xAxis times its size on the xAxis,
+		-> yAxis times its size on the yAxis,
+		-> zAxis times its size on the zAxis. */
 	void scale(float xAxis = 1.0f, float yAxis = 1.0f, float zAxis = 1.0f);
-	void translate(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
-	void rotate(std::set<AxisAngleRotation> axisSet);
+	/* moves the model relative to its location in the following way:
+		-> assume the model's current location is (x,y,z), 
+			then its new location will become (x + newX, y + newY, z + newZ). */
+	void move(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
+
+	void rotate(const std::set<PairOfAxisAngle>& axisAngleSet);
 
 };
