@@ -65,7 +65,10 @@ public:
 		-> assume the model's current location is (x,y,z), 
 			then its new location will become (x + newX, y + newY, z + newZ). */
 	void move(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
-
+	/* moves the model relative to its location in the following way:
+	-> assume the model's current location is (x,y,z),
+	then its new location will become (x + addition, y + addition, z + addition). */
+	void symmetricMove(const float * const addition = nullptr);
 	void rotate(const std::set<PairOfAxisAngle>& axisAngleSet);
 
 };

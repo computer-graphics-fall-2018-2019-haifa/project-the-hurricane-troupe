@@ -7,8 +7,7 @@
 #include <sstream>
 
 void MeshModel::updateWorldTransformation() {
-	glm::mat4x4 translateToOrigin = Utils::IdentityMat() - translateTransform + Utils::IdentityMat();
-	worldTransform = translateToOrigin * (rotateTransform.getTransform() * scaleTransform * translateTransform);
+	worldTransform = (rotateTransform.getTransform() * scaleTransform * translateTransform);
 }
 
 MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
@@ -76,10 +75,17 @@ void MeshModel::scale(float xAxis, float yAxis, float zAxis) {
 //	 set to newX,newY,newZ
 //}
 
-void MeshModel::move(const float * const newX, const float * const newY, const float * const newZ)
+void MeshModel::move(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {
-	translate(newX, newY, newZ);
+	translate(xAddition, yAddition, zAddition);
 }
+
+void MeshModel::symmetricMove(const float * const addition)
+{
+	move(addition, addition, addition);
+}
+
+
 
 void MeshModel::translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {

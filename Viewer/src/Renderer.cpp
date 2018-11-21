@@ -308,7 +308,6 @@ void Renderer::drawModels(const Scene& scene) {
 			float x3 = vertices[v3].x, y3 = vertices[v3].y , z3 = vertices[v3].z;
 			
 			//TODO: Remove next line after scaling is done correctly. (Simply moves the dolphin object more upwards)
-			//x1 += 500;x2 += 500;x3 += 500;y1 += 500;y2 += 500;y3 += 500;z1 += 500;z2 += 500;z3 += 500;
 
 			glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
@@ -326,7 +325,7 @@ void Renderer::drawModels(const Scene& scene) {
 			//model->scale(scalingFactor,scalingFactor,scalingFactor);
 			//activeCam.setProjection(true);
 			float addition = 500.0f;
-			model->move(&addition, &addition, &addition);
+			model->symmetricMove(&addition);
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::vec4 newVertexIndices1 = modelTransform * w1;
 			glm::vec4 newVertexIndices2 = modelTransform * w2;
