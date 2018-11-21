@@ -7,7 +7,7 @@
 #include <sstream>
 
 void MeshModel::updateWorldTransformation() {
-	worldTransform = (rotateTransform.getTransform() * scaleTransform * translateTransform);
+	worldTransform = translateTransform * rotateTransform.getTransform() * scaleTransform;
 }
 
 MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
@@ -59,14 +59,18 @@ std::vector<Face> MeshModel::getFaces() {
 	return faces;
 }
 
-void MeshModel::scale(float xAxis, float yAxis, float zAxis) {
+void MeshModel::scale(float xFactor, float yFactor, float zFactor) {
 	scaleTransform = glm::mat4x4({
-		xAxis,		0.0f,		0.0f,		0.0f,
-		0.0f,		yAxis,		0.0f,		0.0f,
-		0.0f,		0.0f,		zAxis,		0.0f,
+		xFactor,		0.0f,		0.0f,		0.0f,
+		0.0f,		yFactor,		0.0f,		0.0f,
+		0.0f,		0.0f,		zFactor,		0.0f,
 		0.0f,		0.0f,		0.0f,		1.0f
 	});
 	updateWorldTransformation();
+}
+
+void MeshModel::symmetricScale(float factor) {
+	scale(factor, factor, factor);
 }
 
 //void MeshModel::setPosition(const float * const newX, const float * const newY, const float * const newZ)

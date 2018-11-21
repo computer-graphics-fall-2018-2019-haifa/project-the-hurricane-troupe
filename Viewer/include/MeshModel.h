@@ -57,10 +57,13 @@ public:
 	//void setPosition(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
 
 	/* scales model in the following way:
-		-> xAxis times its size on the xAxis,
-		-> yAxis times its size on the yAxis,
-		-> zAxis times its size on the zAxis. */
-	void scale(float xAxis = 1.0f, float yAxis = 1.0f, float zAxis = 1.0f);
+		-> xFactor times its size on the x-axis,
+		-> yFactor times its size on the y-axis,
+		-> zFactor times its size on the z-axis. */
+	void scale(float xFactor = 1.0f, float yFactor = 1.0f, float zFactor = 1.0f);
+	/* scales model in the following way:
+		-> factor times its size on the x-axis, y-axis and z-axis.*/
+	void symmetricScale(float factor = 1.0f);
 	/* moves the model relative to its location in the following way:
 		-> assume the model's current location is (x,y,z), 
 			then its new location will become (x + newX, y + newY, z + newZ). */

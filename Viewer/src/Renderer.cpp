@@ -321,8 +321,8 @@ void Renderer::drawModels(const Scene& scene) {
 
 			//activeCam.setProjection(true);
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
-			//float scalingFactor = 1.0;
-			//model->scale(scalingFactor,scalingFactor,scalingFactor);
+			float scalingFactor = 2.0;
+			model->scale(scalingFactor,scalingFactor,scalingFactor);
 			//activeCam.setProjection(true);
 			float addition = 500.0f;
 			model->symmetricMove(&addition);
