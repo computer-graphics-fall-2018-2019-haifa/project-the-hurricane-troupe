@@ -2,10 +2,9 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
-#include <set>
 #include "Face.h"
 #include "RotationMatrix.h"
-#include "AxisRotation.h"
+#include "RotationRules.h"
 #include "AxisTypes.h"
 
 /*
@@ -31,14 +30,12 @@ private:
 	bool isTransformUpdated;
 	void _translate(const float* const newX, const float* const newY, const float* const newZ );
 	void _scale(float xFactor, float yFactor, float zFactor);
-	void _rotate(const std::set<PairOfAxisAngle>& axisAngleSet);
+	void _rotate(const RotationRules& rotation);
 public:
 
 	MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName = "");
 	virtual ~MeshModel();
 
-	/* returns the updated transformation as a result of rotations, scalings and translations */
-	const glm::mat4x4& GetWorldTransformation();
 
 	const glm::vec4& GetColor() const;
 	void SetColor(const glm::vec4& color);
@@ -49,8 +46,9 @@ public:
 	std::vector<glm::vec3> getVertices();
 	std::vector<Face> getFaces();
 	// Add more methods/functionality as needed...
-	//void setPosition(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
 
+	/* returns the updated transformation as a result of rotations, scalings and translations */
+	const glm::mat4x4& GetWorldTransformation();
 	/* scales model in the following way:
 		-> xFactor times its size on the x-axis,
 		-> yFactor times its size on the y-axis,
@@ -67,7 +65,9 @@ public:
 	-> assume the model's current location is (x,y,z),
 	then its new location will become (x + addition, y + addition, z + addition). */
 	void symmetricMove(const float * const addition = nullptr);
+	//void setPosition(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
+
 	/* rotates the objects in a specific order, additional attention is needed to ensure correctness of rotations.*/
-	void rotate(const std::set<PairOfAxisAngle>& axisAngleSet);
+	void rotate(const RotationRules& rotation);
 
 };

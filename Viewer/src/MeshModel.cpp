@@ -97,8 +97,8 @@ void MeshModel::symmetricMove(const float * const addition)
 	move(addition, addition, addition);
 }
 
-void MeshModel::rotate(const std::set<PairOfAxisAngle>& axisAngleSet) {
-	_rotate(axisAngleSet);
+void MeshModel::rotate(const RotationRules& rotation) {
+	_rotate(rotation);
 }
 
 
@@ -125,22 +125,11 @@ void MeshModel::_translate(const float * const xAddition, const float * const yA
 	isTransformUpdated = false;
 }
 
-void MeshModel::_rotate(const std::set<PairOfAxisAngle>& axisAngleSet)
+void MeshModel::_rotate(const RotationRules& rotation)
 {
-	for each (PairOfAxisAngle info in axisAngleSet)
-	{
-		float angle = info.getAngle();
-		switch (info.getAxis()) {
-		case AxisType::XAXIS:
-			rotateTransform.setXRotation(angle);
-			break;
-		case AxisType::YAXIS:
-			rotateTransform.setYRotation(angle);
-			break;
-		case AxisType::ZAXIS:
-			rotateTransform.setZRotation(angle);
-			break;
-		}
-	}
+	rotateTransform.setXRotation(rotation.getAngleX(AngleUnits::RADIANS));
+	rotateTransform.setYRotation(rotation.getAngleY(AngleUnits::RADIANS));
+	rotateTransform.setZRotation(rotation.getAngleZ(AngleUnits::RADIANS));
+	//rotateTransform.setMultiplicationOrder(....);
 	isTransformUpdated = false;
 }

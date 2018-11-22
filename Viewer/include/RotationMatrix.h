@@ -16,6 +16,7 @@ private:
 	glm::mat4x4 yRotation;
 	glm::mat4x4 zRotation;
 	glm::mat4x4 rotationTransformation;
+	bool isTransformUpdated;
 
 	void updateRotateTransformation();
 public:
@@ -36,7 +37,7 @@ public:
 	/* remove all rotations on object.*/
 	void resetToOrginalRotation();
 	/* returns the rotationTransformation generated from the rotations over the X,Y,Z rotations specified.*/
-	glm::mat4x4 getTransform() const;
+	glm::mat4x4 getTransform();
 	~RotationMatrix();
 };
 

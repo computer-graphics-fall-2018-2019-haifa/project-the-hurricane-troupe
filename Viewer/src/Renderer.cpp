@@ -4,6 +4,7 @@
 #include "InitShader.h"
 #include "Utils.h"
 #include "MeshModel.h"
+#include "RotationRules.h"
 #include <imgui/imgui.h>
 #include <vector>
 #include <cmath>
@@ -327,7 +328,10 @@ void Renderer::drawModels(const Scene& scene) {
 			//activeCam.setProjection(true);
 			float addition = 500.0f;
 			model->symmetricMove(&addition);
-			model->scale(scalingFactor, scalingFactor, scalingFactor);
+			//model->scale(scalingFactor, scalingFactor, scalingFactor);
+			RotationRules modelRotation = RotationRules();
+			modelRotation.setRotation(Axis::YAXIS, -90.0f);
+			model->rotate(modelRotation);
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::vec4 newVertexIndices1 = modelTransform * w1;
 			glm::vec4 newVertexIndices2 = modelTransform * w2;
