@@ -5,23 +5,14 @@
 #include <set>
 #include "Face.h"
 #include "RotationMatrix.h"
+#include "AxisRotation.h"
+#include "AxisTypes.h"
 
 /*
  * MeshModel class.
  * This class represents a mesh model (with faces and normals informations).
  * You can use Utils::LoadMeshModel to create instances of this class from .obj files.
  */
-
-enum class Axis {
-	XAXIS,
-	YAXIS,
-	ZAXIS
-};
-
-typedef struct _AxisAngleRotation {
-	Axis axis;
-	float angle;
-} PairOfAxisAngle;
 
 class MeshModel
 {
@@ -37,13 +28,17 @@ private:
 	glm::mat4x4 scaleTransform;
 	glm::mat4x4 worldTransform;
 	void updateWorldTransformation();
-	void translate(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
+	bool isTransformUpdated;
+	void _translate(const float* const newX, const float* const newY, const float* const newZ );
+	void _scale(float xFactor, float yFactor, float zFactor);
+	void _rotate(const std::set<PairOfAxisAngle>& axisAngleSet);
 public:
 
 	MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName = "");
 	virtual ~MeshModel();
 
-	const glm::mat4x4& GetWorldTransformation() const;
+	/* returns the updated transformation as a result of rotations, scalings and translations */
+	const glm::mat4x4& GetWorldTransformation();
 
 	const glm::vec4& GetColor() const;
 	void SetColor(const glm::vec4& color);
@@ -72,6 +67,7 @@ public:
 	-> assume the model's current location is (x,y,z),
 	then its new location will become (x + addition, y + addition, z + addition). */
 	void symmetricMove(const float * const addition = nullptr);
+	/* rotates the objects in a specific order, additional attention is needed to ensure correctness of rotations.*/
 	void rotate(const std::set<PairOfAxisAngle>& axisAngleSet);
 
 };

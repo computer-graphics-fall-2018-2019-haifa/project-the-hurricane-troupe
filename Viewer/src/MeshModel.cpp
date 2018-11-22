@@ -7,7 +7,9 @@
 #include <sstream>
 
 void MeshModel::updateWorldTransformation() {
+	if (isTransformUpdated == true) return;
 	worldTransform = translateTransform * rotateTransform.getTransform() * scaleTransform;
+	isTransformUpdated = true;
 }
 
 MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
@@ -18,16 +20,18 @@ MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3
 	normals(normals)
 {
 	//initialization code only
-	translate(); //no translation
-	scale(); //no scale
+	_translate(nullptr, nullptr, nullptr); //no translation
+	_scale(1.0, 1.0, 1.0); //no scale
 	rotateTransform = RotationMatrix(); //no rotation
-	updateWorldTransformation();
+	isTransformUpdated = false;
+	updateWorldTransformation(); //set the transformation.
 }
 
 MeshModel::~MeshModel() {}
 
 
-const glm::mat4x4& MeshModel::GetWorldTransformation() const {
+const glm::mat4x4& MeshModel::GetWorldTransformation() {
+	updateWorldTransformation();
 	return worldTransform;
 }
 
@@ -59,18 +63,22 @@ std::vector<Face> MeshModel::getFaces() {
 	return faces;
 }
 
-void MeshModel::scale(float xFactor, float yFactor, float zFactor) {
+void MeshModel::_scale(float xFactor, float yFactor, float zFactor) {
 	scaleTransform = glm::mat4x4({
 		xFactor,		0.0f,		0.0f,		0.0f,
 		0.0f,		yFactor,		0.0f,		0.0f,
 		0.0f,		0.0f,		zFactor,		0.0f,
 		0.0f,		0.0f,		0.0f,		1.0f
 	});
-	updateWorldTransformation();
+	isTransformUpdated = false;
+}
+
+void MeshModel::scale(float xFactor, float yFactor, float zFactor) {
+	_scale(xFactor, yFactor, zFactor);
 }
 
 void MeshModel::symmetricScale(float factor) {
-	scale(factor, factor, factor);
+	_scale(factor, factor, factor);
 }
 
 //void MeshModel::setPosition(const float * const newX, const float * const newY, const float * const newZ)
@@ -81,7 +89,7 @@ void MeshModel::symmetricScale(float factor) {
 
 void MeshModel::move(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {
-	translate(xAddition, yAddition, zAddition);
+	_translate(xAddition, yAddition, zAddition);
 }
 
 void MeshModel::symmetricMove(const float * const addition)
@@ -89,9 +97,13 @@ void MeshModel::symmetricMove(const float * const addition)
 	move(addition, addition, addition);
 }
 
+void MeshModel::rotate(const std::set<PairOfAxisAngle>& axisAngleSet) {
+	_rotate(axisAngleSet);
+}
 
 
-void MeshModel::translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
+
+void MeshModel::_translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {
 	float x = 0, y = 0, z = 0;
 	if (xAddition != nullptr) {
@@ -110,25 +122,25 @@ void MeshModel::translate(const float * const xAddition, const float * const yAd
 		0,		0,		1,		z,
 		0,		0,		0,		1
 		}));
-	updateWorldTransformation();
+	isTransformUpdated = false;
 }
 
-void MeshModel::rotate(const std::set<PairOfAxisAngle>& axisAngleSet)
+void MeshModel::_rotate(const std::set<PairOfAxisAngle>& axisAngleSet)
 {
 	for each (PairOfAxisAngle info in axisAngleSet)
 	{
-		float angle = info.angle;
-		switch (info.axis) {
-		case Axis::XAXIS:
+		float angle = info.getAngle();
+		switch (info.getAxis()) {
+		case AxisType::XAXIS:
 			rotateTransform.setXRotation(angle);
 			break;
-		case Axis::YAXIS:
+		case AxisType::YAXIS:
 			rotateTransform.setYRotation(angle);
 			break;
-		case Axis::ZAXIS:
+		case AxisType::ZAXIS:
 			rotateTransform.setZRotation(angle);
 			break;
 		}
 	}
-	updateWorldTransformation();
+	isTransformUpdated = false;
 }
