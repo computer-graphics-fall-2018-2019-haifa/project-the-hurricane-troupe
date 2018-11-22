@@ -2,7 +2,7 @@
 
 float RotationRules::radiansToDegree(float radian)
 {
-	return (radian*(PI))/180.0f;
+	return (radian*((float)PI))/180.0f;
 }
 
 float RotationRules::degreeToRadians(float degree)

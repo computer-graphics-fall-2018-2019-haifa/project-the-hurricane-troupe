@@ -324,13 +324,13 @@ void Renderer::drawModels(const Scene& scene) {
 
 			//activeCam.setProjection(true);
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
-			float scalingFactor = 2.0;
 			//activeCam.setProjection(true);
+			RotationRules modelRotation = RotationRules();
+			modelRotation.setRotation(Axis::YAXIS, 90.0f);
+			float scalingFactor = 1.0;
 			float addition = 500.0f;
 			model->symmetricMove(&addition);
-			//model->scale(scalingFactor, scalingFactor, scalingFactor);
-			RotationRules modelRotation = RotationRules();
-			modelRotation.setRotation(Axis::YAXIS, -90.0f);
+			model->scale(scalingFactor, scalingFactor, scalingFactor);
 			model->rotate(modelRotation);
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::vec4 newVertexIndices1 = modelTransform * w1;
