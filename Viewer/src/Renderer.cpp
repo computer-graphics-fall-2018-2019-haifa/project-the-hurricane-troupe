@@ -265,22 +265,24 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 }
 
 void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color) {
-	int x1 = point1[0], y1 = point1[1];
-	int x2 = point2[0], y2 = point2[1];
+	float x1 = point1[0], y1 = point1[1];
+	float x2 = point2[0], y2 = point2[1];
+	int _x1 = (int)x1, _y1 = (int)y1; // TODO: This is a temporary fix to avoid the floating point warnings.
+	int _x2 = (int)x2, _y2 = (int)y2; // TODO: Perhaps, it should be the global fix, because it at least calculates the "if"s correctly. Must think about this! TODO Later. :P
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
 		if (x1 > x2) {
-			plotLineLow(x2, y2, x1, y1, color);
+			plotLineLow(_x2, _y2, _x1, _y1, color);
 		}
 		else {
-			plotLineLow(x1, y1, x2, y2, color);
+			plotLineLow(_x1, _y1, _x2, _y2, color);
 		}
 	}
 	else {
 		if (y1 > y2) {
-			plotLineHigh(x2, y2, x1, y1, color);
+			plotLineHigh(_x2, _y2, _x1, _y1, color);
 		}
 		else {
-			plotLineHigh(x1, y1, x2, y2, color);
+			plotLineHigh(_x1, _y1, _x2, _y2, color);
 		}
 	}
 }
@@ -322,10 +324,10 @@ void Renderer::drawModels(const Scene& scene) {
 			//activeCam.setProjection(true);
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
 			float scalingFactor = 2.0;
-			model->scale(scalingFactor,scalingFactor,scalingFactor);
 			//activeCam.setProjection(true);
 			float addition = 500.0f;
 			model->symmetricMove(&addition);
+			model->scale(scalingFactor, scalingFactor, scalingFactor);
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::vec4 newVertexIndices1 = modelTransform * w1;
 			glm::vec4 newVertexIndices2 = modelTransform * w2;
