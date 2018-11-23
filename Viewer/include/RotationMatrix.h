@@ -11,7 +11,7 @@
 class RotationMatrix
 {
 private:
-	float xAngle, yAngle, zAngle;
+	float xAngle, yAngle, zAngle; //These variables are only to help during debug (we can check the expected angles, and they do not serve any other purpose at least not yet).
 	glm::mat4x4 xRotation;
 	glm::mat4x4 yRotation;
 	glm::mat4x4 zRotation;
