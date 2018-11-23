@@ -6,7 +6,6 @@
 */
 /*
 * Documentation: This class is meant to make creation of rotate transformations more accessible.
-* NOTE: Additional optimization is possible, but currently ignored.
 */
 class RotationMatrix
 {

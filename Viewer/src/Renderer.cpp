@@ -268,8 +268,8 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color) {
 	float x1 = point1[0], y1 = point1[1];
 	float x2 = point2[0], y2 = point2[1];
-	int _x1 = (int)x1, _y1 = (int)y1; // TODO: This is a temporary fix to avoid the floating point warnings.
-	int _x2 = (int)x2, _y2 = (int)y2; // TODO: Perhaps, it should be the global fix, because it at least calculates the "if"s correctly. Must think about this! TODO Later. :P
+	int _x1 = ((int)x1) + ((int)(viewportWidth/2.0f)), _y1 = (int)y1 + ((int)(viewportHeight / 2.0f)); // TODO: This is a temporary fix to avoid the floating point warnings.
+	int _x2 = (int)x2 + ((int)(viewportWidth / 2.0f)), _y2 = (int)y2 + ((int)(viewportHeight / 2.0f)); // TODO: Perhaps, it should be the global fix, because it at least calculates the "if"s correctly. Must think about this! TODO Later. :P
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
 		if (x1 > x2) {
 			plotLineLow(_x2, _y2, _x1, _y1, color);
@@ -328,10 +328,10 @@ void Renderer::drawModels(const Scene& scene) {
 			RotationRules modelRotation = RotationRules();
 			modelRotation.setRotation(Axis::ZAXIS, 90.0f);
 			float scalingFactor = 1.0;
-			float addition = 500.0f;
+			float addition = 100.0f;
 			model->symmetricMove(&addition);
 			model->scale(scalingFactor, scalingFactor, scalingFactor);
-			//model->rotate(modelRotation);
+			model->rotate(modelRotation);
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::vec4 newVertexIndices1 = modelTransform * w1;
 			glm::vec4 newVertexIndices2 = modelTransform * w2;
