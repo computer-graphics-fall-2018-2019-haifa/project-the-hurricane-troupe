@@ -11,9 +11,9 @@ void RotationMatrix::updateRotateTransformation()
 
 RotationMatrix::RotationMatrix(float xAngle, float yAngle, float zAngle)
 {
-	this->xAngle = xAngle;
-	this->yAngle = yAngle;
-	this->zAngle = zAngle;
+	this->xAngle = xAngle; setXRotation(xAngle);
+	this->yAngle = yAngle; setYRotation(yAngle);
+	this->zAngle = zAngle; setZRotation(zAngle);
 	isTransformUpdated = false;
 	updateRotateTransformation();
 }
