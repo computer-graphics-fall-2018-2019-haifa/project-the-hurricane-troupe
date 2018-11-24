@@ -7,6 +7,7 @@
 Camera::Camera(const glm::vec4& eye, const glm::vec4& at, const glm::vec4& up) :
 	zoom(1.0),
 	viewTransformation(Utils::IdentityMat()),
+	viewTransformationInverse(Utils::IdentityMat()),
 	projectionTransformation(Utils::IdentityMat())
 {
 	SetCameraLookAt(eye, at, up);
@@ -30,6 +31,7 @@ void Camera::SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const gl
 		0	,	0	,	0	,	1 }));
 
 	viewTransformation = c * translationMatrix;
+	viewTransformationInverse = glm::inverse(viewTransformation);
 }
 
 void Camera::SetOrthographicProjection(const float left, const float right, const float bottom, const float top, const float near, const float far)
@@ -70,7 +72,7 @@ void Camera::SetZoom(const float zoom)
 
 glm::mat4x4 Camera::getViewTransformationInverse() const
 {
-	return glm::inverse(viewTransformation);
+	return viewTransformationInverse;
 }
 
 glm::mat4x4 Camera::getProjectionTransformation() const

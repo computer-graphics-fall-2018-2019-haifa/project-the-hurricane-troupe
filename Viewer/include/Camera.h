@@ -16,7 +16,7 @@ class Camera
 {
 private:
 	glm::mat4x4 viewTransformation;
-	//TODO: Add viewTransformationInverse, to save calculation time!
+	glm::mat4x4 viewTransformationInverse;
 	glm::mat4x4 projectionTransformation;
 	float zoom;
 
