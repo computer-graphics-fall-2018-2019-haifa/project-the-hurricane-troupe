@@ -332,10 +332,12 @@ void Renderer::drawModels(const Scene& scene) {
 			model->symmetricMove(&addition);
 			model->scale(scalingFactor, scalingFactor, scalingFactor);
 			model->rotate(modelRotation);
+			glm::mat4x4 camTransformation = activeCam.getViewTransformationInverse();
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
-			glm::vec4 newVertexIndices1 = modelTransform * w1;
-			glm::vec4 newVertexIndices2 = modelTransform * w2;
-			glm::vec4 newVertexIndices3 = modelTransform * w3;
+			glm::mat4x4 completeTransform = camTransformation * modelTransform;
+			glm::vec4 newVertexIndices1 = completeTransform * w1;
+			glm::vec4 newVertexIndices2 = completeTransform * w2;
+			glm::vec4 newVertexIndices3 = completeTransform * w3;
 
 
 			glm::vec2 p1 = glm::vec2(newVertexIndices1[0], newVertexIndices1[1]);

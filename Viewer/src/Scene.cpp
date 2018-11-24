@@ -3,7 +3,7 @@
 #include <string>
 
 Scene::Scene() :
-	activeCameraIndex(0),
+	activeCameraIndex(-1),
 	activeModelIndex(0)
 {
 
