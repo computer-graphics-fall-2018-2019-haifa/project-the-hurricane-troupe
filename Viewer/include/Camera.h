@@ -36,7 +36,7 @@ public:
 
 	void SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up);
 
-	void setProjection(bool orthographic, const float left = -100.0, const float right = 250.0, const float bottom = -180.0, const float top = 180.0, const float near = -5.0, const float far = -70.0);
+	void setProjection(bool orthographic, const float left = -1.0, const float right = 1.0, const float bottom = -1.0, const float top = 1.0, const float near = 1.0, const float far = -1.0);
 
 	void SetZoom(const float zoom);
 

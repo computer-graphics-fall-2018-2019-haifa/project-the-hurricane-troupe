@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
 	Camera mainCam = Camera(
-		glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+		glm::vec4(0.0f, 0.0f, -13.0f, 0.0f),
 		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 		glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 	);

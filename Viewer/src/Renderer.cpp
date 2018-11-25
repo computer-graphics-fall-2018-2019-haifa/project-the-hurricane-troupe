@@ -294,6 +294,7 @@ void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& col
 void Renderer::drawModels(const Scene& scene) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
+	activeCam.setProjection(true, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0);
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
@@ -326,13 +327,14 @@ void Renderer::drawModels(const Scene& scene) {
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
 			//activeCam.setProjection(true);
 			RotationRules modelRotation = RotationRules();
-			modelRotation.setRotation(Axis::ZAXIS, 90.0f);
+			modelRotation.setRotation(Axis::XAXIS, 90.0f);
 			float scalingFactor = 1.0;
 			float addition = 100.0f;
 			model->symmetricMove(&addition);
-			model->scale(scalingFactor, scalingFactor, scalingFactor);
-			model->rotate(modelRotation);
-			glm::mat4x4 camTransformation = activeCam.getViewTransformationInverse();
+			//model->symmetricMove(&addition);
+			//model->scale(scalingFactor, scalingFactor, scalingFactor);
+			//model->rotate(modelRotation);
+			glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::mat4x4 completeTransform = camTransformation * modelTransform;
 			glm::vec4 newVertexIndices1 = completeTransform * w1;
