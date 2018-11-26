@@ -93,8 +93,9 @@ void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio,
 	default:
 		break;
 	}
-	double height = glm::abs(glm::tan(actualFovy / 2)*near);
-	double width = aspectRatio * height;
+	actualFovy /= zoom;
+	float height = glm::abs(glm::tan(actualFovy / 2.0f)*near);
+	float width = aspectRatio * height;
 	_SetPerspectiveProjection(-width, width, -height, height, near, far);
 	this->_projFovy = fovy;
 	this->_projAspectRatio = aspectRatio;
