@@ -102,6 +102,12 @@ void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio,
 
 void Camera::setOrthographicProjection(const float left, const float right, const float bottom, const float top, const float near, const float far)
 {
+	this->_projLeft = left;
+	this->_projRight = right;
+	this->_projBottom = bottom;
+	this->_projTop = top;
+	this->_projNear = near;
+	this->_projFar = far;
 	orthographicProjectionTransformation = glm::transpose(glm::mat4x4(
 		{ 2.0 / (right - left)		,	0.0						,		0.0					,	-1.0*((right + left) / (right - left)),
 		0.0						,	2.0 / (top - bottom)	,		0.0					,	-1.0*((top + bottom) / (top - bottom)),
