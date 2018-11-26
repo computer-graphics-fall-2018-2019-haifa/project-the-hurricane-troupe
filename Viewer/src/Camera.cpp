@@ -11,9 +11,9 @@ Camera::Camera(const glm::vec4& eye, const glm::vec4& at, const glm::vec4& up) :
 	viewTransformationInverse(Utils::IdentityMat()),
 	perspectionProjectionTransformation(Utils::IdentityMat()),
 	orthographicProjectionTransformation(Utils::IdentityMat()),
-	_projLeft(-1.0f), _projRight(1.0f), _projBottom(-1.0f), _projTop(0.1f), _projNear(1.0), _projFar(1.0), _projFovy(0.0f), _projAspectRatio(0.0f)
+	_projLeft(-10.0f), _projRight(10.0f), _projBottom(-10.0f), _projTop(10.0f), _projNear(1.0), _projFar(10.0), _projFovy(90.0f), _projAspectRatio(1.5f)
 {
-	setOrthographicProjection(_projLeft, _projRight, _projBottom, _projTop, _projNear, _projFar);
+	setPerspectiveProjection(_projFovy, _projAspectRatio, _projNear, _projFar, AngleUnits::DEGREES);
 	SetCameraLookAt(eye, at, up);
 }
 
@@ -88,7 +88,7 @@ void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio,
 		actualFovy = fovy;
 		break;
 	case AngleUnits::DEGREES:
-		actualFovy = (fovy * ((float)(3.14159265359))) / 180.0f; //to radians
+		actualFovy = ((fovy * ((float)(3.14159265359)))) / 180.0f; //to radians
 		break;
 	default:
 		break;
@@ -119,6 +119,18 @@ void Camera::setOrthographicProjection(const float left, const float right, cons
 
 void Camera::SetZoom(const float zoom)
 {
+	if (zoom == 0.0) return;
+	
+	ProjectionType a = whichProjection();
+	this->zoom = zoom;
+	
+	//updates near, far, left, right, etc.. (required for orthographic updates)
+	setPerspectiveProjection(this->_projFovy, this->_projAspectRatio, this->_projNear, this->_projFar, AngleUnits::DEGREES);
+
+	//returns back the view to what kind it was
+	if (a == ProjectionType::PERSPECTIVE) return;
+	if (a == ProjectionType::ORTHOGRAPHIC) setOrthographicProjection(this->_projLeft, this->_projRight, this->_projBottom, this->_projTop, this->_projNear, this->_projFar);
+
 }
 
 glm::mat4x4 Camera::getViewTransformationInverse() const

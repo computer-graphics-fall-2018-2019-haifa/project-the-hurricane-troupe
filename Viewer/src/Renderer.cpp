@@ -268,35 +268,33 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 glm::vec2 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform)
 {
 	glm::vec4 point = fullTransform * _point;
-	float wDivision = point[3];
-	float newX = point[0] / wDivision;
-	newX = (newX + 1) * viewportWidth / 2.0f;
-	float newY = point[1] / wDivision;
-	newY = (newY + 1) * viewportHeight / 2.0f;
+	float wDivision = (1/point[3]);
+	float newX = point[0] * wDivision;
+	newX = ((newX + 1) * viewportWidth) / 2.0f;
+	float newY = point[1] * wDivision;
+	newY = ((newY + 1) * viewportHeight) / 2.0f;
 	//float newZ = point[2] / wDivision;
 	//float newW = point[3] / wDivision;
 	return glm::vec2(newX, newY);
 }
 
 void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color) {
-	float x1 = point1[0], y1 = point1[1];
-	float x2 = point2[0], y2 = point2[1];
-	int _x1 = ((int)x1) /*+ ((int)(viewportWidth/2.0f))*/, _y1 = (int)y1 /*+ ((int)(viewportHeight / 2.0f))*/; // TODO: This is a temporary fix to avoid the floating point warnings.
-	int _x2 = (int)x2 /*+ ((int)(viewportWidth / 2.0f))*/, _y2 = (int)y2 /*+ ((int)(viewportHeight / 2.0f))*/; // TODO: Perhaps, it should be the global fix, because it at least calculates the "if"s correctly. Must think about this! TODO Later. :P
+	int x1 = (int)point1[0], y1 = (int)point1[1];
+	int x2 = (int)point2[0], y2 = (int)point2[1];
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
 		if (x1 > x2) {
-			plotLineLow(_x2, _y2, _x1, _y1, color);
+			plotLineLow(x2, y2, x1, y1, color);
 		}
 		else {
-			plotLineLow(_x1, _y1, _x2, _y2, color);
+			plotLineLow(x1, y1, x2, y2, color);
 		}
 	}
 	else {
 		if (y1 > y2) {
-			plotLineHigh(_x2, _y2, _x1, _y1, color);
+			plotLineHigh(x2, y2, x1, y1, color);
 		}
 		else {
-			plotLineHigh(_x1, _y1, _x2, _y2, color);
+			plotLineHigh(x1, y1, x2, y2, color);
 		}
 	}
 }
@@ -312,8 +310,9 @@ void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm:
 void Renderer::drawModels(const Scene& scene) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
-	//activeCam.setOrthographicProjection(-50, 50, -50, 50, 1.0, 100.0);
-	activeCam.setPerspectiveProjection(100.0f, viewportWidth / viewportHeight, 1.0, 2.0f);
+	activeCam.setPerspectiveProjection(90.0, viewportWidth / viewportHeight, 1.0, 4.0f);
+	//activeCam.SetZoom(0.5f);
+	//activeCam.SetZoom(1.5f);
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
@@ -330,8 +329,6 @@ void Renderer::drawModels(const Scene& scene) {
 			int v3 = face.GetVertexIndex(2);
 			float x3 = vertices[v3].x, y3 = vertices[v3].y , z3 = vertices[v3].z;
 			
-			//TODO: Remove next line after scaling is done correctly. (Simply moves the dolphin object more upwards)
-
 			glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
 			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
@@ -356,6 +353,6 @@ void Renderer::drawModels(const Scene& scene) {
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 			drawTriangle(p1, p2, p3, redColor);
-			}
 		}
+	}
 }
