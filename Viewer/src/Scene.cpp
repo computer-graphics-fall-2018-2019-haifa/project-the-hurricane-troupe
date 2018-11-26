@@ -51,7 +51,6 @@ void Scene::SetActiveModelIndex(int index)
 	if (index < 0 || index >= models.size()) return;
 	// implementation suggestion...
 	activeModelIndex = index;
-	cameras[index].setProjection(true);
 }
 
 const int Scene::GetActiveModelIndex() const

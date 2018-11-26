@@ -4,6 +4,12 @@
 #include "MeshModel.h"
 #include "Utils.h"
 
+
+enum class ProjectionType {
+	PERSPECTIVE,
+	ORTHOGRAPHIC
+};
+
 /*
  * Camera class. This class takes care of all the camera transformations and manipulations.
  *
@@ -17,18 +23,14 @@ class Camera
 private:
 	glm::mat4x4 viewTransformation;
 	glm::mat4x4 viewTransformationInverse;
-	glm::mat4x4 projectionTransformation;
+	glm::mat4x4 orthographicProjectionTransformation;
+	glm::mat4x4 perspectionProjectionTransformation;
+	ProjectionType currentProjectionType;
 	float zoom;
 
-		void SetOrthographicProjection(
-		const float left,
-		const float right,
-		const float bottom,
-		const float top,
-		const float near,
-		const float far);
+	float _projLeft, _projRight, _projTop, _projBottom, _projNear, _projFar, _projFovy, _projAspectRatio;
 
-	void SetPerspectiveProjection(const float left, const float right, const float bottom, const float top, const float near, const float far);
+	void _SetPerspectiveProjection(const float left, const float right, const float bottom, const float top, const float near, const float far);
 
 public:
 	Camera(const glm::vec4& eye, const glm::vec4& at, const glm::vec4& up);
@@ -36,7 +38,12 @@ public:
 
 	void SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up);
 
-	void setProjection(bool orthographic, const float left = -1.0, const float right = 1.0, const float bottom = -1.0, const float top = 1.0, const float near = 1.0, const float far = -1.0);
+	bool isOrthographicProjection() const;
+	bool isPerspectiveProjection() const;
+	ProjectionType whichProjection() const;
+	void setActiveProjection(const ProjectionType& type);
+	void setOrthographicProjection(const float left = -1.0, const float right = 1.0, const float bottom = -1.0, const float top = 1.0, const float near = 1.0, const float far = -1.0);
+	void setPerspectiveProjection(const float fovy, const float aspectRatio, const float near, const float far, AngleUnits unit = AngleUnits::DEGREES);
 
 	void SetZoom(const float zoom);
 
@@ -44,3 +51,5 @@ public:
 	glm::mat4x4 getProjectionTransformation() const;
 	// Add more methods/functionality as needed...
 };
+
+

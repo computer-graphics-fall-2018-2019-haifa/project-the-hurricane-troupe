@@ -265,11 +265,24 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 	}
 }
 
+glm::vec2 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform)
+{
+	glm::vec4 point = fullTransform * _point;
+	float wDivision = point[3];
+	float newX = point[0] / wDivision;
+	newX = (newX + 1) * viewportWidth / 2.0f;
+	float newY = point[1] / wDivision;
+	newY = (newY + 1) * viewportHeight / 2.0f;
+	//float newZ = point[2] / wDivision;
+	//float newW = point[3] / wDivision;
+	return glm::vec2(newX, newY);
+}
+
 void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color) {
 	float x1 = point1[0], y1 = point1[1];
 	float x2 = point2[0], y2 = point2[1];
-	int _x1 = ((int)x1) + ((int)(viewportWidth/2.0f)), _y1 = (int)y1 + ((int)(viewportHeight / 2.0f)); // TODO: This is a temporary fix to avoid the floating point warnings.
-	int _x2 = (int)x2 + ((int)(viewportWidth / 2.0f)), _y2 = (int)y2 + ((int)(viewportHeight / 2.0f)); // TODO: Perhaps, it should be the global fix, because it at least calculates the "if"s correctly. Must think about this! TODO Later. :P
+	int _x1 = ((int)x1) /*+ ((int)(viewportWidth/2.0f))*/, _y1 = (int)y1 /*+ ((int)(viewportHeight / 2.0f))*/; // TODO: This is a temporary fix to avoid the floating point warnings.
+	int _x2 = (int)x2 /*+ ((int)(viewportWidth / 2.0f))*/, _y2 = (int)y2 /*+ ((int)(viewportHeight / 2.0f))*/; // TODO: Perhaps, it should be the global fix, because it at least calculates the "if"s correctly. Must think about this! TODO Later. :P
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
 		if (x1 > x2) {
 			plotLineLow(_x2, _y2, _x1, _y1, color);
@@ -289,12 +302,18 @@ void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& col
 }
 
 
-
+void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3, const glm::vec3& color) 
+{
+	drawLine(p1, p2, color);
+	drawLine(p1, p3, color);
+	drawLine(p2, p3, color);
+}
 
 void Renderer::drawModels(const Scene& scene) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
-	activeCam.setProjection(true, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0);
+	//activeCam.setOrthographicProjection(-50, 50, -50, 50, 1.0, 100.0);
+	activeCam.setPerspectiveProjection(100.0f, viewportWidth / viewportHeight, 1.0, 2.0f);
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
@@ -317,38 +336,26 @@ void Renderer::drawModels(const Scene& scene) {
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
 			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
 
-			//glm::mat4x4 projectionTransform(activeCam.getProjectionTransformation());
-			//glm::mat4x4 camViewTransformInverse(activeCam.getViewTransformationInverse());
-			//glm::mat4x4 worldTransform = models[i]->GetWorldTransformation();
-			//glm::mat4x4 objectTransform = camViewTransformInverse* worldTransform;// *camViewTransformInverse; //*projectionTransform * camViewTransformInverse; //* objectTransform;
-			
-
-			//activeCam.setProjection(true);
 			//TODO: Get new P1,P2 for each line with accordance to the cam direction
-			//activeCam.setProjection(true);
-			RotationRules modelRotation = RotationRules();
-			modelRotation.setRotation(Axis::XAXIS, 90.0f);
-			float scalingFactor = 1.0;
-			float addition = 100.0f;
-			model->symmetricMove(&addition);
+			//RotationRules modelRotation = RotationRules();
+			//modelRotation.setRotation(Axis::XAXIS, 0.0f, AngleUnits::DEGREES);
+			//modelRotation.setRotation(Axis::ZAXIS, 90.0f, AngleUnits::DEGREES);
+			//float scalingFactor = 1.0;
+			//float addition = 100.0f;
+			//model->symmetricMove(&addition);
 			//model->symmetricMove(&addition);
 			//model->scale(scalingFactor, scalingFactor, scalingFactor);
 			//model->rotate(modelRotation);
+			
 			glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::mat4x4 completeTransform = camTransformation * modelTransform;
-			glm::vec4 newVertexIndices1 = completeTransform * w1;
-			glm::vec4 newVertexIndices2 = completeTransform * w2;
-			glm::vec4 newVertexIndices3 = completeTransform * w3;
 
+			glm::vec2 p1 = translatePointIndicesToPixels(w1, completeTransform);
+			glm::vec2 p2 = translatePointIndicesToPixels(w2, completeTransform);
+			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
-			glm::vec2 p1 = glm::vec2(newVertexIndices1[0], newVertexIndices1[1]);
-			glm::vec2 p2 = glm::vec2(newVertexIndices2[0], newVertexIndices2[1]);
-			glm::vec2 p3 = glm::vec2(newVertexIndices3[0], newVertexIndices3[1]);
-
-			drawLine(p1, p2, redColor);
-			drawLine(p1, p3, redColor);
-			drawLine(p2, p3, redColor);
+			drawTriangle(p1, p2, p3, redColor);
 			}
 		}
 }

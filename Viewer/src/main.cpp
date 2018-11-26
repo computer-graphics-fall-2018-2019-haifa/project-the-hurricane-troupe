@@ -33,7 +33,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 int main(int argc, char **argv)
 {
 	// Create GLFW window
-	int windowWidth = 4080, windowHeight = 4720;
+	int windowWidth = 2048, windowHeight = 1152;
 	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Mesh Viewer");
 	if (!window)
 	{
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
 	Camera mainCam = Camera(
-		glm::vec4(0.0f, 0.0f, -13.0f, 0.0f),
+		glm::vec4(0.0f, 0.0f, 4.0f, 0.0f),
 		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 		glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 	);
@@ -140,10 +140,10 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 
 	// Resize handling here... (a suggestion)
+	renderer.SetViewport(frameBufferWidth, frameBufferHeight);
 
 	// Clear the frame buffer
 	renderer.ClearColorBuffer(GetClearColor());
-	
 
 	// Render the scene
 	renderer.Render(scene);
