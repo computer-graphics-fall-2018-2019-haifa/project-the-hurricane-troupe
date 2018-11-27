@@ -35,18 +35,40 @@ char* const stringToCharSeq(const std::string& str)
 	return seq[0];
 }
 
+bool isShowingSymmetricScale = true;
+
+void showScaleSliders(Scene& scene, bool isSymmetric) {
+	float* xFactor = new float(0.0f);
+	float* yFactor = new float(0.0f);
+	float* zFactor = new float(0.0f);
+	ImGui::SameLine();
+	if (ImGui::Button("Reset")) { *xFactor = 1.0f; *yFactor = 1.0f; *zFactor = 1.0f; scene.symmetricScaleActiveModel(1.0f); }
+	
+	scene.getScalingFactorsActiveModel(xFactor, yFactor, zFactor);
+	if (isSymmetric) {
+		ImGui::SliderFloat("Scale", xFactor, -4.0f, 4.0f);
+		*zFactor = *xFactor; *yFactor = *xFactor;
+	}
+	else {
+		ImGui::SliderFloat("X Scale", xFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button("Reset X")) { *xFactor = 1.0f; }
+		ImGui::SliderFloat("Y Scale", yFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button("Reset Y")) { *yFactor = 1.0f; }
+		ImGui::SliderFloat("Z Scale", zFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button("Reset Z")) { *zFactor = 1.0f; }
+	}
+	scene.scaleActiveModel(*xFactor, *yFactor, *zFactor);
+	return;
+}
+
 void openModelManipulationWindow(const char* const modelName, int modelIndex, Scene& scene) {
 	scene.SetActiveModelIndex(modelIndex);
 	
 	ImGui::Text("What would you like to do to %s?", modelName);
-	float* xFactor = new float(0.0f);
-	float* yFactor = new float(0.0f);
-	float* zFactor = new float(0.0f);
-	scene.getScalingFactorsActiveModel(xFactor, yFactor, zFactor);
-	float scaleFactor = *xFactor;
-	if (ImGui::Button("Reset")) { scaleFactor = 1.0f; }
+
+	ImGui::Text("Scale:");
 	ImGui::SameLine();
-	ImGui::SliderFloat("Symmetric Scale", &scaleFactor, -4.0f, 4.0f);
+	if (ImGui::RadioButton("Altogether", isShowingSymmetricScale)) isShowingSymmetricScale = true;
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Seperate", !isShowingSymmetricScale)) isShowingSymmetricScale = false;
+	showScaleSliders(scene, isShowingSymmetricScale);
 	//TODO: Should Add Scale from each side feature.
 
 	//ImGui::SliderFloat("Rotate X", &stam, -30.0f, 40.0f);
@@ -57,8 +79,6 @@ void openModelManipulationWindow(const char* const modelName, int modelIndex, Sc
 	//ImGui::Text("Y");
 	//ImGui::Text("Z");
 	ImGui::Separator();
-
-	scene.symmetricScaleActiveModel(scaleFactor);
 }
 
 void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store)
@@ -81,7 +101,6 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 		if (isSelected) {
 			openModelManipulationWindow(name, i, scene);
 		}
-
 		++i;
 	}
 }
