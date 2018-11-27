@@ -94,6 +94,9 @@ void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio,
 		break;
 	}
 	actualFovy /= zoom;
+
+	if (actualFovy <= MINVIEWABLEANGLE || actualFovy >= MAXVIEWABLEANGLE) return;
+
 	float height = glm::abs(glm::tan(actualFovy / 2.0f)*near);
 	float width = aspectRatio * height;
 	_SetPerspectiveProjection(-width, width, -height, height, near, far);
@@ -120,7 +123,10 @@ void Camera::setOrthographicProjection(const float left, const float right, cons
 
 void Camera::SetZoom(const float zoom)
 {
-	if (zoom == 0.0) return;
+	if (zoom <= 0.0) return;
+
+	float expectedFovy = this->_projFovy / zoom;
+	if (expectedFovy >= MAXVIEWABLEANGLE || expectedFovy <= MINVIEWABLEANGLE) return;
 	
 	ProjectionType a = whichProjection();
 	this->zoom = zoom;
@@ -132,6 +138,16 @@ void Camera::SetZoom(const float zoom)
 	if (a == ProjectionType::PERSPECTIVE) return;
 	if (a == ProjectionType::ORTHOGRAPHIC) setOrthographicProjection(this->_projLeft, this->_projRight, this->_projBottom, this->_projTop, this->_projNear, this->_projFar);
 
+}
+
+float Camera::getMaxZoomAllowed()
+{
+	return MAXZOOM;
+}
+
+float Camera::getMinZoomAllowed()
+{
+	return this->_projFovy/MAXVIEWABLEANGLE;
 }
 
 glm::mat4x4 Camera::getViewTransformationInverse() const

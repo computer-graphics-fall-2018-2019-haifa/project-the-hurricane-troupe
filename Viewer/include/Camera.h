@@ -21,6 +21,9 @@ enum class ProjectionType {
 class Camera
 {
 private:
+	const float MAXVIEWABLEANGLE = 180.0f;
+	const float MINVIEWABLEANGLE = 0.0f;
+	const float MAXZOOM = 10.0f;
 	glm::mat4x4 viewTransformation;
 	glm::mat4x4 viewTransformationInverse;
 	glm::mat4x4 orthographicProjectionTransformation;
@@ -46,6 +49,10 @@ public:
 	void setPerspectiveProjection(const float fovy, const float aspectRatio, const float near, const float far, AngleUnits unit = AngleUnits::DEGREES);
 
 	void SetZoom(const float zoom);
+	// returns the max zoom which allows up to 180 degrees. (not inclusive)
+	float getMaxZoomAllowed();
+	// returns the min zoom which allows minimum 0 degrees. (not inclusive)
+	float getMinZoomAllowed();
 
 	glm::mat4x4 getViewTransformationInverse() const;
 	glm::mat4x4 getProjectionTransformation() const;
