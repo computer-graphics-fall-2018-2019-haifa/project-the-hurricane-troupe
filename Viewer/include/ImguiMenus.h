@@ -20,6 +20,6 @@ public:
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
-void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, GUIStore & store);
+void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, GUIStore& store);
 void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store);
 const glm::vec4& GetClearColor();

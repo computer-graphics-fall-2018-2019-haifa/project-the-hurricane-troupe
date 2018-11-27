@@ -46,7 +46,7 @@ void openModelManipulationWindow(const char* const modelName, int modelIndex, Sc
 	float scaleFactor = *xFactor;
 	if (ImGui::Button("Reset")) { scaleFactor = 1.0f; }
 	ImGui::SameLine();
-	ImGui::SliderFloat("Symmetric Scale", &scaleFactor, -30.0f, 40.0f);
+	ImGui::SliderFloat("Symmetric Scale", &scaleFactor, -4.0f, 4.0f);
 	//TODO: Should Add Scale from each side feature.
 
 	//ImGui::SliderFloat("Rotate X", &stam, -30.0f, 40.0f);
