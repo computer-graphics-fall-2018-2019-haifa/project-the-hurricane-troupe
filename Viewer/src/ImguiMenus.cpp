@@ -38,8 +38,13 @@ char* const stringToCharSeq(const std::string& str)
 void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, GUIStore& store)
 {
 	int i = 0;
-	
-	ImGui::Text("Please select the model you wish to manipulate");
+	if (models.size() == 0) {
+		ImGui::Text("** Here You should see the list of models you loaded. **");
+		ImGui::Text("\t It appears you have not yet loaded any models.");
+		ImGui::Text("\t -> To load a model, please use the menu at the top of the window.");
+		return;
+	}
+	ImGui::Text("Please select the model you wish to manipulate:");
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
 		char* name = stringToCharSeq(model->GetModelName());
@@ -59,7 +64,7 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 		ImGui::ShowDemoWindow(&showDemoWindow);
 	//}
 
-		std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
+	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	{
 		ImGui::Begin("All Models");
 		
