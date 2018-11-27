@@ -54,6 +54,8 @@ int main(int argc, char **argv)
 	// Setup ImGui
 	ImGuiIO& io = SetupDearImgui(window);
 
+	GUIStore store = GUIStore(scene);
+
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
 	Camera mainCam = Camera(
@@ -72,7 +74,8 @@ int main(int argc, char **argv)
 		// Here we build the menus for the next frame. Feel free to pass more arguments to this function call
 		//DrawImguiMenus(io, scene);
 
-		ObjectManipulationMenus(io, scene);
+		store.sync(scene);
+		ObjectManipulationMenus(io, scene, store);
 		
 		// Render the next frame
 		RenderFrame(window, scene, renderer, io);
