@@ -35,7 +35,33 @@ char* const stringToCharSeq(const std::string& str)
 	return seq[0];
 }
 
-void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, GUIStore& store)
+void openModelManipulationWindow(const char* const modelName, int modelIndex, Scene& scene) {
+	scene.SetActiveModelIndex(modelIndex);
+	
+	ImGui::Text("What would you like to do to %s?", modelName);
+	float* xFactor = new float(0.0f);
+	float* yFactor = new float(0.0f);
+	float* zFactor = new float(0.0f);
+	scene.getScalingFactorsActiveModel(xFactor, yFactor, zFactor);
+	float scaleFactor = *xFactor;
+	if (ImGui::Button("Reset")) { scaleFactor = 1.0f; }
+	ImGui::SameLine();
+	ImGui::SliderFloat("Symmetric Scale", &scaleFactor, -30.0f, 40.0f);
+	//TODO: Should Add Scale from each side feature.
+
+	//ImGui::SliderFloat("Rotate X", &stam, -30.0f, 40.0f);
+	//ImGui::SliderFloat("Rotate Y", &stam, -30.0f, 40.0f);
+	//ImGui::SliderFloat("Rotate Z", &stam, -30.0f, 40.0f);
+	//ImGui::Text("Move", &stam, -30.0f, 40.0f);
+	//ImGui::Text("X");
+	//ImGui::Text("Y");
+	//ImGui::Text("Z");
+	ImGui::Separator();
+
+	scene.symmetricScaleActiveModel(scaleFactor);
+}
+
+void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store)
 {
 	int i = 0;
 	if (models.size() == 0) {
@@ -44,14 +70,18 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, GUIStore& 
 		ImGui::Text("\t -> To load a model, please use the menu at the top of the window.");
 		return;
 	}
-	ImGui::Text("Please select the model you wish to manipulate:");
+	ImGui::Text("Please select the model(s) you wish to manipulate:");
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
 		char* name = stringToCharSeq(model->GetModelName());
-		bool curr = store.isModelManipulated(i);
-		if (ImGui::Checkbox(name, &curr)) {
-			store.setModelManipulated(i, curr);
+		bool isSelected = store.isModelManipulated(i);
+		if (ImGui::Checkbox(name, &isSelected)) {
+			store.setModelManipulated(i, isSelected);
 		}
+		if (isSelected) {
+			openModelManipulationWindow(name, i, scene);
+		}
+
 		++i;
 	}
 }
@@ -70,7 +100,7 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 		
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
-			showModelsListed(models, store);
+			showModelsListed(models, scene, store);
 		}
 
 		ImGui::End();

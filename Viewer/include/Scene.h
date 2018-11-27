@@ -37,5 +37,12 @@ public:
 	std::vector<std::shared_ptr<MeshModel>> getSceneModels() const;
 	Camera getActiveCamera() const;
 	// Add more methods as needed...
+	void rotateActiveModel(const RotationRules& rotation);
+	void moveActiveModel(const float const xAddition = 0.0f, const float const yAddition = 0.0f, const float const zAdddition = 0.0f);
+	void symmetricMoveActiveModel(const float addition);
+	void scaleActiveModel(const float const xScale = 1.0f, const float const yScale = 1.0f, const float const zScale = 1.0f);
+	void symmetricScaleActiveModel(const float const scalingFactor);
 
+	void getScalingFactorsActiveModel(float* xFactor, float* yFactor, float* zFactor) const;
+	void getTranslationFactorsActiveModel(float* xTranslation, float* yTranslation, float* zTranslation) const;
 };

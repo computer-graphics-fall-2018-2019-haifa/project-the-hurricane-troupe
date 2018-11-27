@@ -28,6 +28,8 @@ private:
 	glm::mat4x4 worldTransform;
 	void updateWorldTransformation();
 	bool isTransformUpdated;
+	float _xScale, _yScale, _zScale;
+	float _xAddition, _yAddition, _zAddition;
 	void _translate(const float* const newX, const float* const newY, const float* const newZ );
 	void _scale(float xFactor, float yFactor, float zFactor);
 	void _rotate(const RotationRules& rotation);
@@ -69,5 +71,8 @@ public:
 
 	/* rotates the objects in a specific order, additional attention is needed to ensure correctness of rotations.*/
 	void rotate(const RotationRules& rotation);
+
+	void getScalingFactors(float* xFactor, float* yFactor, float* zFactor) const;
+	void getTranslationFactors(float* xTranslation, float* yTranslation, float* zTranslation) const;
 
 };

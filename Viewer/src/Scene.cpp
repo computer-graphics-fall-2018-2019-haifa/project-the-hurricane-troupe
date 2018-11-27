@@ -28,6 +28,41 @@ Camera Scene::getActiveCamera() const {
 	return cameras[GetActiveCameraIndex()];
 }
 
+void Scene::rotateActiveModel(const RotationRules & rotation)
+{
+	models[GetActiveModelIndex()]->rotate(rotation);
+}
+
+void Scene::moveActiveModel(const float const xAddition, const float const yAddition, const float const zAdddition)
+{
+	models[GetActiveModelIndex()]->move(&xAddition, &yAddition, &zAdddition);
+}
+
+void Scene::symmetricMoveActiveModel(const float addition)
+{
+	models[GetActiveModelIndex()]->symmetricMove(&addition);
+}
+
+void Scene::scaleActiveModel(const float const xScale, const float const yScale, const float const zScale)
+{
+	models[GetActiveModelIndex()]->scale(xScale, yScale, zScale);
+}
+
+void Scene::symmetricScaleActiveModel(const float const scalingFactor)
+{
+	models[GetActiveModelIndex()]->symmetricScale(scalingFactor);
+}
+
+void Scene::getScalingFactorsActiveModel(float * xFactor, float * yFactor, float * zFactor) const
+{
+	models[GetActiveModelIndex()]->getScalingFactors(xFactor, yFactor, zFactor);
+}
+
+void Scene::getTranslationFactorsActiveModel(float * xTranslation, float * yTranslation, float * zTranslation) const
+{
+	models[GetActiveModelIndex()]->getTranslationFactors(xTranslation, yTranslation, zTranslation);
+}
+
 const int Scene::GetCameraCount() const
 {
 	return cameras.size();

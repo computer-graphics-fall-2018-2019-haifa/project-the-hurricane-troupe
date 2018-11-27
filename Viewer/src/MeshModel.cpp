@@ -17,7 +17,9 @@ MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3
 	vertices(vertices),
 	faces(faces),
 	//textures(textures),
-	normals(normals)
+	normals(normals),
+	_xScale(1.0f), _yScale(1.0f), _zScale(1.0f),
+	_xAddition(0.0f), _yAddition(0.0f), _zAddition(0.0f)
 {
 	//initialization code only
 	_translate(nullptr, nullptr, nullptr); //no translation
@@ -64,6 +66,7 @@ std::vector<Face> MeshModel::getFaces() {
 }
 
 void MeshModel::_scale(float xFactor, float yFactor, float zFactor) {
+	_xScale = xFactor; _yScale = yFactor; _zScale = zFactor;
 	scaleTransform = glm::mat4x4({
 		xFactor,		0.0f,		0.0f,		0.0f,
 		0.0f,		yFactor,		0.0f,		0.0f,
@@ -101,6 +104,20 @@ void MeshModel::rotate(const RotationRules& rotation) {
 	_rotate(rotation);
 }
 
+void MeshModel::getScalingFactors(float * xFactor, float * yFactor, float * zFactor) const
+{
+	*xFactor = _xScale;
+	*yFactor = _yScale;
+	*zFactor = _zScale;
+}
+
+void MeshModel::getTranslationFactors(float * xTranslation, float * yTranslation, float * zTranslation) const
+{
+	*xTranslation = _xAddition;
+	*yTranslation = _yAddition;
+	*zTranslation = _zAddition;
+}
+
 
 
 void MeshModel::_translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
@@ -108,12 +125,15 @@ void MeshModel::_translate(const float * const xAddition, const float * const yA
 	float x = 0, y = 0, z = 0;
 	if (xAddition != nullptr) {
 		x = *xAddition;
+		_xAddition += x;
 	}
 	if (yAddition != nullptr) {
 		y = *yAddition;
+		_yAddition += y;
 	}
 	if (zAddition != nullptr) {
 		z = *zAddition;
+		_zAddition += z;
 	}
 
 	translateTransform = glm::transpose(glm::mat4x4({
