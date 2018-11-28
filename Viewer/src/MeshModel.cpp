@@ -19,7 +19,7 @@ MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3
 	//textures(textures),
 	normals(normals),
 	_xScale(1.0f), _yScale(1.0f), _zScale(1.0f),
-	_xAddition(0.0f), _yAddition(0.0f), _zAddition(0.0f)
+	_xDelta(0.0f), _yDelta(0.0f), _zDelta(0.0f)
 {
 	//initialization code only
 	_translate(nullptr, nullptr, nullptr); //no translation
@@ -92,12 +92,23 @@ void MeshModel::symmetricScale(float factor) {
 
 void MeshModel::move(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {
-	_translate(xAddition, yAddition, zAddition);
+	float newX = *xAddition + _xDelta;
+	_xDelta = newX;
+	float newY = *yAddition + _yDelta;
+	_yDelta = newY;
+	float newZ = *zAddition + _zDelta;
+	_zDelta = newZ;
+	_translate(&newX, &newY, &newZ);
 }
 
 void MeshModel::symmetricMove(const float * const addition)
 {
 	move(addition, addition, addition);
+}
+
+void MeshModel::setPosition(float newX, float newY, float newZ)
+{
+	_translate(&newX, &newY, &newZ);
 }
 
 void MeshModel::rotate(const RotationRules& rotation) {
@@ -111,13 +122,12 @@ void MeshModel::getScalingFactors(float * xFactor, float * yFactor, float * zFac
 	*zFactor = _zScale;
 }
 
-void MeshModel::getTranslationFactors(float * xTranslation, float * yTranslation, float * zTranslation) const
+void MeshModel::getCoordinateDifference(float* const xDelta, float* const yDelta, float* const zDelta) const
 {
-	*xTranslation = _xAddition;
-	*yTranslation = _yAddition;
-	*zTranslation = _zAddition;
+	*xDelta = _xDelta;
+	*yDelta = _yDelta;
+	*zDelta = _zDelta;
 }
-
 
 
 void MeshModel::_translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
@@ -125,15 +135,12 @@ void MeshModel::_translate(const float * const xAddition, const float * const yA
 	float x = 0, y = 0, z = 0;
 	if (xAddition != nullptr) {
 		x = *xAddition;
-		_xAddition += x;
 	}
 	if (yAddition != nullptr) {
 		y = *yAddition;
-		_yAddition += y;
 	}
 	if (zAddition != nullptr) {
 		z = *zAddition;
-		_zAddition += z;
 	}
 
 	translateTransform = glm::transpose(glm::mat4x4({

@@ -53,14 +53,14 @@ void Scene::symmetricScaleActiveModel(const float const scalingFactor)
 	models[GetActiveModelIndex()]->symmetricScale(scalingFactor);
 }
 
-void Scene::getScalingFactorsActiveModel(float * xFactor, float * yFactor, float * zFactor) const
+void Scene::getScalingFactorsActiveModel(float* const xFactor, float* const yFactor, float* const zFactor) const
 {
 	models[GetActiveModelIndex()]->getScalingFactors(xFactor, yFactor, zFactor);
 }
 
-void Scene::getTranslationFactorsActiveModel(float * xTranslation, float * yTranslation, float * zTranslation) const
+void Scene::getTranslationDeltasActiveModel(float * const xDelta, float * const yDelta, float * const zDelta) const
 {
-	models[GetActiveModelIndex()]->getTranslationFactors(xTranslation, yTranslation, zTranslation);
+	models[GetActiveModelIndex()]->getCoordinateDifference(xDelta, yDelta, zDelta);
 }
 
 const int Scene::GetCameraCount() const

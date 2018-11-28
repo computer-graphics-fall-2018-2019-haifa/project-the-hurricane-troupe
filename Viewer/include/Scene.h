@@ -43,6 +43,6 @@ public:
 	void scaleActiveModel(const float const xScale = 1.0f, const float const yScale = 1.0f, const float const zScale = 1.0f);
 	void symmetricScaleActiveModel(const float const scalingFactor);
 
-	void getScalingFactorsActiveModel(float* xFactor, float* yFactor, float* zFactor) const;
-	void getTranslationFactorsActiveModel(float* xTranslation, float* yTranslation, float* zTranslation) const;
+	void getScalingFactorsActiveModel(float* const xFactor, float* const yFactor, float* const zFactor) const;
+	void getTranslationDeltasActiveModel(float* const xDelta, float* const yDelta, float* const zDelta) const;
 };

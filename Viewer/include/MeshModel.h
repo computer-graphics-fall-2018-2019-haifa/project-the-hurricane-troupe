@@ -29,7 +29,7 @@ private:
 	void updateWorldTransformation();
 	bool isTransformUpdated;
 	float _xScale, _yScale, _zScale;
-	float _xAddition, _yAddition, _zAddition;
+	float _xDelta, _yDelta, _zDelta;
 	void _translate(const float* const newX, const float* const newY, const float* const newZ );
 	void _scale(float xFactor, float yFactor, float zFactor);
 	void _rotate(const RotationRules& rotation);
@@ -59,20 +59,25 @@ public:
 	/* scales model in the following way:
 		-> factor times its size on the x-axis, y-axis and z-axis.*/
 	void symmetricScale(float factor = 1.0f);
+
+
 	/* moves the model relative to its location in the following way:
 		-> assume the model's current location is (x,y,z), 
 			then its new location will become (x + newX, y + newY, z + newZ). */
 	void move(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
+
 	/* moves the model relative to its location in the following way:
 	-> assume the model's current location is (x,y,z),
 	then its new location will become (x + addition, y + addition, z + addition). */
 	void symmetricMove(const float * const addition = nullptr);
-	//void setPosition(const float* const newX = nullptr, const float* const newY = nullptr, const float* const newZ = nullptr);
+
+	/* sets the position *exactly* to (newX, newY, newZ)*/
+	void setPosition(float newX, float newY, float newZ);
 
 	/* rotates the objects in a specific order, additional attention is needed to ensure correctness of rotations.*/
 	void rotate(const RotationRules& rotation);
 
 	void getScalingFactors(float* xFactor, float* yFactor, float* zFactor) const;
-	void getTranslationFactors(float* xTranslation, float* yTranslation, float* zTranslation) const;
+	void getCoordinateDifference(float* const xDelta, float* const yDelta, float* const zDelta) const;
 
 };

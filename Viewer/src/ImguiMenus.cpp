@@ -58,9 +58,36 @@ void showScaleSliders(Scene& scene, bool isSymmetric) {
 	return;
 }
 
-void openModelManipulationWindow(const char* const modelName, int modelIndex, Scene& scene) {
-	scene.SetActiveModelIndex(modelIndex);
-	
+void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scene, ImGuiIO& io) {
+	float xAddition = 0.0f, yAddition = 0.0f, zAddition = 0.0f;
+	bool changed = false;
+	int left = io.KeyMap[ImGuiKey_::ImGuiKey_LeftArrow];
+	int right = io.KeyMap[ImGuiKey_::ImGuiKey_RightArrow];
+	int up = io.KeyMap[ImGuiKey_::ImGuiKey_UpArrow];
+	int down = io.KeyMap[ImGuiKey_::ImGuiKey_DownArrow];
+	int shift = io.KeyShift;
+	float diff = 20.0f;
+	if (ImGui::IsKeyDown(up)) {
+		if (shift) { zAddition -= diff; } //TODO: Was IsKeyDown
+		else { yAddition += diff; }
+		changed = true;
+	}
+	else if (ImGui::IsKeyDown(down)) {
+		if (shift) { zAddition += diff; } //TODO: Was IsKeyDown
+		else { yAddition -= diff; }
+		changed = true;
+	}
+	else if (ImGui::IsKeyDown(left)) { xAddition -= diff; changed = true;}
+	else if (ImGui::IsKeyDown(right)) {
+		xAddition += diff; 
+		changed = true;
+	}
+	if (changed) {
+		scene.moveActiveModel(xAddition, yAddition, zAddition);
+	}
+}
+
+void openModelManipulationWindow(const char* const modelName, Scene& scene) {
 	ImGui::Text("What would you like to do to %s?", modelName);
 
 	ImGui::Text("Scale:");
@@ -69,7 +96,6 @@ void openModelManipulationWindow(const char* const modelName, int modelIndex, Sc
 	ImGui::SameLine();
 	if (ImGui::RadioButton("Seperate", !isShowingSymmetricScale)) isShowingSymmetricScale = false;
 	showScaleSliders(scene, isShowingSymmetricScale);
-	//TODO: Should Add Scale from each side feature.
 
 	//ImGui::SliderFloat("Rotate X", &stam, -30.0f, 40.0f);
 	//ImGui::SliderFloat("Rotate Y", &stam, -30.0f, 40.0f);
@@ -81,7 +107,7 @@ void openModelManipulationWindow(const char* const modelName, int modelIndex, Sc
 	ImGui::Separator();
 }
 
-void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store)
+void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store, ImGuiIO& io)
 {
 	int i = 0;
 	if (models.size() == 0) {
@@ -91,6 +117,7 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 		return;
 	}
 	ImGui::Text("Please select the model(s) you wish to manipulate:");
+	ImGui::Text("To move your models around, firstly select them then use the keyboard arrows:\n UP,DOWN,LEFT,RIGHT, SHIFT+UP, SHIFT+DOWN.");
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
 		char* name = stringToCharSeq(model->GetModelName());
@@ -99,7 +126,9 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 			store.setModelManipulated(i, isSelected);
 		}
 		if (isSelected) {
-			openModelManipulationWindow(name, i, scene);
+			scene.SetActiveModelIndex(i);
+			openModelManipulationWindow(name, scene);
+			handleTranslationFromKeyboardInput(name, scene, io);
 		}
 		++i;
 	}
@@ -119,7 +148,7 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 		
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
-			showModelsListed(models, scene, store);
+			showModelsListed(models, scene, store, io);
 		}
 
 		ImGui::End();
