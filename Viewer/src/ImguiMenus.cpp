@@ -35,24 +35,34 @@ char* const stringToCharSeq(const std::string& str)
 	return seq[0];
 }
 
-bool isShowingSymmetricScale = true;
+char* stringIntConcatenate(char* str, int i) { return stringToCharSeq(std::string(str) + std::to_string(i)); }
 
-void showScaleSliders(Scene& scene, bool isSymmetric) {
+void showScaleSliders(Scene& scene, bool isSymmetric, int index) {
 	float* xFactor = new float(0.0f);
 	float* yFactor = new float(0.0f);
 	float* zFactor = new float(0.0f);
 	ImGui::SameLine();
-	if (ImGui::Button("Reset")) { *xFactor = 1.0f; *yFactor = 1.0f; *zFactor = 1.0f; scene.symmetricScaleActiveModel(1.0f); }
+	char* modelsReset = stringIntConcatenate("Reset##AllAxisReset", index);
+	if (ImGui::Button(modelsReset)) { *xFactor = 1.0f; *yFactor = 1.0f; *zFactor = 1.0f; scene.symmetricScaleActiveModel(1.0f); }
 	
 	scene.getScalingFactorsActiveModel(xFactor, yFactor, zFactor);
 	if (isSymmetric) {
-		ImGui::SliderFloat("Scale", xFactor, -4.0f, 4.0f);
+		char* allScale = stringIntConcatenate("Scale##AllAxisScale", index);
+		ImGui::SliderFloat(allScale, xFactor, -4.0f, 4.0f);
 		*zFactor = *xFactor; *yFactor = *xFactor;
 	}
 	else {
-		ImGui::SliderFloat("X Scale", xFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button("Reset X")) { *xFactor = 1.0f; }
-		ImGui::SliderFloat("Y Scale", yFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button("Reset Y")) { *yFactor = 1.0f; }
-		ImGui::SliderFloat("Z Scale", zFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button("Reset Z")) { *zFactor = 1.0f; }
+		char* xScale = stringIntConcatenate("X Scale##XScale", index);
+		char* yScale = stringIntConcatenate("Y Scale##YScale", index);
+		char* zScale = stringIntConcatenate("z Scale##ZScale", index);
+
+		char* xReset = stringIntConcatenate("Reset##XResetScale", index);
+		char* yReset = stringIntConcatenate("Reset##YResetScale", index);
+		char* zReset = stringIntConcatenate("Reset##ZResetScale", index);
+
+		ImGui::SliderFloat(xScale, xFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(xReset)) { *xFactor = 1.0f; }
+		ImGui::SliderFloat(yScale, yFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(yReset)) { *yFactor = 1.0f; }
+		ImGui::SliderFloat(zScale, zFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(zReset)) { *zFactor = 1.0f; }
 	}
 	scene.scaleActiveModel(*xFactor, *yFactor, *zFactor);
 	return;
@@ -87,15 +97,16 @@ void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scen
 	}
 }
 
-void openModelManipulationWindow(const char* const modelName, Scene& scene) {
-	ImGui::Text("What would you like to do to %s?", modelName);
 
+void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index) {
+	ImGui::Text("What would you like to do to %s?", modelName);
 	ImGui::Text("Scale:");
 	ImGui::SameLine();
-	if (ImGui::RadioButton("Altogether", isShowingSymmetricScale)) isShowingSymmetricScale = true;
+	char* tmp = stringToCharSeq(std::string("Altogether##") + std::to_string(index));
+	if (ImGui::RadioButton(tmp, store.isModelSymmetricScaled(index))) store.setModelSymmetricScaled(index, true);
 	ImGui::SameLine();
-	if (ImGui::RadioButton("Seperate", !isShowingSymmetricScale)) isShowingSymmetricScale = false;
-	showScaleSliders(scene, isShowingSymmetricScale);
+	if (ImGui::RadioButton(stringToCharSeq(std::string("Seperate##") + std::to_string(index)), !store.isModelSymmetricScaled(index))) store.setModelSymmetricScaled(index, false);
+	showScaleSliders(scene, store.isModelSymmetricScaled(index), index);
 
 	//ImGui::SliderFloat("Rotate X", &stam, -30.0f, 40.0f);
 	//ImGui::SliderFloat("Rotate Y", &stam, -30.0f, 40.0f);
@@ -127,7 +138,7 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 		}
 		if (isSelected) {
 			scene.SetActiveModelIndex(i);
-			openModelManipulationWindow(name, scene);
+			openModelManipulationWindow(name, scene, store, i);
 			handleTranslationFromKeyboardInput(name, scene, io);
 		}
 		++i;
@@ -258,6 +269,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	_scene(scene),
 	_models(scene.getSceneModels()),
 	_isModelBeingManipulated(scene.GetModelCount(), false),
+	_isModelSymmetricScaled(scene.GetModelCount(), true),
 	_modelCount(scene.GetModelCount())
 {
 }
@@ -269,6 +281,7 @@ void GUIStore::sync(const Scene& scene)
 	int newSize = _models.size();
 	if (newSize > _modelCount) {
 		_isModelBeingManipulated.push_back(false);
+		_isModelSymmetricScaled.push_back(true);
 	}
 	_modelCount = newSize;
 	}
@@ -283,4 +296,16 @@ bool GUIStore::isModelManipulated(int i) const
 {
 	if (i < 0 || i > _modelCount) return false;
 	return _isModelBeingManipulated[i];
+}
+
+void GUIStore::setModelSymmetricScaled(int i, bool isSymmetric)
+{
+	if (i < 0 || i > _modelCount) return;
+	_isModelSymmetricScaled[i] = isSymmetric;
+}
+
+bool GUIStore::isModelSymmetricScaled(int i) const
+{
+	if (i < 0 || i > _modelCount) return false;
+	return _isModelSymmetricScaled[i];
 }

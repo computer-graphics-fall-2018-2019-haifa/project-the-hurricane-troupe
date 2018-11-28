@@ -9,6 +9,7 @@ private:
 	Scene _scene;
 	std::vector<std::shared_ptr<MeshModel>> _models;
 	std::vector<bool> _isModelBeingManipulated;
+	std::vector<bool> _isModelSymmetricScaled;
 	int _modelCount;
 
 public:
@@ -16,6 +17,8 @@ public:
 	void sync(const Scene& scene);
 	void setModelManipulated(int i, bool isManipulated);
 	bool isModelManipulated(int i) const;
+	void setModelSymmetricScaled(int i, bool isManipulated);
+	bool isModelSymmetricScaled(int i) const;
 
 };
 
