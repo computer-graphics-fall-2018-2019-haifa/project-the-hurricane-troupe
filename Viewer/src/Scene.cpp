@@ -19,8 +19,9 @@ const int Scene::GetModelCount() const
 	return models.size();
 }
 
-void Scene::AddCamera(const Camera& camera)
+void Scene::AddCamera(Camera& camera)
 {
+	camera.setIndex(cameras.size());
 	cameras.push_back(camera);
 }
 
@@ -73,6 +74,27 @@ void Scene::resetRotationActiveModel()
 	models[GetActiveModelIndex()]->resetRotation();
 }
 
+void Scene::setCameraVectors(glm::vec4& eye, glm::vec4& at, glm::vec4& up, int index)
+{
+	cameras[index].setEye(eye);
+	cameras[index].setAt(at);
+	cameras[index].setUp(up);
+	cameras[index].SetCameraLookAt(eye, at, up);
+}
+
+void Scene::setOrthoProjStuff(float top, float bottom, float right, float left, float _near, float _far, int index)
+{
+	cameras[index].setOrthographicProjection(left, right, bottom, top, _near, _far);
+	cameras[index].setActiveProjection(ProjectionType::ORTHOGRAPHIC);
+}
+
+void Scene::setPresProjStuff(float _near, float _far, float fovy, float aspect,int index)
+{
+	cameras[index].setPerspectiveProjection(fovy, aspect, _near, _far);
+	cameras[index].setActiveProjection(ProjectionType::PERSPECTIVE);
+}
+
+
 const int Scene::GetCameraCount() const
 {
 	return cameras.size();
@@ -89,6 +111,11 @@ void Scene::SetActiveCameraIndex(int index)
 const int Scene::GetActiveCameraIndex() const
 {
 	return activeCameraIndex;
+}
+
+std::vector<Camera> Scene::GetCameras() const
+{
+	return cameras;
 }
 
 void Scene::SetActiveModelIndex(int index)

@@ -148,6 +148,166 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	ImGui::Separator();
 }
 
+
+void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& store) {
+	int i = 0;
+	if (cameras.size() == 1){
+		ImGui::Text("** Here You should see the list of cameras you added. **");
+		ImGui::Text("\t It appears you have not yet added any cameras.");
+		ImGui::Text("\t -> To add a camera, please use the menu at the top of the window.");
+		return;
+	}
+	ImGui::Text("Please select the camera(s) you wish to manipulate:");
+	Camera acCamera = scene.getActiveCamera();
+	for each (Camera cam in cameras)
+	{
+		bool isSelected = false;
+		if (cam.getIndex() == acCamera.getIndex())
+		{
+			isSelected = true;
+		}
+		char* name = stringToCharSeq("camera" + std::to_string(cam.getIndex()));
+		int camIndex = cam.getIndex();
+		if (ImGui::Checkbox(name, &isSelected)) {
+
+		}
+		ImGui::SameLine();
+		const char* nameInString = stringToCharSeq("settings of camera" + std::to_string(cam.getIndex()));
+		if(scene.getActiveCamera().getIndex()==camIndex){
+			ImGui::SameLine();
+			if (ImGui::TreeNode(nameInString)) {
+				 glm::vec4 eye = cam.getEye(); 
+				 glm::vec4 at = cam.getAt();
+				 glm::vec4 up = cam.getUp();
+				//eye of the cams
+				{
+					ImGui::Columns(3, "mixed");
+					ImGui::Text("position");
+					ImGui::SameLine();
+					static float x = 0;
+					static float y = 0;
+					static float z = 0;
+					ImGui::InputFloat(stringToCharSeq("x##eye" + std::to_string(camIndex)), &eye.x, 1.0f, 0, "%.3f");
+					ImGui::NextColumn();
+					ImGui::InputFloat(stringToCharSeq("y##eye" + std::to_string(camIndex)), &eye.y, 1.0f, 0, "%.3f");
+					ImGui::NextColumn();
+					ImGui::InputFloat(stringToCharSeq("z##eye" + std::to_string(camIndex)), &eye.z, 1.0f, 0, "%.3f");
+					ImGui::Columns(1);
+				}
+				// at of the cam
+				{
+					//ImGui::Separator();
+					ImGui::Columns(3, "mixed");
+					ImGui::Text("LookingAt");
+					ImGui::SameLine();
+					ImGui::InputFloat(stringToCharSeq("x##at" + std::to_string(camIndex)), &at.x, 1.0f, 0, "%.3f");
+					ImGui::NextColumn();
+					ImGui::InputFloat(stringToCharSeq("y##at" + std::to_string(camIndex)), &at.y, 1.0f, 0, "%.3f");
+					ImGui::NextColumn();
+					ImGui::InputFloat(stringToCharSeq("z##at" + std::to_string(camIndex)), &at.z, 1.0f, 0, "%.3f");
+					ImGui::Columns(1);
+					//ImGui::Separator();
+				}
+
+				//up of the cam
+				{
+					//ImGui::Separator();
+					ImGui::Columns(3, "mixed");
+					
+					ImGui::Text("UpOfCam");
+					ImGui::SameLine();
+					ImGui::InputFloat(stringToCharSeq("x##up" + std::to_string(camIndex)), &up.x, 1.0f, 0, "%.3f");
+					ImGui::NextColumn();
+					ImGui::InputFloat(stringToCharSeq("y##up" + std::to_string(camIndex)), &up.y, 1.0f, 0, "%.3f");
+					ImGui::NextColumn();
+					ImGui::InputFloat(stringToCharSeq("z##up" + std::to_string(camIndex)), &up.z, 1.0f, 0, "%.3f");
+					ImGui::Columns(1);
+					ImGui::Separator();
+				}
+
+				scene.setCameraVectors(eye, at, up, camIndex);
+				ImGui::TreePop();
+				ImGui::SameLine();
+				
+
+				//projection stuff
+				{
+					Mode mode = store.getProjModeForCam(camIndex);
+					ImGui::Text("Please select a projection type...");
+					if (ImGui::RadioButton("Orthographic",  mode == Mode::Orthographic)) {
+						store.setCamsProjMode(camIndex, Mode::Orthographic);
+					}
+					ImGui::SameLine();
+					if (ImGui::RadioButton("Perspective", mode == Mode::Perspective)) {
+						store.setCamsProjMode(camIndex, Mode::Perspective);
+					}
+					if (mode == Mode::Orthographic) {
+						float projNear;
+						float projFar;
+						float projTop;
+						float projBottom;
+						float projLeft;
+						float projRight;
+						cam.getOrthographicProjStuff(&projNear, &projFar, &projTop, &projBottom, &projLeft, &projRight);
+						//ImGui::Separator();
+						ImGui::Columns(6, "mixed");
+						ImGui::InputFloat(stringToCharSeq("Near##" + std::to_string(camIndex)), &projNear, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("Far##" + std::to_string(camIndex)), &projFar, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("Top##" + std::to_string(camIndex)), &projTop, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("Bottom##" + std::to_string(camIndex)), &projBottom, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("Left##" + std::to_string(camIndex)), &projLeft, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("Right##" + std::to_string(camIndex)), &projRight, 1.0f, 0, "%.1f");
+						ImGui::Columns(1);
+						ImGui::Separator();
+						scene.setOrthoProjStuff(projTop, projBottom, projRight, projLeft, projNear, projFar, camIndex);
+					}
+					else {
+						float projNear;
+						float projFar;
+						float projFovy;
+						float projAspectRatio;
+						cam.getPerspectiveProjStuff(&projNear, &projFar, &projFovy, &projAspectRatio);
+						//ImGui::Separator();
+						ImGui::Columns(4, "mixed");
+						ImGui::InputFloat(stringToCharSeq("Near##" + std::to_string(camIndex)), &projNear, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("Far##" + std::to_string(camIndex)), &projFar, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("Angel##" + std::to_string(camIndex)), &projFovy, 1.0f, 0, "%.1f");
+						ImGui::NextColumn();
+						ImGui::InputFloat(stringToCharSeq("width##" + std::to_string(camIndex)), &projAspectRatio, 1.0f, 0, "%.1f");
+						ImGui::Columns(1);
+						ImGui::Separator();
+						scene.setPresProjStuff(projNear, projFar, projFovy, projAspectRatio, camIndex);
+					}
+					if (ImGui::Button("Look at ORIGIN")) {
+						glm::vec4 eye = glm::vec4(0.0f, 0.0f, 4.0f, 0.0f);
+						glm::vec4 at = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+						glm::vec4 up = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+						scene.setCameraVectors(eye, at, up, camIndex);
+						continue;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Reset projection")) {
+						if (mode == Mode::Orthographic) {
+							scene.setOrthoProjStuff(1.0f, -1.0f, 1.5f, -1.5, 1.0f, 10.0f, camIndex);
+						}
+						else
+						{
+							scene.setPresProjStuff(1.0f, 10.0f, 90.0f, 1.5f, camIndex);
+						}
+					}
+				}
+			}
+		
+		}
+	}
+}
 void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store, ImGuiIO& io)
 {
 	int i = 0;
@@ -181,16 +341,21 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 	//if (showDemoWindow)
 	//{
-		ImGui::ShowDemoWindow(&showDemoWindow);
+	//ImGui::ShowDemoWindow(&showDemoWindow);
 	//}
 
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
+	std::vector<Camera> cameras = scene.GetCameras();
 	{
 		ImGui::Begin("All Models");
 		
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
 			showModelsListed(models, scene, store, io);
+		}
+		if (ImGui::CollapsingHeader("Cameras")) {
+			// List All Loaded Mesh Models
+			showCamerasListed(cameras, scene, store);
 		}
 
 		ImGui::End();
@@ -218,6 +383,38 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 					}
 
 				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+	}
+	// 5. Demonstrate creating a new camera
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("Add"))
+			{
+				if (ImGui::MenuItem("Camera"))
+				{
+					Camera mainCam = Camera(
+						glm::vec4(1.0f, 0.0f, 5.0f, 0.0f),
+						glm::vec4(4.0f, 1.0f, 0.0f, 0.0f),
+						glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)
+					);
+					scene.AddCamera(mainCam);
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+	}
+	// 6. Demonstrate help
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("Help"))
+			{
+				//ImGui::ShowDemoWindow(&showDemoWindow);
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
@@ -302,7 +499,9 @@ GUIStore::GUIStore(const Scene & scene) :
 	_isModelBeingManipulated(scene.GetModelCount(), false),
 	_isModelSymmetricScaled(scene.GetModelCount(), true),
 	_modelCount(scene.GetModelCount()),
-	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED)
+	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED),
+	projModeForCams(scene.GetCameraCount(),Mode::Perspective),
+	cameraCount(scene.GetCameraCount())
 {
 }
 
@@ -317,7 +516,14 @@ void GUIStore::sync(const Scene& scene)
 		_modelSpeed.push_back(INITIALMODELSPEED);
 	}
 	_modelCount = newSize;
+	
+	
+	int camCount = scene.GetCameras().size();
+	if (camCount > cameraCount) {
+		projModeForCams.push_back(Mode::Perspective);
 	}
+	cameraCount = camCount;
+}
 
 void GUIStore::setModelManipulated(int i, bool isManipulated)
 {
@@ -353,4 +559,14 @@ float GUIStore::getModelSpeed(int i) const
 {
 	if (i < 0 || i > _modelCount) return false;
 	return _modelSpeed[i];
+}
+
+void GUIStore::setCamsProjMode(int i, Mode mode)
+{
+	projModeForCams[i] = mode;
+}
+
+Mode GUIStore::getProjModeForCam(int i) const
+{
+	return projModeForCams[i];
 }

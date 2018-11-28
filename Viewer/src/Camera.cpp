@@ -6,6 +6,9 @@
 
 //source: https://en.wikipedia.org/wiki/Graphics_pipeline#Rasterisation
 Camera::Camera(const glm::vec4& eye, const glm::vec4& at, const glm::vec4& up) :
+	eye(eye),
+	at(at),
+	up(up),
 	zoom(1.0),
 	viewTransformation(Utils::IdentityMat()),
 	viewTransformationInverse(Utils::IdentityMat()),
@@ -40,6 +43,16 @@ void Camera::SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const gl
 
 	viewTransformation = c * translationMatrix;
 	viewTransformationInverse = glm::transpose(c) * translationMatrix;
+}
+
+void Camera::setIndex(int index)
+{
+	this->index = index;
+}
+
+int Camera::getIndex()
+{
+	return index;
 }
 
 bool Camera::isOrthographicProjection() const
@@ -104,18 +117,18 @@ void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio,
 	this->_projAspectRatio = aspectRatio;
 }
 
-void Camera::setOrthographicProjection(const float left, const float right, const float bottom, const float top, const float near, const float far)
+void Camera::setOrthographicProjection(const float left, const float right, const float bottom, const float top, const float _near, const float _far)
 {
 	this->_projLeft = left;
 	this->_projRight = right;
 	this->_projBottom = bottom;
 	this->_projTop = top;
-	this->_projNear = near;
-	this->_projFar = far;
+	this->_projNear = _near;
+	this->_projFar = _far;
 	orthographicProjectionTransformation = glm::transpose(glm::mat4x4(
 		{ 2.0 / (right - left)		,	0.0						,		0.0					,	-1.0*((right + left) / (right - left)),
 		0.0						,	2.0 / (top - bottom)	,		0.0					,	-1.0*((top + bottom) / (top - bottom)),
-		0.0						,	0.0						,		2.0 / (near - far)	,	-1.0*((far + near) / (far - near)),
+		0.0						,	0.0						,		2.0 / (_near - _far)	,	-1.0*((_far + _near) / (_far - _near)),
 		0.0						,	0.0						,		0.0					,	1.0
 		}));
 	setActiveProjection(ProjectionType::ORTHOGRAPHIC);
@@ -162,6 +175,55 @@ glm::mat4x4 Camera::getProjectionTransformation() const
 	}
 	return perspectionProjectionTransformation;
 }
+
+glm::vec4 Camera::getEye()
+{
+	return eye;
+}
+
+void Camera::setEye(glm::vec4& vec)
+{
+	eye = vec;
+}
+
+glm::vec4 Camera::getAt()
+{
+	return at;
+}
+
+void Camera::setAt(glm::vec4& vec)
+{
+	at = vec;
+}
+
+glm::vec4 Camera::getUp()
+{
+	return up;
+}
+
+void Camera::setUp(glm::vec4& vec)
+{
+	up = vec;
+}
+
+void Camera::getPerspectiveProjStuff(float * projNear, float * projFar, float * projFovy, float * projAspectRatio) const
+{
+	*projNear = _projNear;
+	*projFar = _projFar;
+	*projFovy = _projFovy;
+	*projAspectRatio = _projAspectRatio;
+}
+
+void Camera::getOrthographicProjStuff(float * projNear, float * projFar, float * projTop, float * projBottom, float * projLeft, float * projRight) const
+{
+	*projNear = _projNear;
+	*projFar = _projFar;
+	*projTop = _projTop;
+	*projBottom = _projBottom;
+	*projLeft = _projLeft;
+	*projRight = _projRight;
+}
+
 
 
 Camera::~Camera() { }

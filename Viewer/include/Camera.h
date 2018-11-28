@@ -30,6 +30,10 @@ private:
 	glm::mat4x4 perspectionProjectionTransformation;
 	ProjectionType currentProjectionType;
 	float zoom;
+	int index;
+	glm::vec4 eye;
+	glm::vec4 at;
+	glm::vec4 up;
 
 	float _projLeft, _projRight, _projTop, _projBottom, _projNear, _projFar, _projFovy, _projAspectRatio;
 
@@ -40,13 +44,14 @@ public:
 	~Camera();
 
 	void SetCameraLookAt(const glm::vec3& eye, const glm::vec3& at, const glm::vec3& up);
-
+	void setIndex(int index);
+	int getIndex();
 	bool isOrthographicProjection() const;
 	bool isPerspectiveProjection() const;
 	ProjectionType whichProjection() const;
 	void setActiveProjection(const ProjectionType& type);
 	void setOrthographicProjection(const float left = -1.0, const float right = 1.0, const float bottom = -1.0, const float top = 1.0, const float near = 1.0, const float far = -1.0);
-	void setPerspectiveProjection(const float fovy, const float aspectRatio, const float near, const float far, AngleUnits unit = AngleUnits::DEGREES);
+	void setPerspectiveProjection(const float fovy, const float aspectRatio, const float _near, const float _far, AngleUnits unit = AngleUnits::DEGREES);
 
 	void SetZoom(const float zoom);
 	// returns the max zoom which allows up to 180 degrees. (not inclusive)
@@ -56,6 +61,14 @@ public:
 
 	glm::mat4x4 getViewTransformationInverse() const;
 	glm::mat4x4 getProjectionTransformation() const;
+	glm::vec4 getEye();
+	void setEye(glm::vec4& vec);	
+	glm::vec4 getAt();
+	void setAt(glm::vec4& vec);	
+	glm::vec4 getUp();
+	void setUp(glm::vec4& vec);
+	void getPerspectiveProjStuff(float * projNear,float*  projFar,float*  projFovy,float* projAspectRatio) const;
+	void getOrthographicProjStuff(float * projNear,float*  projFar,float*  projTop,float* projBottom, float* projLeft, float* projRight) const;
 	// Add more methods/functionality as needed...
 };
 

@@ -26,12 +26,12 @@ public:
 	void AddModel(const std::shared_ptr<MeshModel>& model);
 	const int GetModelCount() const;
 
-	void AddCamera(const Camera& camera);
+	void AddCamera(Camera& camera);
 	const int GetCameraCount() const;
 
 	void SetActiveCameraIndex(int index);
 	const int GetActiveCameraIndex() const;
-
+	std::vector<Camera> GetCameras() const;
 	void SetActiveModelIndex(int index);
 	const int GetActiveModelIndex() const;
 	std::vector<std::shared_ptr<MeshModel>> getSceneModels() const;
@@ -45,7 +45,11 @@ public:
 
 	void getScalingFactorsActiveModel(float* const xFactor, float* const yFactor, float* const zFactor) const;
 	void getTranslationDeltasActiveModel(float* const xDelta, float* const yDelta, float* const zDelta) const;
+	void setCameraVectors(glm::vec4& eye, glm::vec4& at, glm::vec4& up, int index);
+	void setOrthoProjStuff(float top, float bottom, float right, float left, float _near, float _far , int index);
+	void setPresProjStuff(float _near, float _far, float fovy, float aspect ,int index);
 
 	void resetPositionActiveModel();
 	void resetRotationActiveModel();
+
 };

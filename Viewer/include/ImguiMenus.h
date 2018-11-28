@@ -2,6 +2,8 @@
 #include <imgui/imgui.h>
 #include "Scene.h"
 
+enum class Mode { Orthographic, Perspective };
+
 class GUIStore 
 {
 private:
@@ -13,6 +15,8 @@ private:
 	std::vector<bool> _isModelSymmetricScaled;
 	std::vector<float> _modelSpeed;
 	int _modelCount;
+	int cameraCount;
+	std::vector<Mode> projModeForCams;
 
 public:
 	GUIStore(const Scene& scene);
@@ -23,6 +27,9 @@ public:
 	bool isModelSymmetricScaled(int i) const;
 	void setModelSpeed(int i, float newSpeed);
 	float getModelSpeed(int i) const;
+
+	void setCamsProjMode(int i, Mode mode);
+	Mode getProjModeForCam(int i) const;
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
