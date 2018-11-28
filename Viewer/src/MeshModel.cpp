@@ -108,6 +108,9 @@ void MeshModel::symmetricMove(const float * const addition)
 
 void MeshModel::setPosition(float newX, float newY, float newZ)
 {
+	_xDelta = 0.0f;
+	_yDelta = 0.0f;
+	_zDelta = 0.0f;
 	_translate(&newX, &newY, &newZ);
 }
 
