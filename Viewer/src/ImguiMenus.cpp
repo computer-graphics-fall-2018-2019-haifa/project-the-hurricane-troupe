@@ -52,23 +52,24 @@ void showScaleSliders(Scene& scene, bool isSymmetric, int index) {
 		*zFactor = *xFactor; *yFactor = *xFactor;
 	}
 	else {
-		char* xScale = stringIntConcatenate("X Scale##XScale", index);
-		char* yScale = stringIntConcatenate("Y Scale##YScale", index);
-		char* zScale = stringIntConcatenate("z Scale##ZScale", index);
+		char* xScaleText = stringIntConcatenate("X Scale##XScale", index);
+		char* yScaleText = stringIntConcatenate("Y Scale##YScale", index);
+		char* zScaleText = stringIntConcatenate("z Scale##ZScale", index);
 
 		char* xReset = stringIntConcatenate("Reset##XResetScale", index);
 		char* yReset = stringIntConcatenate("Reset##YResetScale", index);
 		char* zReset = stringIntConcatenate("Reset##ZResetScale", index);
 
-		ImGui::SliderFloat(xScale, xFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(xReset)) { *xFactor = 1.0f; }
-		ImGui::SliderFloat(yScale, yFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(yReset)) { *yFactor = 1.0f; }
-		ImGui::SliderFloat(zScale, zFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(zReset)) { *zFactor = 1.0f; }
+		ImGui::SliderFloat(xScaleText, xFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(xReset)) { *xFactor = 1.0f; }
+		ImGui::SliderFloat(yScaleText, yFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(yReset)) { *yFactor = 1.0f; }
+		ImGui::SliderFloat(zScaleText, zFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(zReset)) { *zFactor = 1.0f; }
 	}
+
 	scene.scaleActiveModel(*xFactor, *yFactor, *zFactor);
 	return;
 }
 
-void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scene, ImGuiIO& io) {
+void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scene, GUIStore& store, ImGuiIO& io, float moveStrength) {
 	float xAddition = 0.0f, yAddition = 0.0f, zAddition = 0.0f;
 	bool changed = false;
 	int left = io.KeyMap[ImGuiKey_::ImGuiKey_LeftArrow];
@@ -76,20 +77,19 @@ void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scen
 	int up = io.KeyMap[ImGuiKey_::ImGuiKey_UpArrow];
 	int down = io.KeyMap[ImGuiKey_::ImGuiKey_DownArrow];
 	int shift = io.KeyShift;
-	float diff = 20.0f;
 	if (ImGui::IsKeyDown(up)) {
-		if (shift) { zAddition -= diff; } //TODO: Was IsKeyDown
-		else { yAddition += diff; }
+		if (shift) { zAddition -= moveStrength; }
+		else { yAddition += moveStrength; }
 		changed = true;
 	}
 	else if (ImGui::IsKeyDown(down)) {
-		if (shift) { zAddition += diff; } //TODO: Was IsKeyDown
-		else { yAddition -= diff; }
+		if (shift) { zAddition += moveStrength; }
+		else { yAddition -= moveStrength; }
 		changed = true;
 	}
-	else if (ImGui::IsKeyDown(left)) { xAddition -= diff; changed = true;}
+	else if (ImGui::IsKeyDown(left)) { xAddition -= moveStrength; changed = true;}
 	else if (ImGui::IsKeyDown(right)) {
-		xAddition += diff; 
+		xAddition += moveStrength; 
 		changed = true;
 	}
 	if (changed) {
@@ -98,7 +98,7 @@ void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scen
 }
 
 
-void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index) {
+void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
 	ImGui::Text("Scale:");
 	ImGui::SameLine();
@@ -107,14 +107,9 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	ImGui::SameLine();
 	if (ImGui::RadioButton(stringToCharSeq(std::string("Seperate##") + std::to_string(index)), !store.isModelSymmetricScaled(index))) store.setModelSymmetricScaled(index, false);
 	showScaleSliders(scene, store.isModelSymmetricScaled(index), index);
-
-	//ImGui::SliderFloat("Rotate X", &stam, -30.0f, 40.0f);
-	//ImGui::SliderFloat("Rotate Y", &stam, -30.0f, 40.0f);
-	//ImGui::SliderFloat("Rotate Z", &stam, -30.0f, 40.0f);
-	//ImGui::Text("Move", &stam, -30.0f, 40.0f);
-	//ImGui::Text("X");
-	//ImGui::Text("Y");
-	//ImGui::Text("Z");
+	if (ImGui::SliderFloat(stringIntConcatenate("moveSpeed##Speed", index), moveSpeed, 0.0f, 30.0f)) { 
+		store.setModelSpeed(index, *moveSpeed);
+	}
 	ImGui::Separator();
 }
 
@@ -138,8 +133,9 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 		}
 		if (isSelected) {
 			scene.SetActiveModelIndex(i);
-			openModelManipulationWindow(name, scene, store, i);
-			handleTranslationFromKeyboardInput(name, scene, io);
+			float moveSpeed = store.getModelSpeed(i);
+			openModelManipulationWindow(name, scene, store, i, &moveSpeed);
+			handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed);
 		}
 		++i;
 	}
@@ -270,7 +266,8 @@ GUIStore::GUIStore(const Scene & scene) :
 	_models(scene.getSceneModels()),
 	_isModelBeingManipulated(scene.GetModelCount(), false),
 	_isModelSymmetricScaled(scene.GetModelCount(), true),
-	_modelCount(scene.GetModelCount())
+	_modelCount(scene.GetModelCount()),
+	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED)
 {
 }
 
@@ -282,6 +279,7 @@ void GUIStore::sync(const Scene& scene)
 	if (newSize > _modelCount) {
 		_isModelBeingManipulated.push_back(false);
 		_isModelSymmetricScaled.push_back(true);
+		_modelSpeed.push_back(INITIALMODELSPEED);
 	}
 	_modelCount = newSize;
 	}
@@ -308,4 +306,16 @@ bool GUIStore::isModelSymmetricScaled(int i) const
 {
 	if (i < 0 || i > _modelCount) return false;
 	return _isModelSymmetricScaled[i];
+}
+
+void GUIStore::setModelSpeed(int i, float newSpeed)
+{
+	if (i < 0 || i > _modelCount) return;
+	_modelSpeed[i] = newSpeed;
+}
+
+float GUIStore::getModelSpeed(int i) const
+{
+	if (i < 0 || i > _modelCount) return false;
+	return _modelSpeed[i];
 }

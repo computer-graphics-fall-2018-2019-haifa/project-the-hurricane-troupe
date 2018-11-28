@@ -6,10 +6,12 @@ class GUIStore
 {
 private:
 	const int SYNCERROR = -50;
+	const int INITIALMODELSPEED = 10.0f; //pixels
 	Scene _scene;
 	std::vector<std::shared_ptr<MeshModel>> _models;
 	std::vector<bool> _isModelBeingManipulated;
 	std::vector<bool> _isModelSymmetricScaled;
+	std::vector<float> _modelSpeed;
 	int _modelCount;
 
 public:
@@ -19,6 +21,8 @@ public:
 	bool isModelManipulated(int i) const;
 	void setModelSymmetricScaled(int i, bool isManipulated);
 	bool isModelSymmetricScaled(int i) const;
+	void setModelSpeed(int i, float newSpeed);
+	float getModelSpeed(int i) const;
 
 };
 
