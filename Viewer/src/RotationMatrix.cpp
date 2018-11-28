@@ -5,11 +5,17 @@
 void RotationMatrix::updateRotateTransformation()
 {
 	if (isTransformUpdated == true) return;
-	rotationTransformation = zRotation * yRotation * xRotation;
+	rotationTransformation *= zRotation * yRotation * xRotation;
 	isTransformUpdated = true;
 }
 
-RotationMatrix::RotationMatrix(float xAngle, float yAngle, float zAngle)
+RotationMatrix::RotationMatrix(float xAngle, float yAngle, float zAngle) :
+	rotationTransformation(glm::mat4x4({
+		1.0f,	0.0f,	0.0f,	0.0f,
+		0.0f,	1.0f,	0.0f,	0.0f,
+		0.0f,	0.0f,	1.0f,	0.0f,
+		0.0f,	0.0f,	0.0f,	1.0f
+		}))
 {
 	this->xAngle = xAngle; setXRotation(xAngle);
 	this->yAngle = yAngle; setYRotation(yAngle);
@@ -74,10 +80,12 @@ void RotationMatrix::resetZRotation() {
 
 
 void RotationMatrix::resetToOrginalRotation() {
-	resetZRotation();
-	resetYRotation();
-	resetXRotation();
-	isTransformUpdated = false;
+	rotationTransformation = glm::mat4x4({
+		1.0f,	0.0f,	0.0f,	0.0f,
+		0.0f,	1.0f,	0.0f,	0.0f,
+		0.0f,	0.0f,	1.0f,	0.0f,
+		0.0f,	0.0f,	0.0f,	1.0f
+		});
 }
 
 glm::mat4x4 RotationMatrix::getTransform() {

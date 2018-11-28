@@ -37,10 +37,15 @@ char* const stringToCharSeq(const std::string& str)
 
 char* stringIntConcatenate(char* str, int i) { return stringToCharSeq(std::string(str) + std::to_string(i)); }
 
-void showScaleSliders(Scene& scene, bool isSymmetric, int index) {
+void showScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int index) {
 	float* xFactor = new float(0.0f);
 	float* yFactor = new float(0.0f);
 	float* zFactor = new float(0.0f);
+	ImGui::Text("Scale:");
+	ImGui::SameLine();
+	if (ImGui::RadioButton(stringToCharSeq(std::string("Altogether##") + std::to_string(index)), store.isModelSymmetricScaled(index))) store.setModelSymmetricScaled(index, true);
+	ImGui::SameLine();
+	if (ImGui::RadioButton(stringToCharSeq(std::string("Seperate##") + std::to_string(index)), !store.isModelSymmetricScaled(index))) store.setModelSymmetricScaled(index, false);
 	ImGui::SameLine();
 	char* modelsReset = stringIntConcatenate("Reset##AllAxisReset", index);
 	if (ImGui::Button(modelsReset)) { *xFactor = 1.0f; *yFactor = 1.0f; *zFactor = 1.0f; scene.symmetricScaleActiveModel(1.0f); }
@@ -97,19 +102,49 @@ void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scen
 	}
 }
 
+void showTranslationGUI(Scene& scene, GUIStore& store, int index, float* moveSpeed) {
+	if (ImGui::SliderFloat(stringIntConcatenate("move speed##Speed", index), moveSpeed, 0.0f, 30.0f)) {
+		store.setModelSpeed(index, *moveSpeed);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button(stringIntConcatenate("Reset Position##ResetPosition", index))) {
+		scene.resetPositionActiveModel();
+	}
+}
+
+void showRotationGUI(Scene& scene, GUIStore& store, int index) {
+	float xAngle = 0.0f;
+	float yAngle = 0.0f;
+	float zAngle = 0.0f;
+	bool modifiedRotation = false;
+
+	ImGui::Text("Rotate Controls:");
+	ImGui::PushButtonRepeat(true);
+	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_None)) { zAngle = -15.0f; modifiedRotation = true; }
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXPlus", index), ImGuiDir_Up)) { xAngle = 15.0f; modifiedRotation = true; }
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZPlus", index), ImGuiDir_None)) { zAngle = 15.0f; modifiedRotation = true; }
+
+	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYMinus", index), ImGuiDir_Left)) { yAngle = -15.0f; modifiedRotation = true; }
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXMinus", index), ImGuiDir_Down)) { xAngle = -15.0f; modifiedRotation = true; }
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYPlus", index), ImGuiDir_Right)) { yAngle = 15.0f; modifiedRotation = true; }
+	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) { scene.resetRotationActiveModel(); }
+	ImGui::PopButtonRepeat();
+
+	
+	if (modifiedRotation) {
+		scene.rotateActiveModel(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
+	}
+}
 
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
-	ImGui::Text("Scale:");
-	ImGui::SameLine();
-	char* tmp = stringToCharSeq(std::string("Altogether##") + std::to_string(index));
-	if (ImGui::RadioButton(tmp, store.isModelSymmetricScaled(index))) store.setModelSymmetricScaled(index, true);
-	ImGui::SameLine();
-	if (ImGui::RadioButton(stringToCharSeq(std::string("Seperate##") + std::to_string(index)), !store.isModelSymmetricScaled(index))) store.setModelSymmetricScaled(index, false);
-	showScaleSliders(scene, store.isModelSymmetricScaled(index), index);
-	if (ImGui::SliderFloat(stringIntConcatenate("moveSpeed##Speed", index), moveSpeed, 0.0f, 30.0f)) { 
-		store.setModelSpeed(index, *moveSpeed);
-	}
+	showScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
+	showTranslationGUI(scene, store, index, moveSpeed);
+	showRotationGUI(scene, store, index);
 	ImGui::Separator();
 }
 

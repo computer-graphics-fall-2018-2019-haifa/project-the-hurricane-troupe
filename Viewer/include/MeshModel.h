@@ -74,6 +74,12 @@ public:
 	/* sets the position *exactly* to (newX, newY, newZ)*/
 	void setPosition(float newX, float newY, float newZ);
 
+	/*sets the position back to the original model*/
+	void resetPosition();
+	
+	/*sets the rotation back to original*/
+	void resetRotation();
+
 	/* rotates the objects in a specific order, additional attention is needed to ensure correctness of rotations.*/
 	void rotate(const RotationRules& rotation);
 

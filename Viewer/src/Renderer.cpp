@@ -310,7 +310,7 @@ void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm:
 void Renderer::drawModels(const Scene& scene) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
-	activeCam.setPerspectiveProjection(90.0, viewportWidth / viewportHeight, 1.0, 4.0f);
+	//activeCam.setPerspectiveProjection(90.0, viewportWidth / viewportHeight, 1.0, 4.0f);
 	//activeCam.SetZoom(0.5f);
 	//activeCam.SetZoom(1.5f);
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();

@@ -45,4 +45,7 @@ public:
 
 	void getScalingFactorsActiveModel(float* const xFactor, float* const yFactor, float* const zFactor) const;
 	void getTranslationDeltasActiveModel(float* const xDelta, float* const yDelta, float* const zDelta) const;
+
+	void resetPositionActiveModel();
+	void resetRotationActiveModel();
 };

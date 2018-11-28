@@ -23,10 +23,9 @@ public:
 	bool isModelSymmetricScaled(int i) const;
 	void setModelSpeed(int i, float newSpeed);
 	float getModelSpeed(int i) const;
-
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
-void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, GUIStore& store);
+void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store, ImGuiIO& io);
 void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store);
 const glm::vec4& GetClearColor();

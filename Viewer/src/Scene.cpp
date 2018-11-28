@@ -63,6 +63,16 @@ void Scene::getTranslationDeltasActiveModel(float * const xDelta, float * const 
 	models[GetActiveModelIndex()]->getCoordinateDifference(xDelta, yDelta, zDelta);
 }
 
+void Scene::resetPositionActiveModel()
+{
+	models[GetActiveModelIndex()]->resetPosition();
+}
+
+void Scene::resetRotationActiveModel()
+{
+	models[GetActiveModelIndex()]->resetRotation();
+}
+
 const int Scene::GetCameraCount() const
 {
 	return cameras.size();

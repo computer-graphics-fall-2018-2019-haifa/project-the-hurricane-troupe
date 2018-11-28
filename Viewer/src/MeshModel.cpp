@@ -111,6 +111,16 @@ void MeshModel::setPosition(float newX, float newY, float newZ)
 	_translate(&newX, &newY, &newZ);
 }
 
+void MeshModel::resetPosition()
+{
+	setPosition(0.0f, 0.0f, 0.0f);
+}
+
+void MeshModel::resetRotation()
+{
+	rotateTransform.resetToOrginalRotation();
+}
+
 void MeshModel::rotate(const RotationRules& rotation) {
 	_rotate(rotation);
 }
