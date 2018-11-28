@@ -30,6 +30,16 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	// Handle mouse scrolling here...
 }
 
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+void window_size_callback(GLFWwindow* window, int width, int height)
+{
+}
+
+
 int main(int argc, char **argv)
 {
 	// Create GLFW window
@@ -45,6 +55,8 @@ int main(int argc, char **argv)
 
 	// Get the current width/height of the frame buffer
 	int frameBufferWidth, frameBufferHeight;
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetWindowSizeCallback(window, window_size_callback);
 	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
 
 	// Create the renderer and the scene
