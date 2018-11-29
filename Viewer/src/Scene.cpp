@@ -94,6 +94,11 @@ void Scene::setPresProjStuff(float _near, float _far, float fovy, float aspect,i
 	cameras[index].setActiveProjection(ProjectionType::PERSPECTIVE);
 }
 
+void Scene::setZoomForCam(float zoom, int index)
+{
+	cameras[index].SetZoom(zoom);
+}
+
 
 const int Scene::GetCameraCount() const
 {

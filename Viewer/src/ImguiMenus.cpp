@@ -150,29 +150,25 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 
 
 void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& store) {
-	int i = 0;
-	if (cameras.size() == 1){
-		ImGui::Text("** Here You should see the list of cameras you added. **");
-		ImGui::Text("\t It appears you have not yet added any cameras.");
-		ImGui::Text("\t -> To add a camera, please use the menu at the top of the window.");
-		return;
-	}
-	ImGui::Text("Please select the camera(s) you wish to manipulate:");
+	ImGui::Text("Please select the camera you wish to manipulate:");
 	Camera acCamera = scene.getActiveCamera();
 	for each (Camera cam in cameras)
 	{
-		bool isSelected = false;
-		if (cam.getIndex() == acCamera.getIndex())
-		{
-			isSelected = true;
-		}
+		//if (cam.getIndex() == acCamera.getIndex())
+		//{
+		//	isSelected = true;
+		//}
 		char* name = stringToCharSeq("camera" + std::to_string(cam.getIndex()));
 		int camIndex = cam.getIndex();
-		if (ImGui::Checkbox(name, &isSelected)) {
-
-		}
-		ImGui::SameLine();
+		bool isSelected = store.isCameraManipulated(camIndex);
+		//ImGui::SameLine();
 		const char* nameInString = stringToCharSeq("settings of camera" + std::to_string(cam.getIndex()));
+		if (ImGui::Checkbox(name, &isSelected)) {
+			int oldActiveCam = scene.GetActiveCameraIndex();
+			store.setCameraManipulated(oldActiveCam, false);
+			store.setCameraManipulated(camIndex, true);
+			scene.SetActiveCameraIndex(camIndex);
+		}
 		if(scene.getActiveCamera().getIndex()==camIndex){
 			ImGui::SameLine();
 			if (ImGui::TreeNode(nameInString)) {
@@ -285,6 +281,14 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						ImGui::Separator();
 						scene.setPresProjStuff(projNear, projFar, projFovy, projAspectRatio, camIndex);
 					}
+					float zoom = cam.getZoom();
+					ImGui::Columns(2, "mixed");
+					if (ImGui::InputFloat(stringToCharSeq("Zoom##" + std::to_string(camIndex)), &zoom, 1.0f, 0, "%.1f")) {
+						scene.setZoomForCam(zoom, camIndex);
+					}
+					ImGui::Columns(1);
+					ImGui::Separator();
+
 					if (ImGui::Button("Look at ORIGIN")) {
 						glm::vec4 eye = glm::vec4(0.0f, 0.0f, 4.0f, 0.0f);
 						glm::vec4 at = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -397,9 +401,9 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 				if (ImGui::MenuItem("Camera"))
 				{
 					Camera mainCam = Camera(
-						glm::vec4(1.0f, 0.0f, 5.0f, 0.0f),
-						glm::vec4(4.0f, 1.0f, 0.0f, 0.0f),
-						glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)
+						glm::vec4(0.0f, 0.0f, 4.0f, 0.0f),
+						glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+						glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 					);
 					scene.AddCamera(mainCam);
 				}
@@ -501,8 +505,10 @@ GUIStore::GUIStore(const Scene & scene) :
 	_modelCount(scene.GetModelCount()),
 	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED),
 	projModeForCams(scene.GetCameraCount(),Mode::Perspective),
-	cameraCount(scene.GetCameraCount())
+	cameraCount(scene.GetCameraCount()),
+	_isCameraBeingManipulated(scene.GetCameraCount(),false)
 {
+
 }
 
 void GUIStore::sync(const Scene& scene)
@@ -520,6 +526,7 @@ void GUIStore::sync(const Scene& scene)
 	
 	int camCount = scene.GetCameras().size();
 	if (camCount > cameraCount) {
+		_isCameraBeingManipulated.push_back(false);
 		projModeForCams.push_back(Mode::Perspective);
 	}
 	cameraCount = camCount;
@@ -569,4 +576,14 @@ void GUIStore::setCamsProjMode(int i, Mode mode)
 Mode GUIStore::getProjModeForCam(int i) const
 {
 	return projModeForCams[i];
+}
+
+void GUIStore::setCameraManipulated(int i, bool isManipulated)
+{
+	_isCameraBeingManipulated[i] = isManipulated;
+}
+
+bool GUIStore::isCameraManipulated(int i) const
+{
+	return _isCameraBeingManipulated[i];
 }

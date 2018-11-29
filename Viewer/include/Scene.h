@@ -48,7 +48,7 @@ public:
 	void setCameraVectors(glm::vec4& eye, glm::vec4& at, glm::vec4& up, int index);
 	void setOrthoProjStuff(float top, float bottom, float right, float left, float _near, float _far , int index);
 	void setPresProjStuff(float _near, float _far, float fovy, float aspect ,int index);
-
+	void setZoomForCam(float zoom, int index);
 	void resetPositionActiveModel();
 	void resetRotationActiveModel();
 

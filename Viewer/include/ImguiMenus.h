@@ -12,6 +12,7 @@ private:
 	Scene _scene;
 	std::vector<std::shared_ptr<MeshModel>> _models;
 	std::vector<bool> _isModelBeingManipulated;
+	std::vector<bool> _isCameraBeingManipulated;
 	std::vector<bool> _isModelSymmetricScaled;
 	std::vector<float> _modelSpeed;
 	int _modelCount;
@@ -30,6 +31,8 @@ public:
 
 	void setCamsProjMode(int i, Mode mode);
 	Mode getProjModeForCam(int i) const;
+	void setCameraManipulated(int i, bool isManipulated);
+	bool isCameraManipulated(int i) const;
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);

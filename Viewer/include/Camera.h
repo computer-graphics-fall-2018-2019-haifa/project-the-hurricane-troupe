@@ -54,6 +54,7 @@ public:
 	void setPerspectiveProjection(const float fovy, const float aspectRatio, const float _near, const float _far, AngleUnits unit = AngleUnits::DEGREES);
 
 	void SetZoom(const float zoom);
+	float getZoom()const;
 	// returns the max zoom which allows up to 180 degrees. (not inclusive)
 	float getMaxZoomAllowed();
 	// returns the min zoom which allows minimum 0 degrees. (not inclusive)

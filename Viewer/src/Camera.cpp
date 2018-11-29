@@ -153,6 +153,11 @@ void Camera::SetZoom(const float zoom)
 
 }
 
+float Camera::getZoom() const
+{
+	return zoom;
+}
+
 float Camera::getMaxZoomAllowed()
 {
 	return MAXZOOM;
