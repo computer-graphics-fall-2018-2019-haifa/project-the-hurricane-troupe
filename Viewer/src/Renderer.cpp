@@ -82,6 +82,7 @@ void Renderer::Render(const Scene& scene)
 	//#############################################
 
 	drawModels(scene);
+	drawCameras(scene);
 }
 
 void Renderer::drawChess()  {
@@ -353,6 +354,47 @@ void Renderer::drawModels(const Scene& scene) {
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 			drawTriangle(p1, p2, p3, redColor);
+		}
+	}
+}
+
+void Renderer::drawCameras(const Scene& scene) 
+{
+	glm::vec3 blackColor(0.0f, 0.0f, 0.0f);
+	Camera activeCam = scene.getActiveCamera();
+	std::vector<Camera> camList = scene.GetCameras();
+	for each(Camera cam in camList) {
+		if (scene.GetActiveCameraIndex() != cam.getIndex()) {
+			glm::vec4 position = cam.getEye();
+			MeshModel model = (Utils::LoadMeshModel("D:\\Git\\project-the-hurricane-troupe\\Data\\camera.obj"));
+			model.setPosition(position.x, position.y, position.z);
+			std::vector<glm::vec2> textures = model.getTextures();
+			std::vector<glm::vec3> normals = model.getNormals();
+			std::vector<glm::vec3> vertices = model.getVertices();
+			std::vector<Face> faces = model.getFaces();
+			for each (Face face in faces)
+			{
+				int v1 = face.GetVertexIndex(0);
+				float x1 = vertices[v1].x, y1 = vertices[v1].y, z1 = vertices[v1].z;
+				int v2 = face.GetVertexIndex(1);
+				float x2 = vertices[v2].x, y2 = vertices[v2].y, z2 = vertices[v2].z;
+				int v3 = face.GetVertexIndex(2);
+				float x3 = vertices[v3].x, y3 = vertices[v3].y, z3 = vertices[v3].z;
+
+				glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
+				glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
+				glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
+
+				glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
+				glm::mat4x4 modelTransform = model.GetWorldTransformation();
+				glm::mat4x4 completeTransform = camTransformation * modelTransform;
+
+				glm::vec2 p1 = translatePointIndicesToPixels(w1, completeTransform);
+				glm::vec2 p2 = translatePointIndicesToPixels(w2, completeTransform);
+				glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
+
+				drawTriangle(p1, p2, p3, blackColor);
+			}
 		}
 	}
 }

@@ -400,12 +400,17 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 			{
 				if (ImGui::MenuItem("Camera"))
 				{
+					glm::vec4 newEye = scene.getActiveCamera().getEye();
+					newEye.z = -newEye.z;
+					glm::vec4 newAt = scene.getActiveCamera().getAt();
 					Camera mainCam = Camera(
-						glm::vec4(0.0f, 0.0f, 4.0f, 0.0f),
-						glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+						newEye,
+						newAt,
 						glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 					);
 					scene.AddCamera(mainCam);
+					//scene.AddModel(std::make_shared<MeshModel>(Utils::LoadMeshModel("D:\\Git\\project-the-hurricane-troupe\\Data\\camera.obj")));
+
 				}
 				ImGui::EndMenu();
 			}

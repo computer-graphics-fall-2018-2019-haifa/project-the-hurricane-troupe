@@ -44,5 +44,6 @@ public:
 
 	void drawModels(const Scene& scene);
 	void drawChess();
+	void drawCameras(const Scene& scene);
 	// Add more methods/functionality as needed...
 };

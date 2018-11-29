@@ -8,7 +8,7 @@ class GUIStore
 {
 private:
 	const int SYNCERROR = -50;
-	const int INITIALMODELSPEED = 10.0f; //pixels
+	const int INITIALMODELSPEED = 1.0f; //pixels
 	Scene _scene;
 	std::vector<std::shared_ptr<MeshModel>> _models;
 	std::vector<bool> _isModelBeingManipulated;

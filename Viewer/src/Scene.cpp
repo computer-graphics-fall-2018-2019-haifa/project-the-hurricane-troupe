@@ -25,6 +25,7 @@ void Scene::AddCamera(Camera& camera)
 	cameras.push_back(camera);
 }
 
+
 Camera Scene::getActiveCamera() const {
 	return cameras[GetActiveCameraIndex()];
 }
