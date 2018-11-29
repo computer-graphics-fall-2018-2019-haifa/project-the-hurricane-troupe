@@ -15,6 +15,7 @@ private:
 	std::vector<bool> _isCameraBeingManipulated;
 	std::vector<bool> _isModelSymmetricScaled;
 	std::vector<float> _modelSpeed;
+	std::vector<Utils::Normals> _whichNormals;
 	int _modelCount;
 	int cameraCount;
 	std::vector<Mode> projModeForCams;
@@ -33,6 +34,8 @@ public:
 	Mode getProjModeForCam(int i) const;
 	void setCameraManipulated(int i, bool isManipulated);
 	bool isCameraManipulated(int i) const;
+	void setModelNormal(int i, Utils::Normals newNormal);
+	Utils::Normals getModelNormalStatus(int i) const;
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);

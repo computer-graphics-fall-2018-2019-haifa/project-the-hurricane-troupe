@@ -19,7 +19,7 @@ static void GlfwErrorCallback(int error, const char* description);
 GLFWwindow* SetupGlfwWindow(int w, int h, const char* window_name);
 ImGuiIO& SetupDearImgui(GLFWwindow* window);
 void StartFrame();
-void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& io);
+void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& io, const GUIStore& store);
 void Cleanup(GLFWwindow* window);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 		ObjectManipulationMenus(io, scene, store);
 		
 		// Render the next frame
-		RenderFrame(window, scene, renderer, io);
+		RenderFrame(window, scene, renderer, io, store);
     }
 
 	// If we're here, then we're done. Cleanup memory.
@@ -147,7 +147,7 @@ void StartFrame()
 	ImGui::NewFrame();
 }
 
-void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& io)
+void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& io, const GUIStore& store)
 {
 	// Render the menus
 	ImGui::Render();
@@ -163,7 +163,7 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	renderer.ClearColorBuffer(GetClearColor());
 
 	// Render the scene
-	renderer.Render(scene);
+	renderer.Render(scene, store);
 
 	// Swap buffers
 	renderer.SwapBuffers();

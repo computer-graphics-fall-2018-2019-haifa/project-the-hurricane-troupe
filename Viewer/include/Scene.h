@@ -52,4 +52,5 @@ public:
 	void resetPositionActiveModel();
 	void resetRotationActiveModel();
 
+	void getActiveModelNormals();
 };

@@ -44,15 +44,15 @@ Face::~Face()
 
 const int Face::GetVertexIndex(int index)
 {
-	return vertexIndices[index]-1;
+	return vertexIndices[index] - 1;
 }
 
 const int Face::GetNormalIndex(int index)
 {
-	return normalIndices[index];
+	return normalIndices[index] - 1;
 }
 
 const int Face::GetTextureIndex(int index)
 {
-	return textureIndices[index];
+	return textureIndices[index] - 1;
 }

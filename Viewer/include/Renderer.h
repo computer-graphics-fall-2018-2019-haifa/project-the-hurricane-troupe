@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene.h"
+#include "ImguiMenus.h"
 #include <vector>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -30,19 +31,20 @@ private:
 	void plotLineHigh(int x1, int y1, int x2, int y2, const glm::vec3& color);
 	void plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& color);
 	glm::vec2 translatePointIndicesToPixels (const glm::vec4& point, const glm::mat4x4& fullTransform);
+	void drawNormalForVertex(glm::vec2& point, glm::vec2& normal, glm::mat4x4& endTransform, glm::vec3& color);
 
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	~Renderer();
 
-	void Render(const Scene& scene);
+	void Render(const Scene& scene, const GUIStore& store);
 	void SwapBuffers();
 	void ClearColorBuffer(const glm::vec3& color);
 	void SetViewport(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	void drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color);
 	void drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3, const glm::vec3& color);
 
-	void drawModels(const Scene& scene);
+	void drawModels(const Scene& scene, const GUIStore& store);
 	void drawChess();
 	void drawCameras(const Scene& scene);
 	// Add more methods/functionality as needed...

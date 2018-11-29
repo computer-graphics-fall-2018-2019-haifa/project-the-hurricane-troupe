@@ -74,14 +74,14 @@ void Renderer::SetViewport(int viewportWidth, int viewportHeight, int viewportX,
 	createOpenGLBuffer();
 }
 
-void Renderer::Render(const Scene& scene)
+void Renderer::Render(const Scene& scene, const GUIStore& store)
 {
 	//#############################################
 	//## You should override this implementation ##
 	//## Here you should render the scene.       ##
 	//#############################################
 
-	drawModels(scene);
+	drawModels(scene, store);
 	drawCameras(scene);
 }
 
@@ -269,7 +269,10 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 glm::vec2 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform)
 {
 	glm::vec4 point = fullTransform * _point;
-	float wDivision = (1/point[3]);
+	float wDivision = 1.0f;
+	if (point[3] != 0.0f) {
+		wDivision = (1 / point[3]);
+	}
 	float newX = point[0] * wDivision;
 	newX = ((newX + 1) * viewportWidth) / 2.0f;
 	float newY = point[1] * wDivision;
@@ -308,12 +311,16 @@ void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm:
 	drawLine(p2, p3, color);
 }
 
-void Renderer::drawModels(const Scene& scene) {
+void Renderer::drawModels(const Scene& scene, const GUIStore& store) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
+	glm::vec3 blueColor(0.0f, 1.0f, 1.0f);
+	glm::vec3 greenColor(0.0f, 1.0f, 0.0f);
+	glm::vec3 yellowColor(1.0f, 1.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
 	//activeCam.setPerspectiveProjection(90.0, viewportWidth / viewportHeight, 1.0, 4.0f);
 	//activeCam.SetZoom(0.5f);
 	//activeCam.SetZoom(1.5f);
+	int index = -1;
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
@@ -321,6 +328,8 @@ void Renderer::drawModels(const Scene& scene) {
 		std::vector<glm::vec3> normals = model->getNormals();
 		std::vector<glm::vec3> vertices = model->getVertices();
 		std::vector<Face> faces = model->getFaces();
+		++index;
+		Utils::Normals whichNormal = store.getModelNormalStatus(index);
 		for each (Face face in faces)
 		{
 			int v1 = face.GetVertexIndex(0);
@@ -333,17 +342,6 @@ void Renderer::drawModels(const Scene& scene) {
 			glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
 			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
-
-			//TODO: Get new P1,P2 for each line with accordance to the cam direction
-			//RotationRules modelRotation = RotationRules();
-			//modelRotation.setRotation(Axis::XAXIS, 0.0f, AngleUnits::DEGREES);
-			//modelRotation.setRotation(Axis::ZAXIS, 90.0f, AngleUnits::DEGREES);
-			//float scalingFactor = 1.0;
-			//float addition = 100.0f;
-			//model->symmetricMove(&addition);
-			//model->symmetricMove(&addition);
-			//model->scale(scalingFactor, scalingFactor, scalingFactor);
-			//model->rotate(modelRotation);
 			
 			glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
@@ -354,9 +352,59 @@ void Renderer::drawModels(const Scene& scene) {
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 			drawTriangle(p1, p2, p3, redColor);
+
+			/* --------------------------------------------------------------------------------------------- */
+			/* Normal calculations */
+
+			switch (whichNormal) {
+			case Utils::Normals::PerFACE:
+			{
+				//float normalX1 = (w1.x + w2.x + w3.x)/3.0f, normalY1 = (w1.y + w2.y + w3.y) / 3.0f, normalZ1 = (w1.z + w2.z + w3.z) / 3.0f;
+				//glm::vec3 normal1 = glm::vec3(normalX1, normalY1, normalZ1);
+				//glm::vec3 a = glm::vec3(w1.x, w1.y, w1.z);
+				//glm::vec3 b = glm::vec3(w2.x, w2.y, w2.z);
+				//glm::vec3 c = glm::vec3(w3.x, w3.y, w3.z);
+				//glm::vec3 endNormal = glm::cross(b - a, c - a);
+				//glm::vec4 finish = glm::vec4(normal1.x, normal1.y, normal1.x + endNormal.x, normal1.y)
+			}
+				//drawNormalForFace();
+				break;
+			case Utils::Normals::PerVERTEX:
+			{
+				int normalIndex1 = face.GetNormalIndex(0);
+				float normalX1 = normals[normalIndex1].x, normalY1 = normals[normalIndex1].y, normalZ1 = normals[normalIndex1].z;
+				int normalIndex2 = face.GetNormalIndex(1);
+				float normalX2 = normals[normalIndex2].x, normalY2 = normals[normalIndex2].y, normalZ2 = normals[normalIndex2].z;
+				int normalIndex3 = face.GetNormalIndex(2);
+				float normalX3 = normals[normalIndex3].x, normalY3 = normals[normalIndex3].y, normalZ3 = normals[normalIndex3].z;
+
+				glm::vec4 normal1 = glm::vec4(normalX1, normalY1, normalZ1, 0.0f) + w1;
+				glm::vec4 normal2 = glm::vec4(normalX2, normalY2, normalZ2, 0.0f) + w2;
+				glm::vec4 normal3 = glm::vec4(normalX3, normalY3, normalZ3, 0.0f) + w3;
+
+				float len = 0.1f;
+				normal1 *= len;
+				normal2 *= len;
+				normal3 *= len;
+
+				glm::vec2 pixelNormal1 = translatePointIndicesToPixels(normal1, completeTransform);
+				glm::vec2 pixelNormal2 = translatePointIndicesToPixels(normal2, completeTransform);
+				glm::vec2 pixelNormal3 = translatePointIndicesToPixels(normal3, completeTransform);
+
+				drawNormalForVertex(p1, pixelNormal1, completeTransform, blueColor);
+				drawNormalForVertex(p2, pixelNormal2, completeTransform, blueColor);
+				drawNormalForVertex(p3, pixelNormal3, completeTransform, blueColor);
+			}
+				break;
+			case Utils::Normals::NONE:
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }
+
 
 void Renderer::drawCameras(const Scene& scene) 
 {
@@ -366,7 +414,7 @@ void Renderer::drawCameras(const Scene& scene)
 	for each(Camera cam in camList) {
 		if (scene.GetActiveCameraIndex() != cam.getIndex()) {
 			glm::vec4 position = cam.getEye();
-			MeshModel model = (Utils::LoadMeshModel("D:\\Git\\project-the-hurricane-troupe\\Data\\camera.obj"));
+			MeshModel model = (Utils::LoadMeshModel("C:\\Users\\Eli\\Desktop\\University\\3 Third Year\\Semester 1\\Computational Graphics\\project-the-hurricane-troupe\\Data\\camera.obj"));
 			model.setPosition(position.x, position.y, position.z);
 			std::vector<glm::vec2> textures = model.getTextures();
 			std::vector<glm::vec3> normals = model.getNormals();
@@ -397,4 +445,12 @@ void Renderer::drawCameras(const Scene& scene)
 			}
 		}
 	}
+}
+void Renderer::drawNormalForVertex(glm::vec2& point, glm::vec2& normal, glm::mat4x4& endTransform, glm::vec3& color) {
+	drawLine(point, normal, color);
+}
+
+
+void drawNormalForFace() {
+
 }

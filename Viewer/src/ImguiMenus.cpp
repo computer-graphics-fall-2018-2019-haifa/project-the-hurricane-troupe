@@ -133,21 +133,33 @@ void showRotationGUI(Scene& scene, GUIStore& store, int index) {
 	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYPlus", index), ImGuiDir_Right)) { yAngle = 15.0f; modifiedRotation = true; }
 	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) { scene.resetRotationActiveModel(); }
 	ImGui::PopButtonRepeat();
-
 	
 	if (modifiedRotation) {
 		scene.rotateActiveModel(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
 	}
 }
 
+void showNormalGUI(Scene& scene, GUIStore& store, int index) {
+	Utils::Normals whichNormal = store.getModelNormalStatus(index);
+	bool isPerVertex = whichNormal == Utils::Normals::PerVERTEX;
+	bool isPerFace = whichNormal == Utils::Normals::PerFACE;
+	bool isNone = whichNormal == Utils::Normals::NONE;
+	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Vertex##VertexNormals", index), &isPerVertex)) { store.setModelNormal(index, Utils::Normals::PerVERTEX); }
+	//if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Face##FaceNormals", index), &isPerFace)) { store.setModelNormal(index, Utils::Normals::PerFACE); }
+	if (ImGui::Checkbox(stringIntConcatenate("No Normals##FaceNormals", index), &isNone)) { store.setModelNormal(index, Utils::Normals::NONE); }
+}
+
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
 	showScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
 	showTranslationGUI(scene, store, index, moveSpeed);
+	ImGui::Columns(2, "##Manipulation");
 	showRotationGUI(scene, store, index);
+	ImGui::NextColumn();
+	showNormalGUI(scene, store, index);
+	ImGui::Columns(1);
 	ImGui::Separator();
 }
-
 
 void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& store) {
 	ImGui::Text("Please select the camera you wish to manipulate:");
@@ -312,6 +324,12 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 		}
 	}
 }
+
+
+void handleNormalPerVertexOrPerFaceDrawing(GUIStore& store, Scene& scene, int index) {
+	scene;
+}
+
 void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store, ImGuiIO& io)
 {
 	int i = 0;
@@ -335,6 +353,7 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 			float moveSpeed = store.getModelSpeed(i);
 			openModelManipulationWindow(name, scene, store, i, &moveSpeed);
 			handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed);
+			handleNormalPerVertexOrPerFaceDrawing(store, scene, i);
 		}
 		++i;
 	}
@@ -507,6 +526,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	_models(scene.getSceneModels()),
 	_isModelBeingManipulated(scene.GetModelCount(), false),
 	_isModelSymmetricScaled(scene.GetModelCount(), true),
+	_whichNormals(scene.GetModelCount(), Utils::Normals::NONE),
 	_modelCount(scene.GetModelCount()),
 	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED),
 	projModeForCams(scene.GetCameraCount(),Mode::Perspective),
@@ -525,6 +545,7 @@ void GUIStore::sync(const Scene& scene)
 		_isModelBeingManipulated.push_back(false);
 		_isModelSymmetricScaled.push_back(true);
 		_modelSpeed.push_back(INITIALMODELSPEED);
+		_whichNormals.push_back(Utils::Normals::NONE);
 	}
 	_modelCount = newSize;
 	
@@ -539,37 +560,37 @@ void GUIStore::sync(const Scene& scene)
 
 void GUIStore::setModelManipulated(int i, bool isManipulated)
 {
-	if (i < 0 || i > _modelCount) return;
+	if (i < 0 || i >= _modelCount) return;
 	_isModelBeingManipulated[i] = isManipulated;
 }
 
 bool GUIStore::isModelManipulated(int i) const
 {
-	if (i < 0 || i > _modelCount) return false;
+	if (i < 0 || i >= _modelCount) return false;
 	return _isModelBeingManipulated[i];
 }
 
 void GUIStore::setModelSymmetricScaled(int i, bool isSymmetric)
 {
-	if (i < 0 || i > _modelCount) return;
+	if (i < 0 || i >= _modelCount) return;
 	_isModelSymmetricScaled[i] = isSymmetric;
 }
 
 bool GUIStore::isModelSymmetricScaled(int i) const
 {
-	if (i < 0 || i > _modelCount) return false;
+	if (i < 0 || i >= _modelCount) return false;
 	return _isModelSymmetricScaled[i];
 }
 
 void GUIStore::setModelSpeed(int i, float newSpeed)
 {
-	if (i < 0 || i > _modelCount) return;
+	if (i < 0 || i >= _modelCount) return;
 	_modelSpeed[i] = newSpeed;
 }
 
 float GUIStore::getModelSpeed(int i) const
 {
-	if (i < 0 || i > _modelCount) return false;
+	if (i < 0 || i >= _modelCount) return false;
 	return _modelSpeed[i];
 }
 
@@ -591,4 +612,16 @@ void GUIStore::setCameraManipulated(int i, bool isManipulated)
 bool GUIStore::isCameraManipulated(int i) const
 {
 	return _isCameraBeingManipulated[i];
+}
+
+void GUIStore::setModelNormal(int i, Utils::Normals newNormal)
+{
+	if (i < 0 || i >= _modelCount) return;
+	_whichNormals[i] = newNormal;
+}
+
+Utils::Normals GUIStore::getModelNormalStatus(int i) const
+{
+	if (i < 0 || i >= _modelCount) return Utils::Normals::NONE;
+	return _whichNormals[i];
 }
