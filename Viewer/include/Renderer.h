@@ -44,8 +44,8 @@ public:
 	void drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color);
 	void drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3, const glm::vec3& color);
 
-	void drawModels(const Scene& scene, const GUIStore& store);
+	void drawMeshModels(const Scene& scene, const GUIStore& store);
 	void drawChess();
-	void drawCameras(const Scene& scene);
+	void drawCameraModels(const Scene& scene);
 	// Add more methods/functionality as needed...
 };

@@ -77,9 +77,9 @@ void Scene::resetRotationActiveModel()
 
 void Scene::setCameraVectors(glm::vec4& eye, glm::vec4& at, glm::vec4& up, int index)
 {
-	cameras[index].setEye(eye);
-	cameras[index].setAt(at);
-	cameras[index].setUp(up);
+	cameras[index].setEyeVector(eye);
+	cameras[index].setAtVector(at);
+	cameras[index].setUpVector(up);
 	cameras[index].SetCameraLookAt(eye, at, up);
 }
 

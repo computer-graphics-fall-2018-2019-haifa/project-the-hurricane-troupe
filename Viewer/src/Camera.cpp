@@ -181,32 +181,32 @@ glm::mat4x4 Camera::getProjectionTransformation() const
 	return perspectionProjectionTransformation;
 }
 
-glm::vec4 Camera::getEye()
+glm::vec4 Camera::getEyeVector()
 {
 	return eye;
 }
 
-void Camera::setEye(glm::vec4& vec)
+void Camera::setEyeVector(glm::vec4& vec)
 {
 	eye = vec;
 }
 
-glm::vec4 Camera::getAt()
+glm::vec4 Camera::getAtVector()
 {
 	return at;
 }
 
-void Camera::setAt(glm::vec4& vec)
+void Camera::setAtVector(glm::vec4& vec)
 {
 	at = vec;
 }
 
-glm::vec4 Camera::getUp()
+glm::vec4 Camera::getUpVector()
 {
 	return up;
 }
 
-void Camera::setUp(glm::vec4& vec)
+void Camera::setUpVector(glm::vec4& vec)
 {
 	up = vec;
 }

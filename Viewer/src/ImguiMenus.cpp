@@ -184,9 +184,9 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 		if(scene.getActiveCamera().getIndex()==camIndex){
 			ImGui::SameLine();
 			if (ImGui::TreeNode(nameInString)) {
-				 glm::vec4 eye = cam.getEye(); 
-				 glm::vec4 at = cam.getAt();
-				 glm::vec4 up = cam.getUp();
+				 glm::vec4 eye = cam.getEyeVector(); 
+				 glm::vec4 at = cam.getAtVector();
+				 glm::vec4 up = cam.getUpVector();
 				//eye of the cams
 				{
 					ImGui::Columns(3, "mixed");
@@ -359,7 +359,7 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 	}
 }
 
-void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
+void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 	//if (showDemoWindow)
@@ -419,9 +419,9 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 			{
 				if (ImGui::MenuItem("Camera"))
 				{
-					glm::vec4 newEye = scene.getActiveCamera().getEye();
+					glm::vec4 newEye = scene.getActiveCamera().getEyeVector();
 					newEye.z = -newEye.z;
-					glm::vec4 newAt = scene.getActiveCamera().getAt();
+					glm::vec4 newAt = scene.getActiveCamera().getAtVector();
 					Camera mainCam = Camera(
 						newEye,
 						newAt,
@@ -436,18 +436,18 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 			ImGui::EndMainMenuBar();
 		}
 	}
-	// 6. Demonstrate help
-	{
-		if (ImGui::BeginMainMenuBar())
-		{
-			if (ImGui::BeginMenu("Help"))
-			{
-				//ImGui::ShowDemoWindow(&showDemoWindow);
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-	}
+	//// 6. Demonstrate help
+	//{
+	//	if (ImGui::BeginMainMenuBar())
+	//	{
+	//		if (ImGui::BeginMenu("Help"))
+	//		{
+	//			//ImGui::ShowDemoWindow(&showDemoWindow);
+	//			ImGui::EndMenu();
+	//		}
+	//		ImGui::EndMainMenuBar();
+	//	}
+	//}
 }
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)
