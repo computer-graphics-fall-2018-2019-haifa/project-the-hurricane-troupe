@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 		//DrawImguiMenus(io, scene);
 
 		store.sync(scene);
-		ObjectManipulationMenus(io, scene, store);
+		GenerateGUI(io, scene, store);
 		
 		// Render the next frame
 		RenderFrame(window, scene, renderer, io, store);

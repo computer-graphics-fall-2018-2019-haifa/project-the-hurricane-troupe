@@ -81,8 +81,8 @@ void Renderer::Render(const Scene& scene, const GUIStore& store)
 	//## Here you should render the scene.       ##
 	//#############################################
 
-	drawModels(scene, store);
-	drawCameras(scene);
+	drawMeshModels(scene, store);
+	drawCameraModels(scene);
 }
 
 void Renderer::drawChess()  {
@@ -311,15 +311,13 @@ void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm:
 	drawLine(p2, p3, color);
 }
 
-void Renderer::drawModels(const Scene& scene, const GUIStore& store) {
+void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	glm::vec3 blueColor(0.0f, 1.0f, 1.0f);
 	glm::vec3 greenColor(0.0f, 1.0f, 0.0f);
 	glm::vec3 yellowColor(1.0f, 1.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
-	//activeCam.setPerspectiveProjection(90.0, viewportWidth / viewportHeight, 1.0, 4.0f);
-	//activeCam.SetZoom(0.5f);
-	//activeCam.SetZoom(1.5f);
+
 	int index = -1;
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
@@ -367,7 +365,6 @@ void Renderer::drawModels(const Scene& scene, const GUIStore& store) {
 				//glm::vec3 endNormal = glm::cross(b - a, c - a);
 				//glm::vec4 finish = glm::vec4(normal1.x, normal1.y, normal1.x + endNormal.x, normal1.y)
 			}
-				//drawNormalForFace();
 				break;
 			case Utils::Normals::PerVERTEX:
 			{
@@ -397,8 +394,14 @@ void Renderer::drawModels(const Scene& scene, const GUIStore& store) {
 			}
 				break;
 			case Utils::Normals::NONE:
+			{
+				//do nothing.
+			}
 				break;
 			default:
+			{
+				//do nothing.
+			}
 				break;
 			}
 		}
@@ -406,14 +409,14 @@ void Renderer::drawModels(const Scene& scene, const GUIStore& store) {
 }
 
 
-void Renderer::drawCameras(const Scene& scene) 
+void Renderer::drawCameraModels(const Scene& scene) 
 {
 	glm::vec3 blackColor(0.0f, 0.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
 	std::vector<Camera> camList = scene.GetCameras();
 	for each(Camera cam in camList) {
 		if (scene.GetActiveCameraIndex() != cam.getIndex()) {
-			glm::vec4 position = cam.getEye();
+			glm::vec4 position = cam.getEyeVector();
 			MeshModel model = (Utils::LoadMeshModel("D:\\Git\\project-the-hurricane-troupe\\Data\\camera.obj"));
 			model.setPosition(position.x, position.y, position.z);
 			std::vector<glm::vec2> textures = model.getTextures();
@@ -446,6 +449,7 @@ void Renderer::drawCameras(const Scene& scene)
 		}
 	}
 }
+
 void Renderer::drawNormalForVertex(glm::vec2& point, glm::vec2& normal, glm::mat4x4& endTransform, glm::vec3& color) {
 	drawLine(point, normal, color);
 }

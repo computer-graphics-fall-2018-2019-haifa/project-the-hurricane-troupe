@@ -75,21 +75,27 @@ void Scene::resetRotationActiveModel()
 	models[GetActiveModelIndex()]->resetRotation();
 }
 
+void Scene::matchFovyToWindowSize(int viewportHeight, int viewportWidth)
+{
+	ProjectionType a = this->getActiveCamera().whichProjection();
+	// TODO: Should we do this for all cameras at once? Or just for the active camera? What if changing only for one camera will ruin the view for the rest of the cameras?
+}
+
 void Scene::setCameraVectors(glm::vec4& eye, glm::vec4& at, glm::vec4& up, int index)
 {
-	cameras[index].setEye(eye);
-	cameras[index].setAt(at);
-	cameras[index].setUp(up);
+	cameras[index].setEyeVector(eye);
+	cameras[index].setAtVector(at);
+	cameras[index].setUpVector(up);
 	cameras[index].SetCameraLookAt(eye, at, up);
 }
 
-void Scene::setOrthoProjStuff(float top, float bottom, float right, float left, float _near, float _far, int index)
+void Scene::setOrthographicParameters(float top, float bottom, float right, float left, float _near, float _far, int index)
 {
 	cameras[index].setOrthographicProjection(left, right, bottom, top, _near, _far);
 	cameras[index].setActiveProjection(ProjectionType::ORTHOGRAPHIC);
 }
 
-void Scene::setPresProjStuff(float _near, float _far, float fovy, float aspect,int index)
+void Scene::setPerspectiveParameters(float _near, float _far, float fovy, float aspect,int index)
 {
 	cameras[index].setPerspectiveProjection(fovy, aspect, _near, _far);
 	cameras[index].setActiveProjection(ProjectionType::PERSPECTIVE);

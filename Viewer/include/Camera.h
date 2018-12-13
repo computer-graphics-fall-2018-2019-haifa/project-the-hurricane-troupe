@@ -68,12 +68,12 @@ public:
 	glm::vec4 getOrigEye();
 	glm::vec4 getOrigUp();
 	glm::vec4 getOrigAt();
-	glm::vec4 getEye();
-	void setEye(glm::vec4& vec);	
-	glm::vec4 getAt();
-	void setAt(glm::vec4& vec);	
-	glm::vec4 getUp();
-	void setUp(glm::vec4& vec);
+	glm::vec4 getEyeVector();
+	void setEyeVector(glm::vec4& vec);	
+	glm::vec4 getAtVector();
+	void setAtVector(glm::vec4& vec);	
+	glm::vec4 getUpVector();
+	void setUpVector(glm::vec4& vec);
 	void getPerspectiveProjStuff(float * projNear,float*  projFar,float*  projFovy,float* projAspectRatio) const;
 	void getOrthographicProjStuff(float * projNear,float*  projFar,float*  projTop,float* projBottom, float* projLeft, float* projRight) const;
 	// Add more methods/functionality as needed...

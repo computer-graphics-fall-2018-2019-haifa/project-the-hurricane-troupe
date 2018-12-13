@@ -184,9 +184,9 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 		if(scene.getActiveCamera().getIndex()==camIndex){
 			ImGui::SameLine();
 			if (ImGui::TreeNode(nameInString)) {
-				 glm::vec4 eye = cam.getEye(); 
-				 glm::vec4 at = cam.getAt();
-				 glm::vec4 up = cam.getUp();
+				 glm::vec4 eye = cam.getEyeVector(); 
+				 glm::vec4 at = cam.getAtVector();
+				 glm::vec4 up = cam.getUpVector();
 				//eye of the cams
 				{
 					ImGui::Columns(3, "mixed");
@@ -272,7 +272,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						ImGui::InputFloat(stringToCharSeq("Right##" + std::to_string(camIndex)), &projRight, 1.0f, 0, "%.1f");
 						ImGui::Columns(1);
 						ImGui::Separator();
-						scene.setOrthoProjStuff(projTop, projBottom, projRight, projLeft, projNear, projFar, camIndex);
+						scene.setOrthographicParameters(projTop, projBottom, projRight, projLeft, projNear, projFar, camIndex);
 					}
 					else {
 						float projNear;
@@ -291,7 +291,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						ImGui::InputFloat(stringToCharSeq("width##" + std::to_string(camIndex)), &projAspectRatio, 1.0f, 0, "%.1f");
 						ImGui::Columns(1);
 						ImGui::Separator();
-						scene.setPresProjStuff(projNear, projFar, projFovy, projAspectRatio, camIndex);
+						scene.setPerspectiveParameters(projNear, projFar, projFovy, projAspectRatio, camIndex);
 					}
 					float zoom = cam.getZoom();
 					ImGui::Columns(2, "mixed");
@@ -312,11 +312,11 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 					ImGui::SameLine();
 					if (ImGui::Button("Reset projection")) {
 						if (mode == Mode::Orthographic) {
-							scene.setOrthoProjStuff(1.0f, -1.0f, 1.5f, -1.5, 1.0f, 10.0f, camIndex);
+							scene.setOrthographicParameters(1.0f, -1.0f, 1.5f, -1.5, 1.0f, 10.0f, camIndex);
 						}
 						else
 						{
-							scene.setPresProjStuff(1.0f, 10.0f, 90.0f, 1.5f, camIndex);
+							scene.setPerspectiveParameters(1.0f, 10.0f, 90.0f, 1.5f, camIndex);
 						}
 					}
 				}
@@ -360,7 +360,7 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 	}
 }
 
-void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
+void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 	//if (showDemoWindow)
@@ -420,9 +420,9 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 			{
 				if (ImGui::MenuItem("Camera"))
 				{
-					glm::vec4 newEye = scene.getActiveCamera().getEye();
+					glm::vec4 newEye = scene.getActiveCamera().getEyeVector();
 					newEye.z = -newEye.z;
-					glm::vec4 newAt = scene.getActiveCamera().getAt();
+					glm::vec4 newAt = scene.getActiveCamera().getAtVector();
 					Camera mainCam = Camera(
 						newEye,
 						newAt,
@@ -443,7 +443,7 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 	//	{
 	//		if (ImGui::BeginMenu("Help"))
 	//		{
-	//			ImGui::ShowDemoWindow(&showDemoWindow);
+	//			//ImGui::ShowDemoWindow(&showDemoWindow);
 	//			ImGui::EndMenu();
 	//		}
 	//		ImGui::EndMainMenuBar();
