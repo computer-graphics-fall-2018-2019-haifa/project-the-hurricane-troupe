@@ -9,6 +9,9 @@ Camera::Camera(const glm::vec4& eye, const glm::vec4& at, const glm::vec4& up) :
 	eye(eye),
 	at(at),
 	up(up),
+	OrigAt(at),
+	OrigEye(eye),
+	OrigUp(up),
 	zoom(1.0),
 	viewTransformation(Utils::IdentityMat()),
 	viewTransformationInverse(Utils::IdentityMat()),
@@ -179,6 +182,21 @@ glm::mat4x4 Camera::getProjectionTransformation() const
 		return orthographicProjectionTransformation;
 	}
 	return perspectionProjectionTransformation;
+}
+
+glm::vec4 Camera::getOrigEye()
+{
+	return OrigEye;
+}
+
+glm::vec4 Camera::getOrigUp()
+{
+	return OrigUp;
+}
+
+glm::vec4 Camera::getOrigAt()
+{
+	return OrigAt;
 }
 
 glm::vec4 Camera::getEye()

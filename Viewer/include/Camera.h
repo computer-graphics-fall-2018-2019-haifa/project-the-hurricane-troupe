@@ -34,6 +34,9 @@ private:
 	glm::vec4 eye;
 	glm::vec4 at;
 	glm::vec4 up;
+	glm::vec4 OrigUp;
+	glm::vec4 OrigEye;
+	glm::vec4 OrigAt;
 
 	float _projLeft, _projRight, _projTop, _projBottom, _projNear, _projFar, _projFovy, _projAspectRatio;
 
@@ -62,6 +65,9 @@ public:
 
 	glm::mat4x4 getViewTransformationInverse() const;
 	glm::mat4x4 getProjectionTransformation() const;
+	glm::vec4 getOrigEye();
+	glm::vec4 getOrigUp();
+	glm::vec4 getOrigAt();
 	glm::vec4 getEye();
 	void setEye(glm::vec4& vec);	
 	glm::vec4 getAt();

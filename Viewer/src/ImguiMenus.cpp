@@ -295,16 +295,17 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 					}
 					float zoom = cam.getZoom();
 					ImGui::Columns(2, "mixed");
-					if (ImGui::InputFloat(stringToCharSeq("Zoom##" + std::to_string(camIndex)), &zoom, 1.0f, 0, "%.1f")) {
+					if (ImGui::InputFloat(stringToCharSeq("Zoom##" + std::to_string(camIndex)), &zoom, 0.5f, 0, "%.2f")) {
 						scene.setZoomForCam(zoom, camIndex);
 					}
 					ImGui::Columns(1);
 					ImGui::Separator();
 
 					if (ImGui::Button("Look at ORIGIN")) {
-						glm::vec4 eye = glm::vec4(0.0f, 0.0f, 4.0f, 0.0f);
-						glm::vec4 at = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-						glm::vec4 up = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+						
+						glm::vec4 eye = cam.getOrigEye();
+						glm::vec4 at = cam.getOrigAt();
+						glm::vec4 up = cam.getOrigUp();
 						scene.setCameraVectors(eye, at, up, camIndex);
 						continue;
 					}
@@ -436,18 +437,18 @@ void ObjectManipulationMenus(ImGuiIO& io, Scene& scene, GUIStore& store)
 			ImGui::EndMainMenuBar();
 		}
 	}
-	// 6. Demonstrate help
-	{
-		if (ImGui::BeginMainMenuBar())
-		{
-			if (ImGui::BeginMenu("Help"))
-			{
-				//ImGui::ShowDemoWindow(&showDemoWindow);
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-	}
+	//// 6. Demonstrate help
+	//{
+	//	if (ImGui::BeginMainMenuBar())
+	//	{
+	//		if (ImGui::BeginMenu("Help"))
+	//		{
+	//			ImGui::ShowDemoWindow(&showDemoWindow);
+	//			ImGui::EndMenu();
+	//		}
+	//		ImGui::EndMainMenuBar();
+	//	}
+	//}
 }
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene)

@@ -414,7 +414,7 @@ void Renderer::drawCameras(const Scene& scene)
 	for each(Camera cam in camList) {
 		if (scene.GetActiveCameraIndex() != cam.getIndex()) {
 			glm::vec4 position = cam.getEye();
-			MeshModel model = (Utils::LoadMeshModel("C:\\Users\\Eli\\Desktop\\University\\3 Third Year\\Semester 1\\Computational Graphics\\project-the-hurricane-troupe\\Data\\camera.obj"));
+			MeshModel model = (Utils::LoadMeshModel("D:\\Git\\project-the-hurricane-troupe\\Data\\camera.obj"));
 			model.setPosition(position.x, position.y, position.z);
 			std::vector<glm::vec2> textures = model.getTextures();
 			std::vector<glm::vec3> normals = model.getNormals();
