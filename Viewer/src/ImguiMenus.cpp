@@ -272,7 +272,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						ImGui::InputFloat(stringToCharSeq("Right##" + std::to_string(camIndex)), &projRight, 1.0f, 0, "%.1f");
 						ImGui::Columns(1);
 						ImGui::Separator();
-						scene.setOrthoProjStuff(projTop, projBottom, projRight, projLeft, projNear, projFar, camIndex);
+						scene.setOrthographicParameters(projTop, projBottom, projRight, projLeft, projNear, projFar, camIndex);
 					}
 					else {
 						float projNear;
@@ -291,7 +291,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						ImGui::InputFloat(stringToCharSeq("width##" + std::to_string(camIndex)), &projAspectRatio, 1.0f, 0, "%.1f");
 						ImGui::Columns(1);
 						ImGui::Separator();
-						scene.setPresProjStuff(projNear, projFar, projFovy, projAspectRatio, camIndex);
+						scene.setPerspectiveParameters(projNear, projFar, projFovy, projAspectRatio, camIndex);
 					}
 					float zoom = cam.getZoom();
 					ImGui::Columns(2, "mixed");
@@ -311,11 +311,11 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 					ImGui::SameLine();
 					if (ImGui::Button("Reset projection")) {
 						if (mode == Mode::Orthographic) {
-							scene.setOrthoProjStuff(1.0f, -1.0f, 1.5f, -1.5, 1.0f, 10.0f, camIndex);
+							scene.setOrthographicParameters(1.0f, -1.0f, 1.5f, -1.5, 1.0f, 10.0f, camIndex);
 						}
 						else
 						{
-							scene.setPresProjStuff(1.0f, 10.0f, 90.0f, 1.5f, camIndex);
+							scene.setPerspectiveParameters(1.0f, 10.0f, 90.0f, 1.5f, camIndex);
 						}
 					}
 				}

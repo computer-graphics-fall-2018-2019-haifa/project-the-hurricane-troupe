@@ -46,11 +46,12 @@ public:
 	void getScalingFactorsActiveModel(float* const xFactor, float* const yFactor, float* const zFactor) const;
 	void getTranslationDeltasActiveModel(float* const xDelta, float* const yDelta, float* const zDelta) const;
 	void setCameraVectors(glm::vec4& eye, glm::vec4& at, glm::vec4& up, int index);
-	void setOrthoProjStuff(float top, float bottom, float right, float left, float _near, float _far , int index);
-	void setPresProjStuff(float _near, float _far, float fovy, float aspect ,int index);
+	void setOrthographicParameters(float top, float bottom, float right, float left, float _near, float _far , int index);
+	void setPerspectiveParameters(float _near, float _far, float fovy, float aspect ,int index);
 	void setZoomForCam(float zoom, int index);
 	void resetPositionActiveModel();
 	void resetRotationActiveModel();
 
 	void getActiveModelNormals();
+	void matchFovyToWindowSize(int viewportHeight, int viewportWidth);
 };
