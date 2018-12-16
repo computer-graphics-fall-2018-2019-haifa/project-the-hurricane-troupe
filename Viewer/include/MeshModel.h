@@ -15,7 +15,7 @@
 
 class MeshModel
 {
-private:
+protected:
 	std::vector<Face> faces;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
@@ -36,6 +36,7 @@ private:
 public:
 
 	MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName = "");
+	MeshModel();
 	virtual ~MeshModel();
 
 

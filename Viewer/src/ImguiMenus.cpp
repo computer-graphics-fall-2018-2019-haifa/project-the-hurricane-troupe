@@ -120,11 +120,11 @@ void showRotationGUI(Scene& scene, GUIStore& store, int index) {
 
 	ImGui::Text("Rotate Controls:");
 	ImGui::PushButtonRepeat(true);
-	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_None)) { zAngle = -15.0f; modifiedRotation = true; }
+	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_Up)) { zAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
 	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXPlus", index), ImGuiDir_Up)) { xAngle = 15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
-	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZPlus", index), ImGuiDir_None)) { zAngle = 15.0f; modifiedRotation = true; }
+	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZPlus", index), ImGuiDir_Up)) { zAngle = 15.0f; modifiedRotation = true; }
 
 	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYMinus", index), ImGuiDir_Left)) { yAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
@@ -431,6 +431,14 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 					scene.AddCamera(mainCam);
 					//scene.AddModel(std::make_shared<MeshModel>(Utils::LoadMeshModel("D:\\Git\\project-the-hurricane-troupe\\Data\\camera.obj")));
 
+				}
+				if (ImGui::BeginMenu("Basic Models"))
+				{
+					if (ImGui::MenuItem("Pyramid"))
+					{
+						scene.AddModel(std::make_shared<MeshModel>(PrimMeshModel()));
+					}
+					ImGui::EndMenu();
 				}
 				ImGui::EndMenu();
 			}

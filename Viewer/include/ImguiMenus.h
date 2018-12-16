@@ -1,7 +1,7 @@
 #pragma once
 #include <imgui/imgui.h>
 #include "Scene.h"
-
+#include "PrimMeshModel.h"
 enum class Mode { Orthographic, Perspective };
 
 class GUIStore 

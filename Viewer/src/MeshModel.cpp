@@ -29,6 +29,10 @@ MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3
 	updateWorldTransformation(); //set the transformation.
 }
 
+MeshModel::MeshModel()
+{
+}
+
 MeshModel::~MeshModel() {}
 
 

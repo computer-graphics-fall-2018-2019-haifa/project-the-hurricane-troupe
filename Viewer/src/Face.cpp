@@ -7,7 +7,7 @@ Face::Face(std::istream& issLine)
 	textureIndices = { 0, 0, 0 };
 
 	char c;
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)	
 	{
 		issLine >> std::ws >> vertexIndices.at(i) >> std::ws;
 
@@ -35,6 +35,15 @@ Face::Face(std::istream& issLine)
 
 		issLine >> c >> normalIndices.at(i);
 	}
+}
+
+Face::Face(int x, int y, int z)
+{
+	normalIndices = { 0, 0, 0 };
+	textureIndices = { 0, 0, 0 };
+	vertexIndices.push_back(x);
+	vertexIndices.push_back(y);
+	vertexIndices.push_back(z);
 }
 
 Face::~Face()
