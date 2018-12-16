@@ -282,7 +282,7 @@ glm::vec2 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, cons
 	return glm::vec2(newX, newY);
 }
 
-void Renderer::drawLine(glm::vec2 point1, glm::vec2 point2, const glm::vec3& color) {
+void Renderer::drawLine(const glm::vec2 point1, const glm::vec2 point2, const glm::vec3& color) {
 	int x1 = (int)point1[0], y1 = (int)point1[1];
 	int x2 = (int)point2[0], y2 = (int)point2[1];
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
@@ -311,13 +311,15 @@ void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm:
 	drawLine(p2, p3, color);
 }
 
+
+
 void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	glm::vec3 blueColor(0.0f, 1.0f, 1.0f);
 	glm::vec3 greenColor(0.0f, 1.0f, 0.0f);
 	glm::vec3 yellowColor(1.0f, 1.0f, 0.0f);
 	Camera activeCam = scene.getActiveCamera();
-
+	glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
 	int index = -1;
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
@@ -328,6 +330,8 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 		std::vector<Face> faces = model->getFaces();
 		++index;
 		Utils::Normals whichNormal = store.getModelNormalStatus(index);
+		int* max_2D_X = nullptr;
+		int* max_2D_Y = nullptr;
 		for each (Face face in faces)
 		{
 			int v1 = face.GetVertexIndex(0);
@@ -341,7 +345,6 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
 			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
 			
-			glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
 			glm::mat4x4 modelTransform = model->GetWorldTransformation();
 			glm::mat4x4 completeTransform = camTransformation * modelTransform;
 
@@ -350,7 +353,6 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 			drawTriangle(p1, p2, p3, redColor);
-
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 
@@ -364,48 +366,94 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 				//glm::vec3 c = glm::vec3(w3.x, w3.y, w3.z);
 				//glm::vec3 endNormal = glm::cross(b - a, c - a);
 				//glm::vec4 finish = glm::vec4(normal1.x, normal1.y, normal1.x + endNormal.x, normal1.y)
+				float len = store.getModelNormalLength(index);
+				drawNormalsPerFace(face, w1, p1, w2, p2, w3, p3, len, completeTransform, greenColor);
 			}
 				break;
 			case Utils::Normals::PerVERTEX:
 			{
-				int normalIndex1 = face.GetNormalIndex(0);
-				float normalX1 = normals[normalIndex1].x, normalY1 = normals[normalIndex1].y, normalZ1 = normals[normalIndex1].z;
-				int normalIndex2 = face.GetNormalIndex(1);
-				float normalX2 = normals[normalIndex2].x, normalY2 = normals[normalIndex2].y, normalZ2 = normals[normalIndex2].z;
-				int normalIndex3 = face.GetNormalIndex(2);
-				float normalX3 = normals[normalIndex3].x, normalY3 = normals[normalIndex3].y, normalZ3 = normals[normalIndex3].z;
-
-				glm::vec4 normal1 = glm::vec4(normalX1, normalY1, normalZ1, 0.0f) + w1;
-				glm::vec4 normal2 = glm::vec4(normalX2, normalY2, normalZ2, 0.0f) + w2;
-				glm::vec4 normal3 = glm::vec4(normalX3, normalY3, normalZ3, 0.0f) + w3;
-
-				float len = 0.1f;
-				normal1 *= len;
-				normal2 *= len;
-				normal3 *= len;
-
-				glm::vec2 pixelNormal1 = translatePointIndicesToPixels(normal1, completeTransform);
-				glm::vec2 pixelNormal2 = translatePointIndicesToPixels(normal2, completeTransform);
-				glm::vec2 pixelNormal3 = translatePointIndicesToPixels(normal3, completeTransform);
-
-				drawNormalForVertex(p1, pixelNormal1, completeTransform, blueColor);
-				drawNormalForVertex(p2, pixelNormal2, completeTransform, blueColor);
-				drawNormalForVertex(p3, pixelNormal3, completeTransform, blueColor);
+				float len = store.getModelNormalLength(index);
+				drawNormalsPerVertex(face, normals, w1, p1, w2, p2, w3, p3, len, completeTransform, blueColor);
 			}
 				break;
 			case Utils::Normals::NONE:
-			{
 				//do nothing.
-			}
 				break;
 			default:
-			{
 				//do nothing.
-			}
 				break;
 			}
 		}
+	
+		bool shouldDrawBoundingBox = store.isModelBoundingBoxOn(index);
+		if (shouldDrawBoundingBox) {
+
+		}
 	}
+}
+
+void Renderer::drawNormalsPerFace(
+	const Face& face,
+	const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1,
+	const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2,
+	const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3,
+	const float normalLength,
+	const glm::mat4x4& transform,
+	const glm::vec3& color)
+{
+
+	glm::vec4 newPoint = (originalPoint1 + originalPoint2 + originalPoint3) / 3.0f;
+	glm::vec2 pixelConcentratedPoint = translatePointIndicesToPixels(newPoint, transform);
+
+	glm::vec4 vector1 = (originalPoint2 - originalPoint1);
+	glm::vec4 vector2 = (originalPoint3 - originalPoint1);
+	glm::vec4 vector3 = (originalPoint3 - originalPoint2);
+
+	glm::vec3 a = glm::vec3(vector1.x, vector1.y, vector1.z);
+	glm::vec3 b = glm::vec3(vector2.x, vector2.y, vector2.z);
+	glm::vec3 c = glm::vec3(vector3.x, vector3.y, vector3.z);
+
+	glm::vec3 normalHelper1 = glm::cross(a, b);
+	glm::vec3 normalHelper2 = glm::cross(-a, c);
+	glm::vec3 normalHelper3 = glm::cross(-b, -c);
+	glm::vec3 _normalPoint = (normalHelper1 + normalHelper2 + normalHelper3) / 3.0f;
+	glm::vec4 normalPoint = glm::vec4(_normalPoint.x, _normalPoint.y, _normalPoint.z, 0.0f);
+
+	glm::vec4 normal = normalLength * normalPoint + newPoint;
+
+	glm::vec2 pixelNormal = translatePointIndicesToPixels(normal, transform);
+
+	drawLine(pixelConcentratedPoint, pixelNormal, color);
+}
+
+void Renderer::drawNormalsPerVertex(
+	const Face& face, 
+	const std::vector<glm::vec3>& normals, 
+	const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, 
+	const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, 
+	const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, 
+	const float normalLength,
+	const glm::mat4x4& transform,
+	const glm::vec3& color)
+{
+	int normalIndex1 = face.GetNormalIndex(0);
+	float normalX1 = normals[normalIndex1].x, normalY1 = normals[normalIndex1].y, normalZ1 = normals[normalIndex1].z;
+	int normalIndex2 = face.GetNormalIndex(1);
+	float normalX2 = normals[normalIndex2].x, normalY2 = normals[normalIndex2].y, normalZ2 = normals[normalIndex2].z;
+	int normalIndex3 = face.GetNormalIndex(2);
+	float normalX3 = normals[normalIndex3].x, normalY3 = normals[normalIndex3].y, normalZ3 = normals[normalIndex3].z;
+
+	glm::vec4 normal1 = normalLength*glm::vec4(normalX1, normalY1, normalZ1, 0.0f) + originalPoint1;
+	glm::vec4 normal2 = normalLength*glm::vec4(normalX2, normalY2, normalZ2, 0.0f) + originalPoint2;
+	glm::vec4 normal3 = normalLength*glm::vec4(normalX3, normalY3, normalZ3, 0.0f) + originalPoint3;
+
+	glm::vec2 pixelNormal1 = translatePointIndicesToPixels(normal1, transform);
+	glm::vec2 pixelNormal2 = translatePointIndicesToPixels(normal2, transform);
+	glm::vec2 pixelNormal3 = translatePointIndicesToPixels(normal3, transform);
+
+	drawLine(pixelPoint1, pixelNormal1, color);
+	drawLine(pixelPoint2, pixelNormal2, color);
+	drawLine(pixelPoint3, pixelNormal3, color);
 }
 
 
@@ -448,10 +496,6 @@ void Renderer::drawCameraModels(const Scene& scene)
 			}
 		}
 	}
-}
-
-void Renderer::drawNormalForVertex(glm::vec2& point, glm::vec2& normal, glm::mat4x4& endTransform, glm::vec3& color) {
-	drawLine(point, normal, color);
 }
 
 
