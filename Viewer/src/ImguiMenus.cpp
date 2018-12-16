@@ -141,22 +141,28 @@ void showRotationGUI(Scene& scene, GUIStore& store, int index) {
 
 void showNormalGUI(Scene& scene, GUIStore& store, int index) {
 	Utils::Normals whichNormal = store.getModelNormalStatus(index);
+	float length = store.getModelNormalLength(index);
 	bool isPerVertex = whichNormal == Utils::Normals::PerVERTEX;
 	bool isPerFace = whichNormal == Utils::Normals::PerFACE;
 	bool isNone = whichNormal == Utils::Normals::NONE;
 	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Vertex##VertexNormals", index), &isPerVertex)) { store.setModelNormal(index, Utils::Normals::PerVERTEX); }
-	//if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Face##FaceNormals", index), &isPerFace)) { store.setModelNormal(index, Utils::Normals::PerFACE); }
+	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Face##FaceNormals", index), &isPerFace)) { store.setModelNormal(index, Utils::Normals::PerFACE); }
 	if (ImGui::Checkbox(stringIntConcatenate("No Normals##FaceNormals", index), &isNone)) { store.setModelNormal(index, Utils::Normals::NONE); }
+	if (isNone == false) {
+		if (ImGui::SliderFloat(stringIntConcatenate("Length##NormalsLength", index), &length, 0.01f, 100.0f)) { store.setModelNormalLength(index, length); }
+	}
 }
 
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
 	showScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
 	showTranslationGUI(scene, store, index, moveSpeed);
-	ImGui::Columns(2, "##Manipulation");
+	ImGui::Columns(3, "##Manipulation");
 	showRotationGUI(scene, store, index);
 	ImGui::NextColumn();
 	showNormalGUI(scene, store, index);
+	ImGui::NextColumn();
+	showBoundingBoxGUI(scene, store, index);
 	ImGui::Columns(1);
 	ImGui::Separator();
 }
@@ -345,7 +351,7 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
 		char* name = stringToCharSeq(model->GetModelName());
-		bool isSelected = store.isModelManipulated(i);
+		bool isSelected = store.isModelSelected(i);
 		if (ImGui::Checkbox(name, &isSelected)) {
 			store.setModelManipulated(i, isSelected);
 		}
@@ -357,6 +363,14 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 			handleNormalPerVertexOrPerFaceDrawing(store, scene, i);
 		}
 		++i;
+	}
+}
+
+void showBoundingBoxGUI(Scene& scene, GUIStore& store, int index)
+{
+	bool isBoundingBoxDisplayed = store.isModelBoundingBoxOn(index);
+	if (ImGui::Checkbox(stringIntConcatenate("Bounding Box##ON", index), &isBoundingBoxDisplayed)) {
+		store.setModelBoundingBox(index, isBoundingBoxDisplayed);
 	}
 }
 
@@ -528,8 +542,10 @@ GUIStore::GUIStore(const Scene & scene) :
 	_isModelBeingManipulated(scene.GetModelCount(), false),
 	_isModelSymmetricScaled(scene.GetModelCount(), true),
 	_whichNormals(scene.GetModelCount(), Utils::Normals::NONE),
+	_modelNormalLength(scene.GetModelCount(), INITIALMODELNORMALLENGTH),
 	_modelCount(scene.GetModelCount()),
 	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED),
+	_isModelBoundingBoxOn(scene.GetModelCount(), false),
 	projModeForCams(scene.GetCameraCount(),Mode::Perspective),
 	cameraCount(scene.GetCameraCount()),
 	_isCameraBeingManipulated(scene.GetCameraCount(),false)
@@ -547,6 +563,8 @@ void GUIStore::sync(const Scene& scene)
 		_isModelSymmetricScaled.push_back(true);
 		_modelSpeed.push_back(INITIALMODELSPEED);
 		_whichNormals.push_back(Utils::Normals::NONE);
+		_modelNormalLength.push_back(INITIALMODELNORMALLENGTH);
+		_isModelBoundingBoxOn.push_back(false);
 	}
 	_modelCount = newSize;
 	
@@ -565,7 +583,7 @@ void GUIStore::setModelManipulated(int i, bool isManipulated)
 	_isModelBeingManipulated[i] = isManipulated;
 }
 
-bool GUIStore::isModelManipulated(int i) const
+bool GUIStore::isModelSelected(int i) const
 {
 	if (i < 0 || i >= _modelCount) return false;
 	return _isModelBeingManipulated[i];
@@ -593,6 +611,30 @@ float GUIStore::getModelSpeed(int i) const
 {
 	if (i < 0 || i >= _modelCount) return false;
 	return _modelSpeed[i];
+}
+
+void GUIStore::setModelBoundingBox(int i, bool on)
+{
+	if (i < 0 || i >= _modelCount) return;
+	_isModelBoundingBoxOn[i] = on;
+}
+
+bool GUIStore::isModelBoundingBoxOn(int i) const
+{
+	if (i < 0 || i >= _modelCount) return false;
+	return _isModelBoundingBoxOn[i];
+}
+
+void GUIStore::setModelNormalLength(int i, float length)
+{
+	if (i < 0 || i >= _modelCount) return;
+	_modelNormalLength[i] = length;
+}
+
+float GUIStore::getModelNormalLength(int i) const
+{
+	if (i < 0 || i >= _modelCount) return -1.0f;
+	return _modelNormalLength[i];
 }
 
 void GUIStore::setCamsProjMode(int i, Mode mode)
