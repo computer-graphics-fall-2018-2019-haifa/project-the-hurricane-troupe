@@ -372,8 +372,10 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 				break;
 			case Utils::Normals::PerVERTEX:
 			{
-				float len = store.getModelNormalLength(index);
-				drawNormalsPerVertex(face, normals, w1, p1, w2, p2, w3, p3, len, completeTransform, blueColor);
+				if (face.hasNormals() == true) {
+					float len = store.getModelNormalLength(index);
+					drawNormalsPerVertex(face, normals, w1, p1, w2, p2, w3, p3, len, completeTransform, blueColor);
+				}
 			}
 				break;
 			case Utils::Normals::NONE:

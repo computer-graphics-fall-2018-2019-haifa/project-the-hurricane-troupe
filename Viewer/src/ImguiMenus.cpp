@@ -145,7 +145,8 @@ void showNormalGUI(Scene& scene, GUIStore& store, int index) {
 	bool isPerVertex = whichNormal == Utils::Normals::PerVERTEX;
 	bool isPerFace = whichNormal == Utils::Normals::PerFACE;
 	bool isNone = whichNormal == Utils::Normals::NONE;
-	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Vertex##VertexNormals", index), &isPerVertex)) { store.setModelNormal(index, Utils::Normals::PerVERTEX); }
+	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Vertex##VertexNormals", index), &isPerVertex)) {
+		store.setModelNormal(index, Utils::Normals::PerVERTEX); }
 	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Face##FaceNormals", index), &isPerFace)) { store.setModelNormal(index, Utils::Normals::PerFACE); }
 	if (ImGui::Checkbox(stringIntConcatenate("No Normals##FaceNormals", index), &isNone)) { store.setModelNormal(index, Utils::Normals::NONE); }
 	if (isNone == false) {
@@ -333,9 +334,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 }
 
 
-void handleNormalPerVertexOrPerFaceDrawing(GUIStore& store, Scene& scene, int index) {
-	scene;
-}
+
 
 void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store, ImGuiIO& io)
 {
@@ -360,7 +359,6 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 			float moveSpeed = store.getModelSpeed(i);
 			openModelManipulationWindow(name, scene, store, i, &moveSpeed);
 			handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed);
-			handleNormalPerVertexOrPerFaceDrawing(store, scene, i);
 		}
 		++i;
 	}

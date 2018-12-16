@@ -39,8 +39,6 @@ Face::Face(std::istream& issLine)
 
 Face::Face(int x, int y, int z)
 {
-	normalIndices = { 0, 0, 0 };
-	textureIndices = { 0, 0, 0 };
 	vertexIndices.push_back(x);
 	vertexIndices.push_back(y);
 	vertexIndices.push_back(z);
@@ -49,6 +47,11 @@ Face::Face(int x, int y, int z)
 Face::~Face()
 {
 
+}
+
+bool Face::hasNormals() const
+{
+	return normalIndices.size() > 0;
 }
 
 const int Face::GetVertexIndex(int index) const

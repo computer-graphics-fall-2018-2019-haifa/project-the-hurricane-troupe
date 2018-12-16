@@ -17,6 +17,7 @@ PrimMeshModel::PrimMeshModel()
 	faces.push_back(Face(3, 5, 4));
 	faces.push_back(Face(5, 3, 2));
 
+
 	modelName = "Pyramid";
 
 		_xScale=(1.0f);
