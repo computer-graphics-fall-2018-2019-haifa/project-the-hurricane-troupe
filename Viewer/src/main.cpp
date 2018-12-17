@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include <iostream>
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -13,6 +14,8 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "ImguiMenus.h"
+
+#define WINDOW_INITIALIZATION_FAILED -10
 
 // Function declarations
 static void GlfwErrorCallback(int error, const char* description);
@@ -47,7 +50,8 @@ int main(int argc, char **argv)
 	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Mesh Viewer");
 	if (!window)
 	{
-		return 1;
+		std::cout << "Could not open window!" << std::endl;
+		return WINDOW_INITIALIZATION_FAILED;
 	}
 
 	// Move OpenGL context to the newly created window

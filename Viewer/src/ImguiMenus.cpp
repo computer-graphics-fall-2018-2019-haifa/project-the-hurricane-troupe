@@ -150,7 +150,7 @@ void showNormalGUI(Scene& scene, GUIStore& store, int index) {
 	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Face##FaceNormals", index), &isPerFace)) { store.setModelNormal(index, Utils::Normals::PerFACE); }
 	if (ImGui::Checkbox(stringIntConcatenate("No Normals##FaceNormals", index), &isNone)) { store.setModelNormal(index, Utils::Normals::NONE); }
 	if (isNone == false) {
-		if (ImGui::SliderFloat(stringIntConcatenate("Length##NormalsLength", index), &length, 0.01f, 100.0f)) { store.setModelNormalLength(index, length); }
+		if (ImGui::SliderFloat(stringIntConcatenate("Length##NormalsLength", index), &length, 0.01f, 20.0f)) { store.setModelNormalLength(index, length); }
 	}
 }
 
