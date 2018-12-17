@@ -311,6 +311,58 @@ void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm:
 	drawLine(p2, p3, color);
 }
 
+void Renderer::handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStore& store, const Face& face, std::vector<glm::vec3>& normalsPerPoint, const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, const glm::mat4x4& transform, int modelGUIIndex, const glm::vec3& colorPerFaceNormal, const glm::vec3& colorPerVertexNormal)
+{
+	switch (normalType) {
+	case Utils::Normals::PerFACE:
+	{
+		float len = store.getModelNormalLength(modelGUIIndex);
+		drawNormalsPerFace(face, originalPoint1, pixelPoint1, originalPoint2, pixelPoint2, originalPoint3, pixelPoint3, len, transform, colorPerFaceNormal);
+	}
+	break;
+	case Utils::Normals::PerVERTEX:
+	{
+		if (face.hasNormals() == true) {
+			float len = store.getModelNormalLength(modelGUIIndex);
+			drawNormalsPerVertex(face, normalsPerPoint, originalPoint1, pixelPoint1, originalPoint2, pixelPoint2, originalPoint3, pixelPoint3, len, transform, colorPerVertexNormal);
+		}
+	}
+	break;
+	case Utils::Normals::NONE:
+		//do nothing.
+		break;
+	default:
+		//do nothing.
+		break;
+	}
+}
+
+void Renderer::handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex, float x1, float y1, float z1, float x2, float y2, float z2, const glm::mat4x4& transform, const glm::vec3& color)
+{
+	if (store.isModelBoundingBoxOn(modelGUIIndex) == false) return;
+	glm::vec2 point1 = translatePointIndicesToPixels(glm::vec4(x1, y1, z1, 1.0f), transform);
+	glm::vec2 point2 = translatePointIndicesToPixels(glm::vec4(x1, y1, z2, 1.0f), transform);
+	glm::vec2 point3 = translatePointIndicesToPixels(glm::vec4(x1, y2, z1, 1.0f), transform);
+	glm::vec2 point4 = translatePointIndicesToPixels(glm::vec4(x1, y2, z2, 1.0f), transform);
+	glm::vec2 point5 = translatePointIndicesToPixels(glm::vec4(x2, y2, z1, 1.0f), transform);
+	glm::vec2 point6 = translatePointIndicesToPixels(glm::vec4(x2, y2, z2, 1.0f), transform);
+	glm::vec2 point7 = translatePointIndicesToPixels(glm::vec4(x2, y1, z2, 1.0f), transform);
+	glm::vec2 point8 = translatePointIndicesToPixels(glm::vec4(x2, y1, z1, 1.0f), transform);
+
+	drawLine(point1, point2, color);
+	drawLine(point1, point3, color);
+	drawLine(point1, point8, color);
+	drawLine(point2, point7, color);
+	drawLine(point2, point4, color);
+	drawLine(point3, point4, color);
+	drawLine(point3, point5, color);
+	drawLine(point4, point6, color);
+	drawLine(point5, point8, color);
+	drawLine(point5, point6, color);
+	drawLine(point6, point7, color);
+	drawLine(point7, point8, color);
+}
+
 
 
 void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
@@ -318,6 +370,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	glm::vec3 blueColor(0.0f, 1.0f, 1.0f);
 	glm::vec3 greenColor(0.0f, 1.0f, 0.0f);
 	glm::vec3 yellowColor(1.0f, 1.0f, 0.0f);
+	glm::vec3 pinkColor(1.0f, 20.0f/255.0f, 147.0f/255.0f);
 	Camera activeCam = scene.getActiveCamera();
 	glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
 	int index = -1;
@@ -328,10 +381,17 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 		std::vector<glm::vec3> normals = model->getNormals();
 		std::vector<glm::vec3> vertices = model->getVertices();
 		std::vector<Face> faces = model->getFaces();
+		glm::mat4x4 modelTransform = model->GetWorldTransformation();
+		glm::mat4x4 completeTransform = camTransformation * modelTransform;
 		++index;
 		Utils::Normals whichNormal = store.getModelNormalStatus(index);
-		int* max_2D_X = nullptr;
-		int* max_2D_Y = nullptr;
+		float maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
+		if (faces.size() > 0) {
+			int i = faces[0].GetVertexIndex(0);
+			maxX = vertices[i].x; minX = vertices[i].x;
+			maxY = vertices[i].y; minY = vertices[i].y;
+			maxZ = vertices[i].z; minZ = vertices[i].z;
+		}
 		for each (Face face in faces)
 		{
 			int v1 = face.GetVertexIndex(0);
@@ -344,9 +404,6 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
 			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
-			
-			glm::mat4x4 modelTransform = model->GetWorldTransformation();
-			glm::mat4x4 completeTransform = camTransformation * modelTransform;
 
 			glm::vec2 p1 = translatePointIndicesToPixels(w1, completeTransform);
 			glm::vec2 p2 = translatePointIndicesToPixels(w2, completeTransform);
@@ -355,42 +412,16 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			drawTriangle(p1, p2, p3, redColor);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
+			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);
 
-			switch (whichNormal) {
-			case Utils::Normals::PerFACE:
-			{
-				//float normalX1 = (w1.x + w2.x + w3.x)/3.0f, normalY1 = (w1.y + w2.y + w3.y) / 3.0f, normalZ1 = (w1.z + w2.z + w3.z) / 3.0f;
-				//glm::vec3 normal1 = glm::vec3(normalX1, normalY1, normalZ1);
-				//glm::vec3 a = glm::vec3(w1.x, w1.y, w1.z);
-				//glm::vec3 b = glm::vec3(w2.x, w2.y, w2.z);
-				//glm::vec3 c = glm::vec3(w3.x, w3.y, w3.z);
-				//glm::vec3 endNormal = glm::cross(b - a, c - a);
-				//glm::vec4 finish = glm::vec4(normal1.x, normal1.y, normal1.x + endNormal.x, normal1.y)
-				float len = store.getModelNormalLength(index);
-				drawNormalsPerFace(face, w1, p1, w2, p2, w3, p3, len, completeTransform, greenColor);
-			}
-				break;
-			case Utils::Normals::PerVERTEX:
-			{
-				if (face.hasNormals() == true) {
-					float len = store.getModelNormalLength(index);
-					drawNormalsPerVertex(face, normals, w1, p1, w2, p2, w3, p3, len, completeTransform, blueColor);
-				}
-			}
-				break;
-			case Utils::Normals::NONE:
-				//do nothing.
-				break;
-			default:
-				//do nothing.
-				break;
-			}
-		}
-	
-		bool shouldDrawBoundingBox = store.isModelBoundingBoxOn(index);
-		if (shouldDrawBoundingBox) {
+			/* Max and Min Points in the mesh */
+			maxX = getMax(x1, x2, x3, maxX); minX = getMin(x1, x2, x3, minX);
+			maxY = getMax(y1, y2, y3, maxY); minY = getMin(y1, y2, y3, minY);
+			maxZ = getMax(z1, z2, z3, maxZ); minZ = getMin(z1, z2, z3, minZ);
 
 		}
+
+		handleBoundingBoxDrawing(store, index, maxX, maxY, maxZ, minX, minY, minZ, completeTransform, pinkColor);
 	}
 }
 
@@ -426,6 +457,29 @@ void Renderer::drawNormalsPerFace(
 	glm::vec2 pixelNormal = translatePointIndicesToPixels(normal, transform);
 
 	drawLine(pixelConcentratedPoint, pixelNormal, color);
+}
+
+float Renderer::getMax(float a, float b)
+{
+	if (a > b) return a;
+	return b;
+}
+
+
+float Renderer::getMax(float a, float b, float c, float d)
+{
+	return getMax(getMax(a, b), getMax(c, d));
+}
+
+float Renderer::getMin(float a, float b)
+{
+	if (a < b) return a;
+	return b;
+}
+
+float Renderer::getMin(float a, float b, float c, float d)
+{
+	return getMin(getMin(a, b), getMin(c, d));
 }
 
 void Renderer::drawNormalsPerVertex(
@@ -498,9 +552,4 @@ void Renderer::drawCameraModels(const Scene& scene)
 			}
 		}
 	}
-}
-
-
-void drawNormalForFace() {
-
 }

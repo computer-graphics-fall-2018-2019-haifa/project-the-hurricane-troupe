@@ -33,6 +33,10 @@ private:
 	glm::vec2 translatePointIndicesToPixels (const glm::vec4& point, const glm::mat4x4& fullTransform);
 	void drawNormalsPerVertex(const Face& face, const std::vector<glm::vec3>& normals, const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, const float normalLength, const glm::mat4x4& transform, const glm::vec3& color);
 	void drawNormalsPerFace(const Face& face, const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, const float normalLength, const glm::mat4x4& transform, const glm::vec3& color);
+	float getMax(float a, float b);
+	float getMax(float a, float b, float c, float d);
+	float getMin(float a, float b);
+	float getMin(float a, float b, float c, float d);
 
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
@@ -44,6 +48,8 @@ public:
 	void SetViewport(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	void drawLine(const glm::vec2 point1, const glm::vec2 point2, const glm::vec3& color);
 	void drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3, const glm::vec3& color);
+	void handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStore& store, const Face& face, std::vector<glm::vec3>& normalsPerPoint, const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, const glm::mat4x4& transform, int modelGUIIndex, const glm::vec3& colorPerFaceNormal, const glm::vec3& colorPerVertexNormal);
+	void handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex, float x1, float y1, float z1, float x2, float y2, float z2, const glm::mat4x4& transform, const glm::vec3& color);
 
 	void drawMeshModels(const Scene& scene, const GUIStore& store);
 	void drawChess();
