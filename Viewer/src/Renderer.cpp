@@ -340,15 +340,20 @@ void Renderer::handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStor
 void Renderer::handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex, float x1, float y1, float z1, float x2, float y2, float z2, const glm::mat4x4& transform, const glm::vec3& color)
 {
 	if (store.isModelBoundingBoxOn(modelGUIIndex) == false) return;
+
+	//right side of the cube:
 	glm::vec2 point1 = translatePointIndicesToPixels(glm::vec4(x1, y1, z1, 1.0f), transform);
 	glm::vec2 point2 = translatePointIndicesToPixels(glm::vec4(x1, y1, z2, 1.0f), transform);
 	glm::vec2 point3 = translatePointIndicesToPixels(glm::vec4(x1, y2, z1, 1.0f), transform);
 	glm::vec2 point4 = translatePointIndicesToPixels(glm::vec4(x1, y2, z2, 1.0f), transform);
+
+	//left side of the cube:
 	glm::vec2 point5 = translatePointIndicesToPixels(glm::vec4(x2, y2, z1, 1.0f), transform);
 	glm::vec2 point6 = translatePointIndicesToPixels(glm::vec4(x2, y2, z2, 1.0f), transform);
 	glm::vec2 point7 = translatePointIndicesToPixels(glm::vec4(x2, y1, z2, 1.0f), transform);
 	glm::vec2 point8 = translatePointIndicesToPixels(glm::vec4(x2, y1, z1, 1.0f), transform);
 
+	//the cube:
 	drawLine(point1, point2, color);
 	drawLine(point1, point3, color);
 	drawLine(point1, point8, color);
