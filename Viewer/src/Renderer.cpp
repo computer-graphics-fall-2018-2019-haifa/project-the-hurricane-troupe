@@ -222,6 +222,31 @@ void Renderer::SwapBuffers()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+
+float Renderer::getMax(float a, float b)
+{
+	if (a > b) return a;
+	return b;
+}
+
+
+float Renderer::getMax(float a, float b, float c, float d)
+{
+	return getMax(getMax(a, b), getMax(c, d));
+}
+
+float Renderer::getMin(float a, float b)
+{
+	if (a < b) return a;
+	return b;
+}
+
+float Renderer::getMin(float a, float b, float c, float d)
+{
+	return getMin(getMin(a, b), getMin(c, d));
+}
+
+
 void Renderer::plotLineHigh(int x1, int y1, int x2, int y2, const glm::vec3& color) {
 	int deltaX = x2 - x1;
 	int deltaY = y2 - y1;
@@ -311,6 +336,73 @@ void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm:
 	drawLine(p2, p3, color);
 }
 
+
+void Renderer::drawNormalsPerFace(
+	const Face& face,
+	const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1,
+	const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2,
+	const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3,
+	const float normalLength,
+	const glm::mat4x4& transform,
+	const glm::vec3& color)
+{
+
+	glm::vec4 newPoint = (originalPoint1 + originalPoint2 + originalPoint3) / 3.0f;
+	glm::vec2 pixelConcentratedPoint = translatePointIndicesToPixels(newPoint, transform);
+
+	glm::vec4 vector1 = (originalPoint2 - originalPoint1);
+	glm::vec4 vector2 = (originalPoint3 - originalPoint1);
+	glm::vec4 vector3 = (originalPoint3 - originalPoint2);
+
+	glm::vec3 a = glm::vec3(vector1.x, vector1.y, vector1.z);
+	glm::vec3 b = glm::vec3(vector2.x, vector2.y, vector2.z);
+	glm::vec3 c = glm::vec3(vector3.x, vector3.y, vector3.z);
+
+	glm::vec3 normalHelper1 = glm::cross(a, b);
+	glm::vec3 normalHelper2 = glm::cross(-a, c);
+	glm::vec3 normalHelper3 = glm::cross(-b, -c);
+	glm::vec3 _normalPoint = (normalHelper1 + normalHelper2 + normalHelper3) / 3.0f;
+	glm::vec4 normalPoint = glm::vec4(_normalPoint.x, _normalPoint.y, _normalPoint.z, 0.0f);
+
+	glm::vec4 normal = normalLength * normalPoint + newPoint;
+
+	glm::vec2 pixelNormal = translatePointIndicesToPixels(normal, transform);
+
+	drawLine(pixelConcentratedPoint, pixelNormal, color);
+}
+
+void Renderer::drawNormalsPerVertex(
+	const Face& face,
+	const std::vector<glm::vec3>& normals,
+	const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1,
+	const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2,
+	const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3,
+	const float normalLength,
+	const glm::mat4x4& transform,
+	const glm::vec3& color)
+{
+	int normalIndex1 = face.GetNormalIndex(0);
+	float normalX1 = normals[normalIndex1].x, normalY1 = normals[normalIndex1].y, normalZ1 = normals[normalIndex1].z;
+	int normalIndex2 = face.GetNormalIndex(1);
+	float normalX2 = normals[normalIndex2].x, normalY2 = normals[normalIndex2].y, normalZ2 = normals[normalIndex2].z;
+	int normalIndex3 = face.GetNormalIndex(2);
+	float normalX3 = normals[normalIndex3].x, normalY3 = normals[normalIndex3].y, normalZ3 = normals[normalIndex3].z;
+
+	glm::vec4 normal1 = normalLength * glm::vec4(normalX1, normalY1, normalZ1, 0.0f) + originalPoint1;
+	glm::vec4 normal2 = normalLength * glm::vec4(normalX2, normalY2, normalZ2, 0.0f) + originalPoint2;
+	glm::vec4 normal3 = normalLength * glm::vec4(normalX3, normalY3, normalZ3, 0.0f) + originalPoint3;
+
+	glm::vec2 pixelNormal1 = translatePointIndicesToPixels(normal1, transform);
+	glm::vec2 pixelNormal2 = translatePointIndicesToPixels(normal2, transform);
+	glm::vec2 pixelNormal3 = translatePointIndicesToPixels(normal3, transform);
+
+	drawLine(pixelPoint1, pixelNormal1, color);
+	drawLine(pixelPoint2, pixelNormal2, color);
+	drawLine(pixelPoint3, pixelNormal3, color);
+}
+
+
+
 void Renderer::handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStore& store, const Face& face, std::vector<glm::vec3>& normalsPerPoint, const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, const glm::mat4x4& transform, int modelGUIIndex, const glm::vec3& colorPerFaceNormal, const glm::vec3& colorPerVertexNormal)
 {
 	switch (normalType) {
@@ -367,8 +459,6 @@ void Renderer::handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex
 	drawLine(point6, point7, color);
 	drawLine(point7, point8, color);
 }
-
-
 
 void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
@@ -429,94 +519,6 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 		handleBoundingBoxDrawing(store, index, maxX, maxY, maxZ, minX, minY, minZ, completeTransform, pinkColor);
 	}
 }
-
-void Renderer::drawNormalsPerFace(
-	const Face& face,
-	const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1,
-	const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2,
-	const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3,
-	const float normalLength,
-	const glm::mat4x4& transform,
-	const glm::vec3& color)
-{
-
-	glm::vec4 newPoint = (originalPoint1 + originalPoint2 + originalPoint3) / 3.0f;
-	glm::vec2 pixelConcentratedPoint = translatePointIndicesToPixels(newPoint, transform);
-
-	glm::vec4 vector1 = (originalPoint2 - originalPoint1);
-	glm::vec4 vector2 = (originalPoint3 - originalPoint1);
-	glm::vec4 vector3 = (originalPoint3 - originalPoint2);
-
-	glm::vec3 a = glm::vec3(vector1.x, vector1.y, vector1.z);
-	glm::vec3 b = glm::vec3(vector2.x, vector2.y, vector2.z);
-	glm::vec3 c = glm::vec3(vector3.x, vector3.y, vector3.z);
-
-	glm::vec3 normalHelper1 = glm::cross(a, b);
-	glm::vec3 normalHelper2 = glm::cross(-a, c);
-	glm::vec3 normalHelper3 = glm::cross(-b, -c);
-	glm::vec3 _normalPoint = (normalHelper1 + normalHelper2 + normalHelper3) / 3.0f;
-	glm::vec4 normalPoint = glm::vec4(_normalPoint.x, _normalPoint.y, _normalPoint.z, 0.0f);
-
-	glm::vec4 normal = normalLength * normalPoint + newPoint;
-
-	glm::vec2 pixelNormal = translatePointIndicesToPixels(normal, transform);
-
-	drawLine(pixelConcentratedPoint, pixelNormal, color);
-}
-
-float Renderer::getMax(float a, float b)
-{
-	if (a > b) return a;
-	return b;
-}
-
-
-float Renderer::getMax(float a, float b, float c, float d)
-{
-	return getMax(getMax(a, b), getMax(c, d));
-}
-
-float Renderer::getMin(float a, float b)
-{
-	if (a < b) return a;
-	return b;
-}
-
-float Renderer::getMin(float a, float b, float c, float d)
-{
-	return getMin(getMin(a, b), getMin(c, d));
-}
-
-void Renderer::drawNormalsPerVertex(
-	const Face& face, 
-	const std::vector<glm::vec3>& normals, 
-	const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, 
-	const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, 
-	const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, 
-	const float normalLength,
-	const glm::mat4x4& transform,
-	const glm::vec3& color)
-{
-	int normalIndex1 = face.GetNormalIndex(0);
-	float normalX1 = normals[normalIndex1].x, normalY1 = normals[normalIndex1].y, normalZ1 = normals[normalIndex1].z;
-	int normalIndex2 = face.GetNormalIndex(1);
-	float normalX2 = normals[normalIndex2].x, normalY2 = normals[normalIndex2].y, normalZ2 = normals[normalIndex2].z;
-	int normalIndex3 = face.GetNormalIndex(2);
-	float normalX3 = normals[normalIndex3].x, normalY3 = normals[normalIndex3].y, normalZ3 = normals[normalIndex3].z;
-
-	glm::vec4 normal1 = normalLength*glm::vec4(normalX1, normalY1, normalZ1, 0.0f) + originalPoint1;
-	glm::vec4 normal2 = normalLength*glm::vec4(normalX2, normalY2, normalZ2, 0.0f) + originalPoint2;
-	glm::vec4 normal3 = normalLength*glm::vec4(normalX3, normalY3, normalZ3, 0.0f) + originalPoint3;
-
-	glm::vec2 pixelNormal1 = translatePointIndicesToPixels(normal1, transform);
-	glm::vec2 pixelNormal2 = translatePointIndicesToPixels(normal2, transform);
-	glm::vec2 pixelNormal3 = translatePointIndicesToPixels(normal3, transform);
-
-	drawLine(pixelPoint1, pixelNormal1, color);
-	drawLine(pixelPoint2, pixelNormal2, color);
-	drawLine(pixelPoint3, pixelNormal3, color);
-}
-
 
 void Renderer::drawCameraModels(const Scene& scene) 
 {
