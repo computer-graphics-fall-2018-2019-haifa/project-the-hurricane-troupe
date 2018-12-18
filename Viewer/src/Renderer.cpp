@@ -229,6 +229,11 @@ float Renderer::getMax(float a, float b)
 	return b;
 }
 
+float Renderer::getMax(float a, float b, float c)
+{
+	return getMax(a, b, c, c);
+}
+
 
 float Renderer::getMax(float a, float b, float c, float d)
 {
@@ -241,9 +246,41 @@ float Renderer::getMin(float a, float b)
 	return b;
 }
 
+float Renderer::getMin(float a, float b, float c)
+{
+	return getMin(a, b, c, c);
+}
+
 float Renderer::getMin(float a, float b, float c, float d)
 {
 	return getMin(getMin(a, b), getMin(c, d));
+}
+
+void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec2 & point1, const glm::vec2 & point2, const glm::vec2 & point3, const glm::vec3& color)
+{
+	for (int y = maxY; y >= minY; --y) {
+		if (isPointInTriangle(x, y, point1, point2, point3)) {
+			putPixel(x, y, color);
+		}
+	}
+}
+
+bool Renderer::isPointInTriangle(int x, int y, const glm::vec2 & point1, const glm::vec2 & point2, const glm::vec2 & point3)
+{
+	//source: http://totologic.blogspot.com/2014/01/accurate-point-in-triangle-test.html
+	int x1 = point1.x, x2 = point2.x, x3 = point3.x;
+	int y1 = point1.y, y2 = point2.y, y3 = point3.y;
+	float diva = ((y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3));
+	if (diva == 0) return false;
+	float a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / diva;
+	if (a < 0.0f || a > 1.0f) return false;
+	float divb = ((y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3));
+	if (divb == 0) return false;
+	float b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / divb;
+	if (b < 0.0f || b > 1.0f) return false;
+	float c = 1.0f - a - b;
+	if (c < 0.0f || c > 1.0f) return false;
+	return true;
 }
 
 
@@ -325,6 +362,24 @@ void Renderer::drawLine(const glm::vec2 point1, const glm::vec2 point2, const gl
 		else {
 			plotLineHigh(x1, y1, x2, y2, color);
 		}
+	}
+}
+
+void Renderer::colorTriangle(const glm::vec2 & p1, const glm::vec2 & p2, const glm::vec2 & p3, const glm::vec3 & color)
+{
+	//steps:
+	/*
+	1. Find bounding box for the triangle defined by (p1,p2,p3)
+	2. For each pixel in Bounding Box
+		2.1. if pixel is outside triangle, do nothing
+		2.2. else color pixel
+	*/
+	int minX = getMin(p1.x, p2.x, p3.x);
+	int maxX = getMax(p1.x, p2.x, p3.x);
+	int minY = getMin(p1.y, p2.y, p3.y);
+	int maxY = getMax(p1.y, p2.y, p3.y);
+	for (int x = minX; x <= maxX; ++x) {
+		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color);
 	}
 }
 
@@ -505,6 +560,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 			drawTriangle(p1, p2, p3, redColor);
+			colorTriangle(p1, p2, p3, yellowColor);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);
