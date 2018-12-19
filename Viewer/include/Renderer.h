@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "ImguiMenus.h"
 #include <vector>
+#include <map>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
