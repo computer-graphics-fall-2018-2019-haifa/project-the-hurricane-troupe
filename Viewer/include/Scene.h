@@ -38,6 +38,7 @@ public:
 	Camera getActiveCamera() const;
 	// Add more methods as needed...
 	void rotateActiveModel(const RotationRules& rotation);
+	void rotateActiveModelAroundWorld(const RotationRules & rotation);
 	void moveActiveModel(const float const xAddition = 0.0f, const float const yAddition = 0.0f, const float const zAdddition = 0.0f);
 	void symmetricMoveActiveModel(const float addition);
 	void scaleActiveModel(const float const xScale = 1.0f, const float const yScale = 1.0f, const float const zScale = 1.0f);
@@ -51,7 +52,7 @@ public:
 	void setZoomForCam(float zoom, int index);
 	void resetPositionActiveModel();
 	void resetRotationActiveModel();
+	void resetRotationAroundWorldActiveModel();
 
-	void getActiveModelNormals();
 	void matchFovyToWindowSize(int viewportHeight, int viewportWidth);
 };

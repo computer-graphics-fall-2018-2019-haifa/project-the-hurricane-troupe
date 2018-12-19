@@ -23,6 +23,7 @@ protected:
 	glm::vec4 color;
 	std::string modelName;
 	RotationMatrix rotateTransform;
+	RotationMatrix worldRotationTransform;
 	glm::mat4x4 translateTransform;
 	glm::mat4x4 scaleTransform;
 	glm::mat4x4 worldTransform;
@@ -33,6 +34,7 @@ protected:
 	void _translate(const float* const newX, const float* const newY, const float* const newZ );
 	void _scale(float xFactor, float yFactor, float zFactor);
 	void _rotate(const RotationRules& rotation);
+	void _rotateAroundWorld(const RotationRules & rotation);
 public:
 
 	MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName = "");
@@ -81,8 +83,14 @@ public:
 	/*sets the rotation back to original*/
 	void resetRotation();
 
+	/*sets the rotation for the world back to original*/
+	void resetRotationAroundWorld();
+
 	/* rotates the objects in a specific order, additional attention is needed to ensure correctness of rotations.*/
 	void rotate(const RotationRules& rotation);
+
+	/* rotates the object around the world */
+	void rotateAroundWorld(const RotationRules & rotation);
 
 	void getScalingFactors(float* xFactor, float* yFactor, float* zFactor) const;
 	void getCoordinateDifference(float* const xDelta, float* const yDelta, float* const zDelta) const;

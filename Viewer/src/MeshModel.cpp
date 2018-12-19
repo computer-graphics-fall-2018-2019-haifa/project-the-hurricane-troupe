@@ -8,7 +8,7 @@
 
 void MeshModel::updateWorldTransformation() {
 	if (isTransformUpdated == true) return;
-	worldTransform = translateTransform * rotateTransform.getTransform() * scaleTransform;
+	worldTransform = worldRotationTransform.getTransform() * translateTransform * rotateTransform.getTransform() * scaleTransform;
 	isTransformUpdated = true;
 }
 
@@ -25,6 +25,7 @@ MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3
 	_translate(nullptr, nullptr, nullptr); //no translation
 	_scale(1.0, 1.0, 1.0); //no scale
 	rotateTransform = RotationMatrix(); //no rotation
+	worldRotationTransform = RotationMatrix(); //no rotation
 	isTransformUpdated = false;
 	updateWorldTransformation(); //set the transformation.
 }
@@ -128,8 +129,17 @@ void MeshModel::resetRotation()
 	rotateTransform.resetToOrginalRotation();
 }
 
+void MeshModel::resetRotationAroundWorld()
+{
+	worldRotationTransform.resetToOrginalRotation();
+}
+
 void MeshModel::rotate(const RotationRules& rotation) {
 	_rotate(rotation);
+}
+
+void MeshModel::rotateAroundWorld(const RotationRules& rotation) {
+	_rotateAroundWorld(rotation);
 }
 
 void MeshModel::getScalingFactors(float * xFactor, float * yFactor, float * zFactor) const
@@ -174,6 +184,12 @@ void MeshModel::_rotate(const RotationRules& rotation)
 	rotateTransform.setXRotation(rotation.getAngleX(AngleUnits::RADIANS));
 	rotateTransform.setYRotation(rotation.getAngleY(AngleUnits::RADIANS));
 	rotateTransform.setZRotation(rotation.getAngleZ(AngleUnits::RADIANS));
-	//rotateTransform.setMultiplicationOrder(....);
+	isTransformUpdated = false;
+}
+
+void MeshModel::_rotateAroundWorld(const RotationRules& rotation) {
+	worldRotationTransform.setXRotation(rotation.getAngleX(AngleUnits::RADIANS));
+	worldRotationTransform.setYRotation(rotation.getAngleY(AngleUnits::RADIANS));
+	worldRotationTransform.setZRotation(rotation.getAngleZ(AngleUnits::RADIANS));
 	isTransformUpdated = false;
 }

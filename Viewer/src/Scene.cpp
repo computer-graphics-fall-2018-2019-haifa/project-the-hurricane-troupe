@@ -35,6 +35,11 @@ void Scene::rotateActiveModel(const RotationRules & rotation)
 	models[GetActiveModelIndex()]->rotate(rotation);
 }
 
+void Scene::rotateActiveModelAroundWorld(const RotationRules & rotation)
+{
+	models[GetActiveModelIndex()]->rotateAroundWorld(rotation);
+}
+
 void Scene::moveActiveModel(const float const xAddition, const float const yAddition, const float const zAdddition)
 {
 	models[GetActiveModelIndex()]->move(&xAddition, &yAddition, &zAdddition);
@@ -73,6 +78,11 @@ void Scene::resetPositionActiveModel()
 void Scene::resetRotationActiveModel()
 {
 	models[GetActiveModelIndex()]->resetRotation();
+}
+
+void Scene::resetRotationAroundWorldActiveModel()
+{
+	models[GetActiveModelIndex()]->resetRotationAroundWorld();
 }
 
 void Scene::matchFovyToWindowSize(int viewportHeight, int viewportWidth)

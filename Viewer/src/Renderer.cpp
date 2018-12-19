@@ -524,6 +524,7 @@ void Renderer::handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex
 	drawLine(point7, point8, color);
 }
 
+
 void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	glm::vec3 redColor(1.0f, 0.0f, 0.0f);
 	glm::vec3 blueColor(0.0f, 1.0f, 1.0f);
@@ -544,7 +545,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 		std::vector<glm::vec3> vertices = model->getVertices();
 		std::vector<Face> faces = model->getFaces();
 		glm::mat4x4 modelTransform = model->GetWorldTransformation();
-		glm::mat4x4 completeTransform = camTransformation * modelTransform;
+		glm::mat4x4 completeTransform =  camTransformation * modelTransform;
 		
 		Utils::Normals whichNormal = store.getModelNormalStatus(index);
 		float maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;

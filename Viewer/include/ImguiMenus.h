@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "PrimMeshModel.h"
 enum class Mode { Orthographic, Perspective };
+enum class RotationType { MODEL, WORLD };
 
 class GUIStore 
 {
@@ -23,6 +24,7 @@ private:
 	std::vector<float> _modelNormalLength;
 	std::vector<bool> _isModelBoundingBoxOn;
 	std::vector<glm::vec3> _modelColor;
+	std::vector<RotationType> _modelRotationType;
 
 	//Camera variables
 	int _modelCount;
@@ -46,6 +48,9 @@ public:
 	float getModelNormalLength(int i) const;
 	glm::vec3 getModelColor(int i) const;
 	void setModelColor(int i, const glm::vec3& color);
+	bool isModelRotationAroundModel(int i) const;
+	bool isModelRotationAroundWorld(int i) const;
+	void setRotationAround(int i, const RotationType& rotType);
 
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);

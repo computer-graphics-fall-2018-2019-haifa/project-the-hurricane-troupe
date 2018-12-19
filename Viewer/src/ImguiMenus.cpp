@@ -117,8 +117,17 @@ void showRotationGUI(Scene& scene, GUIStore& store, int index) {
 	float yAngle = 0.0f;
 	float zAngle = 0.0f;
 	bool modifiedRotation = false;
+	bool isModelRotation = store.isModelRotationAroundModel(index);
+	bool isWorldRotation = store.isModelRotationAroundWorld(index);
 
 	ImGui::Text("Rotate Controls:");
+	if (ImGui::RadioButton(stringIntConcatenate("Model##ModelRotation", index), isModelRotation)) {
+		store.setRotationAround(index, RotationType::MODEL);
+	}
+	ImGui::SameLine();
+	if (ImGui::RadioButton(stringIntConcatenate("World##WorldRotation", index), isWorldRotation)) {
+		store.setRotationAround(index, RotationType::WORLD);
+	}
 	ImGui::PushButtonRepeat(true);
 	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_Up)) { zAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
@@ -131,11 +140,24 @@ void showRotationGUI(Scene& scene, GUIStore& store, int index) {
 	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXMinus", index), ImGuiDir_Down)) { xAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
 	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYPlus", index), ImGuiDir_Right)) { yAngle = 15.0f; modifiedRotation = true; }
-	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) { scene.resetRotationActiveModel(); }
+	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) { 
+	
+		if (isModelRotation == true) {
+			scene.resetRotationActiveModel();
+		}
+		else {
+			scene.resetRotationAroundWorldActiveModel();
+		}
+	}
 	ImGui::PopButtonRepeat();
 	
 	if (modifiedRotation) {
-		scene.rotateActiveModel(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
+		if (isModelRotation) {
+			scene.rotateActiveModel(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
+		}
+		else {
+			scene.rotateActiveModelAroundWorld(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
+		}
 	}
 }
 
@@ -561,7 +583,8 @@ GUIStore::GUIStore(const Scene & scene) :
 	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED),
 	_isModelBoundingBoxOn(scene.GetModelCount(), false),
 	_modelColor(scene.GetModelCount(), INITIALCOLOR),
-	projModeForCams(scene.GetCameraCount(),Mode::Perspective),
+	_modelRotationType(scene.GetModelCount(), RotationType::MODEL),
+	projModeForCams(scene.GetCameraCount(), Mode::Perspective),
 	cameraCount(scene.GetCameraCount()),
 	_isCameraBeingManipulated(scene.GetCameraCount(),false)
 {
@@ -581,6 +604,7 @@ void GUIStore::sync(const Scene& scene)
 		_modelNormalLength.push_back(INITIALMODELNORMALLENGTH);
 		_isModelBoundingBoxOn.push_back(false);
 		_modelColor.push_back(INITIALCOLOR);
+		_modelRotationType.push_back(RotationType::MODEL);
 	}
 	_modelCount = newSize;
 	
@@ -663,6 +687,24 @@ void GUIStore::setModelColor(int i, const glm::vec3& color)
 {
 	if (i < 0 || i >= _modelCount) return;
 	_modelColor[i] = color;
+}
+
+bool GUIStore::isModelRotationAroundModel(int i) const
+{
+	if (i < 0 || i >= _modelCount) return false;
+	return _modelRotationType[i] == RotationType::MODEL;
+}
+
+bool GUIStore::isModelRotationAroundWorld(int i) const
+{
+	if (i < 0 || i >= _modelCount) return false;
+	return _modelRotationType[i] == RotationType::WORLD;
+}
+
+void GUIStore::setRotationAround(int i, const RotationType& rotType)
+{
+	if (i < 0 || i >= _modelCount) return;
+	_modelRotationType[i] = rotType;
 }
 
 void GUIStore::setCamsProjMode(int i, Mode mode)
