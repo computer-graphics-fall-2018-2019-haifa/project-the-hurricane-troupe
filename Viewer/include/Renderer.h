@@ -41,7 +41,7 @@ private:
 	float getMin(float a, float b, float c, float d);
 	void colorYsInTriangle(int x, int minY, int maxY, const glm::vec2& point1, const glm::vec2& point2, const glm::vec2& point3, const glm::vec3& color);
 	bool isPointInTriangle(int x, int y, const glm::vec2& point1, const glm::vec2& point2, const glm::vec2& point3);
-
+	glm::vec3 generateColorVariation(const glm::vec3& color, float variation);
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	~Renderer();

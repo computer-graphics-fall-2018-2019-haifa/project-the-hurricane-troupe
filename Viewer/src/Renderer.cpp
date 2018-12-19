@@ -283,6 +283,15 @@ bool Renderer::isPointInTriangle(int x, int y, const glm::vec2 & point1, const g
 	return true;
 }
 
+glm::vec3 Renderer::generateColorVariation(const glm::vec3& color, float variation)
+{
+	return glm::vec3(
+						(((int)(color.x * 255.0f + (variation))) % 255) / 255.0f, 
+						(((int)(color.y * 255.0f + (variation))) % 255) / 255.0f,
+						(((int)(color.z * 255.0f + (variation))) % 255) / 255.0f
+					);
+}
+
 
 void Renderer::plotLineHigh(int x1, int y1, int x2, int y2, const glm::vec3& color) {
 	int deltaX = x2 - x1;
@@ -527,13 +536,16 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
+		++index;
+		glm::vec3 modelColor = store.getModelColor(index);
+		glm::vec3 triangleColor = generateColorVariation(modelColor, 30.0f);
 		std::vector<glm::vec2> textures = model->getTextures();
 		std::vector<glm::vec3> normals = model->getNormals();
 		std::vector<glm::vec3> vertices = model->getVertices();
 		std::vector<Face> faces = model->getFaces();
 		glm::mat4x4 modelTransform = model->GetWorldTransformation();
 		glm::mat4x4 completeTransform = camTransformation * modelTransform;
-		++index;
+		
 		Utils::Normals whichNormal = store.getModelNormalStatus(index);
 		float maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
 		if (faces.size() > 0) {
@@ -559,8 +571,8 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec2 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
-			drawTriangle(p1, p2, p3, redColor);
-			colorTriangle(p1, p2, p3, yellowColor);
+			drawTriangle(p1, p2, p3, triangleColor);
+			colorTriangle(p1, p2, p3, modelColor);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);

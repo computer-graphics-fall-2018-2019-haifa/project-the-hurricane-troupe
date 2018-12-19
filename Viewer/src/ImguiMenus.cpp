@@ -154,8 +154,16 @@ void showNormalGUI(Scene& scene, GUIStore& store, int index) {
 	}
 }
 
+void showModelColoringGUI(const Scene & scene, GUIStore & store, int index) {
+	glm::vec3 newColor = store.getModelColor(index);
+	if (ImGui::ColorEdit3(stringIntConcatenate("Model Color##AllTrianglesColors", index), (float*)&newColor)) {
+		store.setModelColor(index, newColor);
+	}
+}
+
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
+	showModelColoringGUI(scene, store, index);
 	showScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
 	showTranslationGUI(scene, store, index, moveSpeed);
 	ImGui::Columns(3, "##Manipulation");
@@ -390,7 +398,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 			showModelsListed(models, scene, store, io);
 		}
 		if (ImGui::CollapsingHeader("Cameras")) {
-			// List All Loaded Mesh Models
+			// List All Loaded Cameras
 			showCamerasListed(cameras, scene, store);
 		}
 
@@ -552,6 +560,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	_modelCount(scene.GetModelCount()),
 	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED),
 	_isModelBoundingBoxOn(scene.GetModelCount(), false),
+	_modelColor(scene.GetModelCount(), INITIALCOLOR),
 	projModeForCams(scene.GetCameraCount(),Mode::Perspective),
 	cameraCount(scene.GetCameraCount()),
 	_isCameraBeingManipulated(scene.GetCameraCount(),false)
@@ -571,6 +580,7 @@ void GUIStore::sync(const Scene& scene)
 		_whichNormals.push_back(Utils::Normals::NONE);
 		_modelNormalLength.push_back(INITIALMODELNORMALLENGTH);
 		_isModelBoundingBoxOn.push_back(false);
+		_modelColor.push_back(INITIALCOLOR);
 	}
 	_modelCount = newSize;
 	
@@ -641,6 +651,18 @@ float GUIStore::getModelNormalLength(int i) const
 {
 	if (i < 0 || i >= _modelCount) return -1.0f;
 	return _modelNormalLength[i];
+}
+
+glm::vec3 GUIStore::getModelColor(int i) const
+{
+	if (i < 0 || i >= _modelCount) return INITIALCOLOR;
+	return _modelColor[i];
+}
+
+void GUIStore::setModelColor(int i, const glm::vec3& color)
+{
+	if (i < 0 || i >= _modelCount) return;
+	_modelColor[i] = color;
 }
 
 void GUIStore::setCamsProjMode(int i, Mode mode)

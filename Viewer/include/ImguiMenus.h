@@ -10,6 +10,7 @@ private:
 	const int SYNCERROR = -50;
 	const float INITIALMODELSPEED = 1.0f; //pixels
 	const float INITIALMODELNORMALLENGTH = 0.5f;
+	const glm::vec3 INITIALCOLOR = glm::vec3(1.0f, 0.0f, 0.0f); //red color
 	Scene _scene;
 
 	//Model variables
@@ -21,6 +22,7 @@ private:
 	std::vector<Utils::Normals> _whichNormals;
 	std::vector<float> _modelNormalLength;
 	std::vector<bool> _isModelBoundingBoxOn;
+	std::vector<glm::vec3> _modelColor;
 
 	//Camera variables
 	int _modelCount;
@@ -42,6 +44,8 @@ public:
 	bool isModelBoundingBoxOn(int i) const;
 	void setModelNormalLength(int i, float length);
 	float getModelNormalLength(int i) const;
+	glm::vec3 getModelColor(int i) const;
+	void setModelColor(int i, const glm::vec3& color);
 
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);
@@ -56,6 +60,9 @@ void DrawImguiMenus(ImGuiIO& io, Scene& scene);
 void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store, ImGuiIO& io);
 void showBoundingBoxGUI(Scene& scene, GUIStore& store, int index);
 void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store);
+void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed);
+void showNormalGUI(Scene& scene, GUIStore& store, int index);
+void showModelColoringGUI(const Scene& scene, GUIStore& store, int index);
 const glm::vec4& GetClearColor();
 
-void showNormalGUI(Scene & scene, GUIStore & store, int index);
+
