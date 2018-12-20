@@ -582,10 +582,12 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			maxX = getMax(x1, x2, x3, maxX); minX = getMin(x1, x2, x3, minX);
 			maxY = getMax(y1, y2, y3, maxY); minY = getMin(y1, y2, y3, minY);
 			maxZ = getMax(z1, z2, z3, maxZ); minZ = getMin(z1, z2, z3, minZ);
-
+			
 		}
 
 		handleBoundingBoxDrawing(store, index, maxX, maxY, maxZ, minX, minY, minZ, completeTransform, pinkColor);
+		model->setMaxBoundingBoxVec(completeTransform*glm::vec4(maxX, maxY, maxZ,1.0f));
+		model->setMinBoundingBoxVec(completeTransform*glm::vec4(minX, minY, minZ,1.0f));
 	}
 }
 

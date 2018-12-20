@@ -69,5 +69,5 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 void showNormalGUI(Scene& scene, GUIStore& store, int index);
 void showModelColoringGUI(const Scene& scene, GUIStore& store, int index);
 const glm::vec4& GetClearColor();
-
+void showFocusButton(const char* const modelName, Scene& scene, GUIStore& store);
 

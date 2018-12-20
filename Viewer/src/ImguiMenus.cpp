@@ -196,6 +196,20 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	showBoundingBoxGUI(scene, store, index);
 	ImGui::Columns(1);
 	ImGui::Separator();
+	showFocusButton(modelName,scene,store);
+}
+
+void showFocusButton(const char* const modelName, Scene& scene, GUIStore& store) {
+	if (ImGui::Button("Focus on me ;)")) {
+		std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
+		MeshModel model = *models[scene.GetActiveModelIndex()];
+		glm::vec3 min = model.getMinBoundingBoxVec();
+		glm::vec3 max = model.getMaxBoundingBoxVec();
+		float xAvg = (min.x + max.x) / 2.0f;
+		float yAvg = (min.y + max.y) / 2.0f;
+		float zAvg = (min.z + max.z) / 2.0f;
+		scene.setCameraVectors(glm::vec4(xAvg,yAvg,5.0,1), glm::vec4(xAvg, yAvg, zAvg, 1.0f), scene.getActiveCamera().getUpVector(), scene.GetActiveCameraIndex());
+	}
 }
 
 void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& store) {

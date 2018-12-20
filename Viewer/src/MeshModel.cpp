@@ -156,6 +156,26 @@ void MeshModel::getCoordinateDifference(float* const xDelta, float* const yDelta
 	*zDelta = _zDelta;
 }
 
+glm::vec4 MeshModel::getMinBoundingBoxVec()
+{
+	return minBoundingBoxVec;
+}
+
+glm::vec4 MeshModel::getMaxBoundingBoxVec()
+{
+	return maxBoundingBoxVec;
+}
+
+void MeshModel::setMinBoundingBoxVec(glm::vec4 min)
+{
+	minBoundingBoxVec = min;
+}
+
+void MeshModel::setMaxBoundingBoxVec(glm::vec4 max)
+{
+	maxBoundingBoxVec = max;
+}
+
 
 void MeshModel::_translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {

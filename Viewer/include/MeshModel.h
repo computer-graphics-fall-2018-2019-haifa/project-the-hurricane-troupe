@@ -21,6 +21,8 @@ protected:
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> textures;
 	glm::vec4 color;
+	glm::vec4 minBoundingBoxVec;
+	glm::vec4 maxBoundingBoxVec;
 	std::string modelName;
 	RotationMatrix rotateTransform;
 	RotationMatrix worldRotationTransform;
@@ -94,5 +96,8 @@ public:
 
 	void getScalingFactors(float* xFactor, float* yFactor, float* zFactor) const;
 	void getCoordinateDifference(float* const xDelta, float* const yDelta, float* const zDelta) const;
-
+	glm::vec4 getMinBoundingBoxVec();
+	glm::vec4 getMaxBoundingBoxVec();
+	void setMinBoundingBoxVec(glm::vec4 min);
+	void setMaxBoundingBoxVec(glm::vec4 max);
 };
