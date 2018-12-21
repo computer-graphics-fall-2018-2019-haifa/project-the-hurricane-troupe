@@ -65,7 +65,7 @@ void    ImGui_ImplOpenGL3_NewFrame()
 // OpenGL3 Render function.
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so. 
-void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
+void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data, bool shouldMsaa)
 {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     ImGuiIO& io = ImGui::GetIO();
@@ -104,7 +104,9 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
-	glEnable(GL_MULTISAMPLE);
+	if (shouldMsaa) {
+		glEnable(GL_MULTISAMPLE);
+	}
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Setup viewport, orthographic projection matrix

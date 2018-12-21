@@ -173,7 +173,7 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	// Swap buffers
 	renderer.SwapBuffers();
 
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData(), store.getMsaa());
 	glfwSwapBuffers(window);
 }
 

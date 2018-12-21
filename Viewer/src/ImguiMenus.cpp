@@ -446,6 +446,10 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 				store.setFogDensity(fogDensity);
 			}
 		}
+		bool shouldMsaa = store.getMsaa();
+		if (ImGui::Checkbox("Check me for supersampling anti-aliasing", &shouldMsaa)) {
+			store.setMsaa(shouldMsaa);
+		}
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
 			showModelsListed(models, scene, store, io);
@@ -620,8 +624,8 @@ GUIStore::GUIStore(const Scene & scene) :
 	_isCameraBeingManipulated(scene.GetCameraCount(),false),
 	fog(false),
 	fogColor(glm::vec3(128,128,128)),
-	fogDensity(1.0f)
-
+	fogDensity(1.0f),
+	_msaa(false)
 {
 }
 
@@ -769,6 +773,16 @@ float GUIStore::getFogDensity() const
 void GUIStore::setFogDensity(float density)
 {
 	fogDensity = density;
+}
+
+bool GUIStore::getMsaa() const
+{
+	return _msaa;
+}
+
+void GUIStore::setMsaa(bool msaa)
+{
+	_msaa = msaa;
 }
 
 void GUIStore::setCamsProjMode(int i, Mode mode)

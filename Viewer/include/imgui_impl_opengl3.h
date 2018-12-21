@@ -12,7 +12,7 @@
 IMGUI_API bool  ImGui_ImplOpenGL3_Init(const char* glsl_version = "#version 150");
 IMGUI_API void  ImGui_ImplOpenGL3_Shutdown();
 IMGUI_API void  ImGui_ImplOpenGL3_NewFrame();
-IMGUI_API void  ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data);
+IMGUI_API void  ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data,bool shouldMsaa);
 
 // Called by Init/NewFrame/Shutdown
 IMGUI_API bool  ImGui_ImplOpenGL3_CreateFontsTexture();
