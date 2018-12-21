@@ -416,6 +416,10 @@ void showBoundingBoxGUI(Scene& scene, GUIStore& store, int index)
 	}
 }
 
+void addFogToTheWorld() {
+
+}
+
 void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 {
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
@@ -428,7 +432,20 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 	std::vector<Camera> cameras = scene.GetCameras();
 	{
 		ImGui::Begin("All Models");
-		
+		bool shouldFog= store.getFog();
+		if (ImGui::Checkbox("Let's add some fog :O", &shouldFog)) {
+			store.setFog(shouldFog);
+		}
+		if (shouldFog) {
+						glm::vec3 newColor = store.getFogColor();
+			float fogDensity = store.getFogDensity();
+			if (ImGui::ColorEdit3("FogColor##FogColor", (float*)&newColor)) {
+				store.setFogColor(newColor);
+			}
+			if (ImGui::SliderFloat("Fog Density", &fogDensity, 0.0f, 2.0f)) {
+				store.setFogDensity(fogDensity);
+			}
+		}
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
 			showModelsListed(models, scene, store, io);
@@ -600,9 +617,12 @@ GUIStore::GUIStore(const Scene & scene) :
 	_modelRotationType(scene.GetModelCount(), RotationType::MODEL),
 	projModeForCams(scene.GetCameraCount(), Mode::Perspective),
 	cameraCount(scene.GetCameraCount()),
-	_isCameraBeingManipulated(scene.GetCameraCount(),false)
-{
+	_isCameraBeingManipulated(scene.GetCameraCount(),false),
+	fog(false),
+	fogColor(glm::vec3(128,128,128)),
+	fogDensity(1.0f)
 
+{
 }
 
 void GUIStore::sync(const Scene& scene)
@@ -719,6 +739,36 @@ void GUIStore::setRotationAround(int i, const RotationType& rotType)
 {
 	if (i < 0 || i >= _modelCount) return;
 	_modelRotationType[i] = rotType;
+}
+
+void GUIStore::setFog(bool _bool)
+{
+	fog = _bool;
+}
+
+bool GUIStore::getFog() const
+{
+	return fog;
+}
+
+glm::vec3 GUIStore::getFogColor() const
+{
+	return fogColor;
+}
+
+void GUIStore::setFogColor(glm::vec3 _fogColor)
+{
+	fogColor = _fogColor;
+}
+
+float GUIStore::getFogDensity() const
+{
+	return fogDensity;
+}
+
+void GUIStore::setFogDensity(float density)
+{
+	fogDensity = density;
 }
 
 void GUIStore::setCamsProjMode(int i, Mode mode)

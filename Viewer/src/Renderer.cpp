@@ -80,10 +80,10 @@ void Renderer::Render(const Scene& scene, const GUIStore& store)
 	//## You should override this implementation ##
 	//## Here you should render the scene.       ##
 	//#############################################
-
 	drawMeshModels(scene, store);
 	drawCameraModels(scene);
 }
+
 
 void Renderer::drawChess()  {
 	// Draw a chess board in the middle of the screen
@@ -256,11 +256,21 @@ float Renderer::getMin(float a, float b, float c, float d)
 	return getMin(getMin(a, b), getMin(c, d));
 }
 
-void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec2 & point1, const glm::vec2 & point2, const glm::vec2 & point3, const glm::vec3& color)
+void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec2 & point1, const glm::vec2 & point2, const glm::vec2 & point3, const glm::vec3& color, bool shouldFog, glm::vec3 fogColor, float fogDensity, glm::vec4 cameraPosition)
 {
 	for (int y = maxY; y >= minY; --y) {
 		if (isPointInTriangle(x, y, point1, point2, point3)) {
-			putPixel(x, y, color);
+			if (shouldFog) {
+				float distance = sqrt((pow((cameraPosition.x - x), 2) + (pow((cameraPosition.y - y), 2))));
+				float f = 1 / (exp(fogDensity*distance));
+				glm::vec3 finalColor = (1 - f)*fogColor + f*color;
+				putPixel(x, y, finalColor);
+
+			}
+			else
+			{
+				putPixel(x, y, color);
+			}
 		}
 	}
 }
@@ -374,7 +384,7 @@ void Renderer::drawLine(const glm::vec2 point1, const glm::vec2 point2, const gl
 	}
 }
 
-void Renderer::colorTriangle(const glm::vec2 & p1, const glm::vec2 & p2, const glm::vec2 & p3, const glm::vec3 & color)
+void Renderer::colorTriangle(const glm::vec2 & p1, const glm::vec2 & p2, const glm::vec2 & p3, const glm::vec3 & color,bool shouldFog,glm::vec3 fogColor,float fogDensity,glm::vec4 cameraPosition)
 {
 	//steps:
 	/*
@@ -388,7 +398,7 @@ void Renderer::colorTriangle(const glm::vec2 & p1, const glm::vec2 & p2, const g
 	int minY = getMin(p1.y, p2.y, p3.y);
 	int maxY = getMax(p1.y, p2.y, p3.y);
 	for (int x = minX; x <= maxX; ++x) {
-		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color);
+		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color,shouldFog,fogColor,fogDensity,cameraPosition);
 	}
 }
 
@@ -573,7 +583,11 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 			drawTriangle(p1, p2, p3, triangleColor);
-			colorTriangle(p1, p2, p3, modelColor);
+			bool shouldFog = store.getFog();
+			glm::vec3 fogColor = store.getFogColor();
+			float fogDensity = store.getFogDensity();
+			glm::vec4 cameraPosition = scene.getActiveCamera().getEyeVector();
+			colorTriangle(p1, p2, p3, modelColor,shouldFog,fogColor,fogDensity,cameraPosition);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);
@@ -627,6 +641,20 @@ void Renderer::drawCameraModels(const Scene& scene)
 				glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 				drawTriangle(p1, p2, p3, blackColor);
+			}
+		}
+	}
+}
+
+void Renderer::addFogToTheWorld(const Scene & scene, const GUIStore & store)
+{
+	if (store.getFog()) {
+		//glm::mix(glm::vec3(), glm::vec3(), 1);
+		for (int i = 0; i < viewportWidth; i++)
+		{
+			for (int j = 0; j < viewportHeight; j++)
+			{
+				putPixel(i, j, glm::vec3(1, 0, 0));
 			}
 		}
 	}

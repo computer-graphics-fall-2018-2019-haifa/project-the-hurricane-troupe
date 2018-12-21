@@ -25,7 +25,9 @@ private:
 	std::vector<bool> _isModelBoundingBoxOn;
 	std::vector<glm::vec3> _modelColor;
 	std::vector<RotationType> _modelRotationType;
-
+	bool fog;
+	glm::vec3 fogColor;
+	float fogDensity;
 	//Camera variables
 	int _modelCount;
 	int cameraCount;
@@ -51,7 +53,13 @@ public:
 	bool isModelRotationAroundModel(int i) const;
 	bool isModelRotationAroundWorld(int i) const;
 	void setRotationAround(int i, const RotationType& rotType);
-
+	void setFog(bool _bool);
+	bool getFog() const;
+	glm::vec3 getFogColor() const;
+	void setFogColor(glm::vec3 fogColor);
+	float getFogDensity() const;
+	void setFogDensity(float density);
+	
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);
 	Mode getProjModeForCam(int i) const;
@@ -70,4 +78,3 @@ void showNormalGUI(Scene& scene, GUIStore& store, int index);
 void showModelColoringGUI(const Scene& scene, GUIStore& store, int index);
 const glm::vec4& GetClearColor();
 void showFocusButton(const char* const modelName, Scene& scene, GUIStore& store);
-
