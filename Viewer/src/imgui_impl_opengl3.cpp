@@ -104,6 +104,7 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
+	glEnable(GL_MULTISAMPLE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Setup viewport, orthographic projection matrix

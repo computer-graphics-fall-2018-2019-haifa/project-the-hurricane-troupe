@@ -582,7 +582,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec2 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
-			drawTriangle(p1, p2, p3, triangleColor);
+			//drawTriangle(p1, p2, p3, triangleColor);
 			bool shouldFog = store.getFog();
 			glm::vec3 fogColor = store.getFogColor();
 			float fogDensity = store.getFogDensity();
