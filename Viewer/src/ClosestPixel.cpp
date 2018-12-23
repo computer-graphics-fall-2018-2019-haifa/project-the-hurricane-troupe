@@ -1,8 +1,5 @@
 #include "..\include\ClosestPixel.h"
 
-PixelPoint::PixelPoint(int x, int y) : _x(x), _y(y)
-{
-}
 
 bool ZColor::isColorLegal(const glm::vec3 & color) const
 {

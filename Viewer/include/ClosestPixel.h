@@ -3,17 +3,6 @@
 #include <functional>
 #include <glm/glm.hpp>
 
-
-class PixelPoint {
-private:
-	int _x;
-	int _y;
-
-public:
-	PixelPoint(int x, int y);
-};
-
-
 class ZColor {
 private:
 	float _z;
