@@ -8,6 +8,7 @@
 #include <imgui/imgui.h>
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 #define INDEX(width,x,y,c) ((x)+(y)*(width))*3+(c)
 
@@ -264,19 +265,21 @@ float Renderer::getMin(float a, float b, float c, float d)
 }
 
 
-void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, bool shouldFog, glm::vec3 fogColor, float fogDensity, glm::vec4 cameraPosition)
+void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const GUIStore& store)
 {
 	for (int y = maxY; y >= minY; --y) {
 		float pixelZ = -1000.0f;
 		if (isPointInTriangle(x, y, point1, point2, point3, &pixelZ)) {
-			if (shouldFog) {
-				float distance = sqrt((pow((cameraPosition.x - x), 2) + (pow((cameraPosition.y - y), 2))));
-				float f = 1 / (exp(fogDensity*distance));
-				glm::vec3 finalColor = (1 - f)*fogColor + f * color;
-				colorPixel(x, y, pixelZ, color);
+			if (store.getFog()) {
+				float distance = pixelZ;
+				float fogDensity = store.getFogDensity();
+				glm::vec3 fogColor = store.getFogColor();
+				float f = (exp(fogDensity*distance));
+				glm::vec3 finalColor = ((f - 1.0f)* fogColor) / f + color / f;
+				colorPixel(x, y, pixelZ, finalColor);
+
 			}
-			else
-			{
+			else {
 				colorPixel(x, y, pixelZ, color);
 			}
 		}
@@ -308,10 +311,19 @@ bool Renderer::isPointInTriangle(int x, int y, const glm::vec3& point1, const gl
 glm::vec3 Renderer::generateColorVariation(const glm::vec3& color, float variation)
 {
 	return glm::vec3(
-						(((int)(color.x * 255.0f + (variation))) % 255) / 255.0f, 
-						(((int)(color.y * 255.0f + (variation))) % 255) / 255.0f,
-						(((int)(color.z * 255.0f + (variation))) % 255) / 255.0f
-					);
+		(((int)(color.x * 255.0f + (variation))) % 255) / 255.0f,
+		(((int)(color.y * 255.0f + (variation))) % 255) / 255.0f,
+		(((int)(color.z * 255.0f + (variation))) % 255) / 255.0f
+	);
+}
+
+glm::vec3 Renderer::Color256ToMinimizedScaling(const glm::vec3& color, float variation)
+{
+	return glm::vec3(
+		(((int)(color.x + (variation))) % 255) / 255.0f,
+		(((int)(color.y + (variation))) % 255) / 255.0f,
+		(((int)(color.z + (variation))) % 255) / 255.0f
+	);
 }
 
 float Renderer::getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y2, float z2) 
@@ -373,6 +385,7 @@ void Renderer::plotLineLow(int x1, int y1, float z1, int x2, int y2, float z2, c
 glm::vec3 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform)
 {
 	glm::vec4 point = fullTransform * _point;
+
 	float wDivision = 1.0f;
 	if (point[3] != 0.0f) {
 		wDivision = (1 / point[3]);
@@ -408,7 +421,7 @@ void Renderer::drawLine(const glm::vec3& point1, const glm::vec3& point2, const 
 	}
 }
 
-void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, bool shouldFog, glm::vec3 fogColor, float fogDensity, glm::vec4 cameraPosition)
+void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const GUIStore& store)
 {
 	//steps:
 	/*
@@ -422,7 +435,7 @@ void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm
 	int minY = getMin(p1.y, p2.y, p3.y);
 	int maxY = getMax(p1.y, p2.y, p3.y);
 	for (int x = minX; x <= maxX; ++x) {
-		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color,shouldFog,fogColor,fogDensity,cameraPosition);
+		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color,store);
 	}
 }
 
@@ -612,13 +625,10 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
 			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
-
+			
 			//drawTriangle(p1, p2, p3, triangleColor);
-			bool shouldFog = store.getFog();
-			glm::vec3 fogColor = store.getFogColor();
-			float fogDensity = store.getFogDensity();
-			glm::vec4 cameraPosition = scene.getActiveCamera().getEyeVector();
-			colorTriangle(p1, p2, p3, modelColor,shouldFog,fogColor,fogDensity,cameraPosition);
+
+			colorTriangle(p1, p2, p3, modelColor,store);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);

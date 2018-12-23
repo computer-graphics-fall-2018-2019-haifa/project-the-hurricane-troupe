@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
 	Camera mainCam = Camera(
-		glm::vec4(0.0f, 0.0f, 4.0f, 0.0f),
+		glm::vec4(0.0f, 0.0f, 14.0f, 0.0f),
 		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 		glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 	);
@@ -114,7 +114,6 @@ GLFWwindow* SetupGlfwWindow(int w, int h, const char* window_name)
 		return NULL;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);

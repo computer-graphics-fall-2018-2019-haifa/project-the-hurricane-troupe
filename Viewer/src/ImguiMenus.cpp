@@ -453,7 +453,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 			if (ImGui::ColorEdit3("FogColor##FogColor", (float*)&newColor)) {
 				store.setFogColor(newColor);
 			}
-			if (ImGui::SliderFloat("Fog Density", &fogDensity, 0.0f, 2.0f)) {
+			if (ImGui::SliderFloat("Fog Density", &fogDensity, 0.0f, 3.0f)) {
 				store.setFogDensity(fogDensity);
 			}
 		}
@@ -636,7 +636,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	_isCameraBeingManipulated(scene.GetCameraCount(),false),
 	_shading(INITIALSHADING),
 	fog(false),
-	fogColor(glm::vec3(128,128,128)),
+	fogColor(INITIALFOGCOLOR),
 	fogDensity(1.0f),
 	_msaa(false)
 {
