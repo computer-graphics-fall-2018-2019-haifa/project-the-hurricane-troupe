@@ -183,6 +183,27 @@ void showModelColoringGUI(const Scene & scene, GUIStore & store, int index) {
 	}
 }
 
+void showLightningGUI(const Scene & scene, GUIStore & store)
+{
+	ShadingType shade = store.getShading();
+	bool isFlatShading = shade == ShadingType::FLAT;
+	bool isGouraudShaing = shade == ShadingType::GOURAUD;
+	bool isPhongShading = shade == ShadingType::PHONG;
+	ImGui::Text("Shading: ");
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Flat##Shading", isFlatShading)) {
+		store.setShading(ShadingType::FLAT);
+	}
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Gouraud##Shading", isGouraudShaing)) {
+		store.setShading(ShadingType::GOURAUD);
+	}
+	ImGui::SameLine();
+	if (ImGui::RadioButton("Phong##Shading", isPhongShading)) {
+		store.setShading(ShadingType::PHONG);
+	}
+}
+
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
 	showModelColoringGUI(scene, store, index);
@@ -217,14 +238,9 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 	Camera acCamera = scene.getActiveCamera();
 	for each (Camera cam in cameras)
 	{
-		//if (cam.getIndex() == acCamera.getIndex())
-		//{
-		//	isSelected = true;
-		//}
 		char* name = stringToCharSeq("camera" + std::to_string(cam.getIndex()));
 		int camIndex = cam.getIndex();
 		bool isSelected = store.isCameraManipulated(camIndex);
-		//ImGui::SameLine();
 		const char* nameInString = stringToCharSeq("settings of camera" + std::to_string(cam.getIndex()));
 		if (ImGui::Checkbox(name, &isSelected)) {
 			int oldActiveCam = scene.GetActiveCameraIndex();
@@ -255,7 +271,6 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 				}
 				// at of the cam
 				{
-					//ImGui::Separator();
 					ImGui::Columns(3, "mixed");
 					ImGui::Text("LookingAt");
 					ImGui::SameLine();
@@ -265,12 +280,10 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 					ImGui::NextColumn();
 					ImGui::InputFloat(stringToCharSeq("z##at" + std::to_string(camIndex)), &at.z, 1.0f, 0, "%.3f");
 					ImGui::Columns(1);
-					//ImGui::Separator();
 				}
 
 				//up of the cam
 				{
-					//ImGui::Separator();
 					ImGui::Columns(3, "mixed");
 					
 					ImGui::Text("UpOfCam");
@@ -308,7 +321,6 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						float projLeft;
 						float projRight;
 						cam.getOrthographicProjStuff(&projNear, &projFar, &projTop, &projBottom, &projLeft, &projRight);
-						//ImGui::Separator();
 						ImGui::Columns(6, "mixed");
 						ImGui::InputFloat(stringToCharSeq("Near##" + std::to_string(camIndex)), &projNear, 1.0f, 0, "%.1f");
 						ImGui::NextColumn();
@@ -331,7 +343,6 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						float projFovy;
 						float projAspectRatio;
 						cam.getPerspectiveProjStuff(&projNear, &projFar, &projFovy, &projAspectRatio);
-						//ImGui::Separator();
 						ImGui::Columns(4, "mixed");
 						ImGui::InputFloat(stringToCharSeq("Near##" + std::to_string(camIndex)), &projNear, 1.0f, 0, "%.1f");
 						ImGui::NextColumn();
@@ -432,7 +443,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 	std::vector<Camera> cameras = scene.GetCameras();
 	{
 		ImGui::Begin("All Models");
-		bool shouldFog= store.getFog();
+		bool shouldFog = store.getFog();
 		if (ImGui::Checkbox("Let's add some fog :O", &shouldFog)) {
 			store.setFog(shouldFog);
 		}
@@ -450,6 +461,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 		if (ImGui::Checkbox("Check me for supersampling anti-aliasing", &shouldMsaa)) {
 			store.setMsaa(shouldMsaa);
 		}
+		showLightningGUI(scene, store);
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
 			showModelsListed(models, scene, store, io);
@@ -622,6 +634,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	projModeForCams(scene.GetCameraCount(), Mode::Perspective),
 	cameraCount(scene.GetCameraCount()),
 	_isCameraBeingManipulated(scene.GetCameraCount(),false),
+	_shading(INITIALSHADING),
 	fog(false),
 	fogColor(glm::vec3(128,128,128)),
 	fogDensity(1.0f),
@@ -743,6 +756,16 @@ void GUIStore::setRotationAround(int i, const RotationType& rotType)
 {
 	if (i < 0 || i >= _modelCount) return;
 	_modelRotationType[i] = rotType;
+}
+
+ShadingType GUIStore::getShading() const
+{
+	return _shading;
+}
+
+void GUIStore::setShading(const ShadingType& type)
+{
+	_shading = type;
 }
 
 void GUIStore::setFog(bool _bool)

@@ -4,6 +4,7 @@
 #include "PrimMeshModel.h"
 enum class Mode { Orthographic, Perspective };
 enum class RotationType { MODEL, WORLD };
+enum class ShadingType { FLAT, GOURAUD, PHONG };
 
 class GUIStore 
 {
@@ -12,6 +13,7 @@ private:
 	const float INITIALMODELSPEED = 1.0f; //pixels
 	const float INITIALMODELNORMALLENGTH = 0.5f;
 	const glm::vec3 INITIALCOLOR = glm::vec3(1.0f, 0.0f, 0.0f); //red color
+	const ShadingType INITIALSHADING = ShadingType::FLAT;
 	Scene _scene;
 
 	//Model variables
@@ -25,6 +27,8 @@ private:
 	std::vector<bool> _isModelBoundingBoxOn;
 	std::vector<glm::vec3> _modelColor;
 	std::vector<RotationType> _modelRotationType;
+	//Lightning/Color/Shading Variables:
+	ShadingType _shading;
 	bool fog;
 	glm::vec3 fogColor;
 	float fogDensity;
@@ -54,13 +58,16 @@ public:
 	bool isModelRotationAroundModel(int i) const;
 	bool isModelRotationAroundWorld(int i) const;
 	void setRotationAround(int i, const RotationType& rotType);
+	//Lightning/Color/Shading Management functions:
+	ShadingType getShading() const;
+	void setShading(const ShadingType& type);
 	void setFog(bool _bool);
 	bool getFog() const;
 	glm::vec3 getFogColor() const;
 	void setFogColor(glm::vec3 fogColor);
 	float getFogDensity() const;
 	void setFogDensity(float density);
-	bool getMsaa()const;
+	bool getMsaa() const;
 	void setMsaa(bool msaa);
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);
@@ -78,5 +85,6 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store);
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed);
 void showNormalGUI(Scene& scene, GUIStore& store, int index);
 void showModelColoringGUI(const Scene& scene, GUIStore& store, int index);
+void showLightningGUI(const Scene& scene, GUIStore& store);
 const glm::vec4& GetClearColor();
 void showFocusButton(const char* const modelName, Scene& scene, GUIStore& store);
