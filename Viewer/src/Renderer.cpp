@@ -13,7 +13,7 @@
 
 Renderer::Renderer(int viewportWidth, int viewportHeight, int viewportX, int viewportY) :
 	colorBuffer(nullptr),
-	zBuffer(nullptr)
+	zBuffer()
 {
 	initOpenGLRendering();
 	SetViewport(viewportWidth, viewportHeight, viewportX, viewportY);
@@ -25,6 +25,12 @@ Renderer::~Renderer()
 	{
 		delete[] colorBuffer;
 	}
+}
+
+void Renderer::colorPixel(int x, int y, float z, const glm::vec3 & color)
+{
+	zBuffer.tryToSetColor(x, y, z, color);
+	putPixel(x, y, zBuffer.getPixelColor(x,y));
 }
 
 void Renderer::putPixel(int i, int j, const glm::vec3& color)
@@ -80,6 +86,7 @@ void Renderer::Render(const Scene& scene, const GUIStore& store)
 	//## You should override this implementation ##
 	//## Here you should render the scene.       ##
 	//#############################################
+	zBuffer.resetColor();
 	drawMeshModels(scene, store);
 	drawCameraModels(scene);
 }
@@ -256,30 +263,32 @@ float Renderer::getMin(float a, float b, float c, float d)
 	return getMin(getMin(a, b), getMin(c, d));
 }
 
-void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec2 & point1, const glm::vec2 & point2, const glm::vec2 & point3, const glm::vec3& color, bool shouldFog, glm::vec3 fogColor, float fogDensity, glm::vec4 cameraPosition)
+
+void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, bool shouldFog, glm::vec3 fogColor, float fogDensity, glm::vec4 cameraPosition)
 {
 	for (int y = maxY; y >= minY; --y) {
-		if (isPointInTriangle(x, y, point1, point2, point3)) {
+		float pixelZ = -1000.0f;
+		if (isPointInTriangle(x, y, point1, point2, point3, &pixelZ)) {
 			if (shouldFog) {
 				float distance = sqrt((pow((cameraPosition.x - x), 2) + (pow((cameraPosition.y - y), 2))));
 				float f = 1 / (exp(fogDensity*distance));
-				glm::vec3 finalColor = (1 - f)*fogColor + f*color;
-				putPixel(x, y, finalColor);
-
+				glm::vec3 finalColor = (1 - f)*fogColor + f * color;
+				colorPixel(x, y, pixelZ, color);
 			}
 			else
 			{
-				putPixel(x, y, color);
+				colorPixel(x, y, pixelZ, color);
 			}
 		}
 	}
 }
 
-bool Renderer::isPointInTriangle(int x, int y, const glm::vec2 & point1, const glm::vec2 & point2, const glm::vec2 & point3)
+bool Renderer::isPointInTriangle(int x, int y, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, float* const pixelZ)
 {
 	//source: http://totologic.blogspot.com/2014/01/accurate-point-in-triangle-test.html
 	int x1 = point1.x, x2 = point2.x, x3 = point3.x;
 	int y1 = point1.y, y2 = point2.y, y3 = point3.y;
+	float z1 = point1.z, z2 = point2.z, z3 = point3.z;
 	float diva = ((y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3));
 	if (diva == 0) return false;
 	float a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / diva;
@@ -290,6 +299,9 @@ bool Renderer::isPointInTriangle(int x, int y, const glm::vec2 & point1, const g
 	if (b < 0.0f || b > 1.0f) return false;
 	float c = 1.0f - a - b;
 	if (c < 0.0f || c > 1.0f) return false;
+	if (pixelZ != nullptr) {
+		*pixelZ = a * z1 + b * z2 + c * z3;
+	}
 	return true;
 }
 
@@ -302,8 +314,17 @@ glm::vec3 Renderer::generateColorVariation(const glm::vec3& color, float variati
 					);
 }
 
+float Renderer::getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y2, float z2) 
+{
+	float divBeta = (y2 * x1 - y1 * x2);
+	if (x1 == 0.0f || divBeta == 0.0f) return -100000;
+	float beta = (y * x1 - x * y1) / divBeta;
+	float alpha = (x - x2 * beta) / x1;
+	float z = alpha * z1 + beta * z2;
+	return z;
+}
 
-void Renderer::plotLineHigh(int x1, int y1, int x2, int y2, const glm::vec3& color) {
+void Renderer::plotLineHigh(int x1, int y1, float z1, int x2, int y2, float z2, const glm::vec3& color) {
 	int deltaX = x2 - x1;
 	int deltaY = y2 - y1;
 	int xi = 1;
@@ -315,7 +336,8 @@ void Renderer::plotLineHigh(int x1, int y1, int x2, int y2, const glm::vec3& col
 	int x = x1;
 	int y = y1;
 	while (y < y2) {
-		putPixel(x, y, color);
+		float newZ = getZOnLine(x, y, x2, y1, z1, x2, y2, z2);
+		colorPixel(x, y, newZ, color);
 		if (d > 0) {
 			x = x + xi;
 			d = d - 2 * deltaY;
@@ -325,7 +347,7 @@ void Renderer::plotLineHigh(int x1, int y1, int x2, int y2, const glm::vec3& col
 	}
 }
 
-void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& color) {
+void Renderer::plotLineLow(int x1, int y1, float z1, int x2, int y2, float z2, const glm::vec3& color) {
 	int deltaX = x2 - x1;
 	int deltaY = y2 - y1;
 	int yi = 1;
@@ -337,7 +359,8 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 	int x = x1;
 	int y = y1;
 	while (x < x2) {
-		putPixel(x, y, color);
+		float newZ = getZOnLine(x, y, x1, y1, z1, x2, y2, z2);
+		colorPixel(x, y, newZ, color);
 		if (d > 0) {
 			y = y + yi;
 			d = d - 2 * deltaX;
@@ -347,7 +370,7 @@ void Renderer::plotLineLow(int x1, int y1, int x2, int y2, const glm::vec3& colo
 	}
 }
 
-glm::vec2 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform)
+glm::vec3 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform)
 {
 	glm::vec4 point = fullTransform * _point;
 	float wDivision = 1.0f;
@@ -358,33 +381,34 @@ glm::vec2 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, cons
 	newX = ((newX + 1) * viewportWidth) / 2.0f;
 	float newY = point[1] * wDivision;
 	newY = ((newY + 1) * viewportHeight) / 2.0f;
-	//float newZ = point[2] / wDivision;
+	float newZ = point[2] * wDivision;
 	//float newW = point[3] / wDivision;
-	return glm::vec2(newX, newY);
+	return glm::vec3(newX, newY, newZ);
 }
 
-void Renderer::drawLine(const glm::vec2 point1, const glm::vec2 point2, const glm::vec3& color) {
+void Renderer::drawLine(const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& color) {
 	int x1 = (int)point1[0], y1 = (int)point1[1];
 	int x2 = (int)point2[0], y2 = (int)point2[1];
+	float z1 = point1[2], z2 = point2[2];
 	if (std::abs(y2 - y1) < std::abs(x2 - x1)) {
 		if (x1 > x2) {
-			plotLineLow(x2, y2, x1, y1, color);
+			plotLineLow(x2, y2, z2, x1, y1, z1, color);
 		}
 		else {
-			plotLineLow(x1, y1, x2, y2, color);
+			plotLineLow(x1, y1, z1, x2, y2, z2, color);
 		}
 	}
 	else {
 		if (y1 > y2) {
-			plotLineHigh(x2, y2, x1, y1, color);
+			plotLineHigh(x2, y2, z2, x1, y1, z1, color);
 		}
 		else {
-			plotLineHigh(x1, y1, x2, y2, color);
+			plotLineHigh(x1, y1, z1, x2, y2, z2, color);
 		}
 	}
 }
 
-void Renderer::colorTriangle(const glm::vec2 & p1, const glm::vec2 & p2, const glm::vec2 & p3, const glm::vec3 & color,bool shouldFog,glm::vec3 fogColor,float fogDensity,glm::vec4 cameraPosition)
+void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, bool shouldFog, glm::vec3 fogColor, float fogDensity, glm::vec4 cameraPosition)
 {
 	//steps:
 	/*
@@ -403,7 +427,7 @@ void Renderer::colorTriangle(const glm::vec2 & p1, const glm::vec2 & p2, const g
 }
 
 
-void Renderer::drawTriangle(const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& p3, const glm::vec3& color) 
+void Renderer::drawTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color) 
 {
 	drawLine(p1, p2, color);
 	drawLine(p1, p3, color);
@@ -422,7 +446,7 @@ void Renderer::drawNormalsPerFace(
 {
 
 	glm::vec4 newPoint = (originalPoint1 + originalPoint2 + originalPoint3) / 3.0f;
-	glm::vec2 pixelConcentratedPoint = translatePointIndicesToPixels(newPoint, transform);
+	glm::vec3 pixelConcentratedPoint = translatePointIndicesToPixels(newPoint, transform);
 
 	glm::vec4 vector1 = (originalPoint2 - originalPoint1);
 	glm::vec4 vector2 = (originalPoint3 - originalPoint1);
@@ -440,7 +464,7 @@ void Renderer::drawNormalsPerFace(
 
 	glm::vec4 normal = normalLength * normalPoint + newPoint;
 
-	glm::vec2 pixelNormal = translatePointIndicesToPixels(normal, transform);
+	glm::vec3 pixelNormal = translatePointIndicesToPixels(normal, transform);
 
 	drawLine(pixelConcentratedPoint, pixelNormal, color);
 }
@@ -448,9 +472,9 @@ void Renderer::drawNormalsPerFace(
 void Renderer::drawNormalsPerVertex(
 	const Face& face,
 	const std::vector<glm::vec3>& normals,
-	const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1,
-	const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2,
-	const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3,
+	const glm::vec4& originalPoint1, const glm::vec3& pixelPoint1,
+	const glm::vec4& originalPoint2, const glm::vec3& pixelPoint2,
+	const glm::vec4& originalPoint3, const glm::vec3& pixelPoint3,
 	const float normalLength,
 	const glm::mat4x4& transform,
 	const glm::vec3& color)
@@ -466,9 +490,9 @@ void Renderer::drawNormalsPerVertex(
 	glm::vec4 normal2 = normalLength * glm::vec4(normalX2, normalY2, normalZ2, 0.0f) + originalPoint2;
 	glm::vec4 normal3 = normalLength * glm::vec4(normalX3, normalY3, normalZ3, 0.0f) + originalPoint3;
 
-	glm::vec2 pixelNormal1 = translatePointIndicesToPixels(normal1, transform);
-	glm::vec2 pixelNormal2 = translatePointIndicesToPixels(normal2, transform);
-	glm::vec2 pixelNormal3 = translatePointIndicesToPixels(normal3, transform);
+	glm::vec3 pixelNormal1 = translatePointIndicesToPixels(normal1, transform);
+	glm::vec3 pixelNormal2 = translatePointIndicesToPixels(normal2, transform);
+	glm::vec3 pixelNormal3 = translatePointIndicesToPixels(normal3, transform);
 
 	drawLine(pixelPoint1, pixelNormal1, color);
 	drawLine(pixelPoint2, pixelNormal2, color);
@@ -477,7 +501,7 @@ void Renderer::drawNormalsPerVertex(
 
 
 
-void Renderer::handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStore& store, const Face& face, std::vector<glm::vec3>& normalsPerPoint, const glm::vec4& originalPoint1, const glm::vec2& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec2& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec2& pixelPoint3, const glm::mat4x4& transform, int modelGUIIndex, const glm::vec3& colorPerFaceNormal, const glm::vec3& colorPerVertexNormal)
+void Renderer::handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStore& store, const Face& face, std::vector<glm::vec3>& normalsPerPoint, const glm::vec4& originalPoint1, const glm::vec3& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec3& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec3& pixelPoint3, const glm::mat4x4& transform, int modelGUIIndex, const glm::vec3& colorPerFaceNormal, const glm::vec3& colorPerVertexNormal)
 {
 	switch (normalType) {
 	case Utils::Normals::PerFACE:
@@ -506,18 +530,25 @@ void Renderer::handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStor
 void Renderer::handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex, float x1, float y1, float z1, float x2, float y2, float z2, const glm::mat4x4& transform, const glm::vec3& color)
 {
 	if (store.isModelBoundingBoxOn(modelGUIIndex) == false) return;
-
+	float _z1 = 0.0f;
+	float _z2 = 0.0f;
+	float _z3 = 0.0f;
+	float _z4 = 0.0f;
+	float _z5 = 0.0f;
+	float _z6 = 0.0f;
+	float _z7 = 0.0f;
+	float _z8 = 0.0f;
 	//right side of the cube:
-	glm::vec2 point1 = translatePointIndicesToPixels(glm::vec4(x1, y1, z1, 1.0f), transform);
-	glm::vec2 point2 = translatePointIndicesToPixels(glm::vec4(x1, y1, z2, 1.0f), transform);
-	glm::vec2 point3 = translatePointIndicesToPixels(glm::vec4(x1, y2, z1, 1.0f), transform);
-	glm::vec2 point4 = translatePointIndicesToPixels(glm::vec4(x1, y2, z2, 1.0f), transform);
+	glm::vec3 point1 = translatePointIndicesToPixels(glm::vec4(x1, y1, z1, 1.0f), transform);
+	glm::vec3 point2 = translatePointIndicesToPixels(glm::vec4(x1, y1, z2, 1.0f), transform);
+	glm::vec3 point3 = translatePointIndicesToPixels(glm::vec4(x1, y2, z1, 1.0f), transform);
+	glm::vec3 point4 = translatePointIndicesToPixels(glm::vec4(x1, y2, z2, 1.0f), transform);
 
 	//left side of the cube:
-	glm::vec2 point5 = translatePointIndicesToPixels(glm::vec4(x2, y2, z1, 1.0f), transform);
-	glm::vec2 point6 = translatePointIndicesToPixels(glm::vec4(x2, y2, z2, 1.0f), transform);
-	glm::vec2 point7 = translatePointIndicesToPixels(glm::vec4(x2, y1, z2, 1.0f), transform);
-	glm::vec2 point8 = translatePointIndicesToPixels(glm::vec4(x2, y1, z1, 1.0f), transform);
+	glm::vec3 point5 = translatePointIndicesToPixels(glm::vec4(x2, y2, z1, 1.0f), transform);
+	glm::vec3 point6 = translatePointIndicesToPixels(glm::vec4(x2, y2, z2, 1.0f), transform);
+	glm::vec3 point7 = translatePointIndicesToPixels(glm::vec4(x2, y1, z2, 1.0f), transform);
+	glm::vec3 point8 = translatePointIndicesToPixels(glm::vec4(x2, y1, z1, 1.0f), transform);
 
 	//the cube:
 	drawLine(point1, point2, color);
@@ -578,9 +609,9 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
 			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
 
-			glm::vec2 p1 = translatePointIndicesToPixels(w1, completeTransform);
-			glm::vec2 p2 = translatePointIndicesToPixels(w2, completeTransform);
-			glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
+			glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
+			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
+			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 			//drawTriangle(p1, p2, p3, triangleColor);
 			bool shouldFog = store.getFog();
@@ -636,9 +667,9 @@ void Renderer::drawCameraModels(const Scene& scene)
 				glm::mat4x4 modelTransform = model.GetWorldTransformation();
 				glm::mat4x4 completeTransform = camTransformation * modelTransform;
 
-				glm::vec2 p1 = translatePointIndicesToPixels(w1, completeTransform);
-				glm::vec2 p2 = translatePointIndicesToPixels(w2, completeTransform);
-				glm::vec2 p3 = translatePointIndicesToPixels(w3, completeTransform);
+				glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
+				glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
+				glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 				drawTriangle(p1, p2, p3, blackColor);
 			}
