@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
 	Camera mainCam = Camera(
-		glm::vec4(0.0f, 0.0f, 14.0f, 0.0f),
+		glm::vec4(0.0f, 0.0f, 4.0f, 0.0f),
 		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 		glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 	);
@@ -172,7 +172,7 @@ void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& 
 	// Swap buffers
 	renderer.SwapBuffers();
 
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData(), store.getMsaa());
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	glfwSwapBuffers(window);
 }
 

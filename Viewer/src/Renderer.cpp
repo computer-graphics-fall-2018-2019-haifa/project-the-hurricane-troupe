@@ -14,7 +14,7 @@
 
 Renderer::Renderer(int viewportWidth, int viewportHeight, int viewportX, int viewportY) :
 	colorBuffer(nullptr),
-	zBuffer()
+	zBuffer(GetClearColor())
 {
 	initOpenGLRendering();
 	SetViewport(viewportWidth, viewportHeight, viewportX, viewportY);
@@ -31,7 +31,6 @@ Renderer::~Renderer()
 void Renderer::colorPixel(int x, int y, float z, const glm::vec3 & color)
 {
 	zBuffer.tryToSetColor(x, y, z, color);
-	putPixel(x, y, zBuffer.getPixelColor(x,y));
 }
 
 void Renderer::putPixel(int i, int j, const glm::vec3& color)
@@ -88,8 +87,10 @@ void Renderer::Render(const Scene& scene, const GUIStore& store)
 	//## Here you should render the scene.       ##
 	//#############################################
 	zBuffer.resetColor();
+	zBuffer.setAntiAliasing(store.isAntiAliased());
 	drawMeshModels(scene, store);
 	drawCameraModels(scene);
+	updatePixelValues();
 }
 
 
@@ -270,18 +271,8 @@ void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& poi
 	for (int y = maxY; y >= minY; --y) {
 		float pixelZ = -1000.0f;
 		if (isPointInTriangle(x, y, point1, point2, point3, &pixelZ)) {
-			if (store.getFog()) {
-				float distance = pixelZ;
-				float fogDensity = store.getFogDensity();
-				glm::vec3 fogColor = store.getFogColor();
-				float f = (exp(fogDensity*distance));
-				glm::vec3 finalColor = ((f - 1.0f)* fogColor) / f + color / f;
-				colorPixel(x, y, pixelZ, finalColor);
-
-			}
-			else {
-				colorPixel(x, y, pixelZ, color);
-			}
+			glm::vec3 finalColor = generateColorFromFog(x, y, pixelZ, color, store);
+			colorPixel(x, y, pixelZ, finalColor);
 		}
 	}
 }
@@ -334,6 +325,19 @@ float Renderer::getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y
 	float alpha = (x - x2 * beta) / x1;
 	float z = alpha * z1 + beta * z2;
 	return z;
+}
+
+glm::vec3 Renderer::generateColorFromFog(int x, int y, float pixelZ, const glm::vec3& originalColor, const GUIStore & store) const
+{
+	if (store.getFog()) {
+		float distance = pixelZ;
+		float fogDensity = store.getFogDensity();
+		glm::vec3 fogColor = store.getFogColor();
+		float f = (exp(fogDensity*distance));
+		glm::vec3 finalColor = ((f - 1.0f)* fogColor) / f + originalColor / f;
+		return finalColor;
+	}
+	return originalColor;
 }
 
 void Renderer::plotLineHigh(int x1, int y1, float z1, int x2, int y2, float z2, const glm::vec3& color) {
@@ -687,16 +691,15 @@ void Renderer::drawCameraModels(const Scene& scene)
 	}
 }
 
-void Renderer::addFogToTheWorld(const Scene & scene, const GUIStore & store)
+
+void Renderer::updatePixelValues()
 {
-	if (store.getFog()) {
-		//glm::mix(glm::vec3(), glm::vec3(), 1);
-		for (int i = 0; i < viewportWidth; i++)
-		{
-			for (int j = 0; j < viewportHeight; j++)
-			{
-				putPixel(i, j, glm::vec3(1, 0, 0));
-			}
-		}
+	std::vector<std::pair<int, int>> coordinates = zBuffer.getCoordinates();
+	for each (std::pair<int, int> xyPair in coordinates)
+	{
+		int x = xyPair.first;
+		int y = xyPair.second;
+		glm::vec3 color = zBuffer.getPixelColor(x, y);
+		putPixel(x, y, color);
 	}
 }

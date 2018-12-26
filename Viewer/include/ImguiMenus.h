@@ -33,7 +33,7 @@ private:
 	bool fog;
 	glm::vec3 fogColor;
 	float fogDensity;
-	bool _msaa;
+	bool _antiAliased;
 	//Camera variables
 	int _modelCount;
 	int cameraCount;
@@ -68,8 +68,8 @@ public:
 	void setFogColor(glm::vec3 fogColor);
 	float getFogDensity() const;
 	void setFogDensity(float density);
-	bool getMsaa() const;
-	void setMsaa(bool msaa);
+	bool isAntiAliased() const;
+	void setAntiAlias(bool isAliased);
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);
 	Mode getProjModeForCam(int i) const;

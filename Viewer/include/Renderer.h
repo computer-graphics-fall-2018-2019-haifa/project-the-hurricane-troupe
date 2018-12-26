@@ -46,6 +46,7 @@ private:
 	glm::vec3 generateColorVariation(const glm::vec3& color, float variation);
 	glm::vec3 Color256ToMinimizedScaling(const glm::vec3 & color, float variation);
 	float getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y2, float z2);
+	glm::vec3 generateColorFromFog(int x, int y, float pixelZ, const glm::vec3& originalColor, const GUIStore& store) const;
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	~Renderer();
@@ -63,6 +64,6 @@ public:
 	void drawMeshModels(const Scene& scene, const GUIStore& store);
 	void drawChess();
 	void drawCameraModels(const Scene& scene);
-	void addFogToTheWorld(const Scene& scene, const GUIStore& store);
+	void updatePixelValues();
 	// Add more methods/functionality as needed...
 };

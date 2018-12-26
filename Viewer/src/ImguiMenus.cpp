@@ -457,9 +457,9 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 				store.setFogDensity(fogDensity);
 			}
 		}
-		bool shouldMsaa = store.getMsaa();
-		if (ImGui::Checkbox("Check me for supersampling anti-aliasing", &shouldMsaa)) {
-			store.setMsaa(shouldMsaa);
+		bool shouldAntiAlias = store.isAntiAliased();
+		if (ImGui::Checkbox("Check me for supersampling anti-aliasing", &shouldAntiAlias)) {
+			store.setAntiAlias(shouldAntiAlias);
 		}
 		showLightningGUI(scene, store);
 		if (ImGui::CollapsingHeader("Models")) {
@@ -638,7 +638,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	fog(false),
 	fogColor(INITIALFOGCOLOR),
 	fogDensity(1.0f),
-	_msaa(false)
+	_antiAliased(false)
 {
 }
 
@@ -798,14 +798,14 @@ void GUIStore::setFogDensity(float density)
 	fogDensity = density;
 }
 
-bool GUIStore::getMsaa() const
+bool GUIStore::isAntiAliased() const
 {
-	return _msaa;
+	return _antiAliased;
 }
 
-void GUIStore::setMsaa(bool msaa)
+void GUIStore::setAntiAlias(bool isAliased)
 {
-	_msaa = msaa;
+	_antiAliased = isAliased;
 }
 
 void GUIStore::setCamsProjMode(int i, Mode mode)
