@@ -68,3 +68,13 @@ const int Face::GetTextureIndex(int index) const
 {
 	return textureIndices[index] - 1;
 }
+
+glm::vec3 Face::getFaceNormal() const
+{
+	return faceNormal;
+}
+
+void Face::setFaceNormal(glm::vec3 normal)
+{
+	faceNormal = normal;
+}

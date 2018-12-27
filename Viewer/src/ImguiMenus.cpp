@@ -636,7 +636,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	_isCameraBeingManipulated(scene.GetCameraCount(),false),
 	_shading(INITIALSHADING),
 	fog(false),
-	fogColor(INITIALFOGCOLOR),
+	fogColor(GetClearColor()),
 	fogDensity(1.0f),
 	_antiAliased(false)
 {

@@ -12,14 +12,15 @@ void MeshModel::updateWorldTransformation() {
 	isTransformUpdated = true;
 }
 
-MeshModel::MeshModel(const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
+MeshModel::MeshModel(std::map<int, glm::vec3>& _finalNormalPerVertex, const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName) :
 	modelName(modelName),
 	vertices(vertices),
 	faces(faces),
 	//textures(textures),
 	normals(normals),
 	_xScale(1.0f), _yScale(1.0f), _zScale(1.0f),
-	_xDelta(0.0f), _yDelta(0.0f), _zDelta(0.0f)
+	_xDelta(0.0f), _yDelta(0.0f), _zDelta(0.0f),
+	finalNormalPerVertex(_finalNormalPerVertex)
 {
 	//initialization code only
 	_translate(nullptr, nullptr, nullptr); //no translation
@@ -174,6 +175,11 @@ void MeshModel::setMinBoundingBoxVec(glm::vec4 min)
 void MeshModel::setMaxBoundingBoxVec(glm::vec4 max)
 {
 	maxBoundingBoxVec = max;
+}
+
+std::map<int, glm::vec3> MeshModel::getNormalForVertices()
+{
+	return finalNormalPerVertex;
 }
 
 

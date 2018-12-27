@@ -10,7 +10,7 @@ private:
 	std::vector<int> vertexIndices;
 	std::vector<int> normalIndices;
 	std::vector<int> textureIndices;
-
+	glm::vec3 faceNormal;
 public:
 	Face(std::istream& issLine);
 	Face(int x,int y,int z);
@@ -19,4 +19,6 @@ public:
 	const int Face::GetVertexIndex(int index) const;
 	const int Face::GetNormalIndex(int index) const;
 	const int Face::GetTextureIndex(int index) const;
+	glm::vec3 getFaceNormal() const;
+	void setFaceNormal(glm::vec3 normal);
 };

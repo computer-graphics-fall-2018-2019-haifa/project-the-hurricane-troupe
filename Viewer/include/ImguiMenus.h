@@ -14,7 +14,6 @@ private:
 	const float INITIALMODELNORMALLENGTH = 0.5f;
 	const glm::vec3 INITIALCOLOR = glm::vec3(1.0f, 0.0f, 0.0f); //red color
 	const ShadingType INITIALSHADING = ShadingType::FLAT;
-	const glm::vec3 INITIALFOGCOLOR = glm::vec3(128.0f/256.0f,128.0f/256.0f,128.0f/256.0f);
 	Scene _scene;
 
 	//Model variables

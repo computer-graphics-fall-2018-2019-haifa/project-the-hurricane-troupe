@@ -273,6 +273,17 @@ void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& poi
 		if (isPointInTriangle(x, y, point1, point2, point3, &pixelZ)) {
 			glm::vec3 finalColor = generateColorFromFog(x, y, pixelZ, color, store);
 			colorPixel(x, y, pixelZ, finalColor);
+			if (store.getShading() == ShadingType::FLAT) {
+
+			}
+			if (store.getShading() == ShadingType::GOURAUD)
+			{
+
+			}
+			if (store.getShading() == ShadingType::PHONG)
+			{
+
+			}
 		}
 	}
 }
@@ -465,18 +476,7 @@ void Renderer::drawNormalsPerFace(
 	glm::vec4 newPoint = (originalPoint1 + originalPoint2 + originalPoint3) / 3.0f;
 	glm::vec3 pixelConcentratedPoint = translatePointIndicesToPixels(newPoint, transform);
 
-	glm::vec4 vector1 = (originalPoint2 - originalPoint1);
-	glm::vec4 vector2 = (originalPoint3 - originalPoint1);
-	glm::vec4 vector3 = (originalPoint3 - originalPoint2);
-
-	glm::vec3 a = glm::vec3(vector1.x, vector1.y, vector1.z);
-	glm::vec3 b = glm::vec3(vector2.x, vector2.y, vector2.z);
-	glm::vec3 c = glm::vec3(vector3.x, vector3.y, vector3.z);
-
-	glm::vec3 normalHelper1 = glm::cross(a, b);
-	glm::vec3 normalHelper2 = glm::cross(-a, c);
-	glm::vec3 normalHelper3 = glm::cross(-b, -c);
-	glm::vec3 _normalPoint = (normalHelper1 + normalHelper2 + normalHelper3) / 3.0f;
+	glm::vec3 _normalPoint = face.getFaceNormal();
 	glm::vec4 normalPoint = glm::vec4(_normalPoint.x, _normalPoint.y, _normalPoint.z, 0.0f);
 
 	glm::vec4 normal = normalLength * normalPoint + newPoint;
@@ -604,7 +604,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 		std::vector<Face> faces = model->getFaces();
 		glm::mat4x4 modelTransform = model->GetWorldTransformation();
 		glm::mat4x4 completeTransform =  camTransformation * modelTransform;
-		
+		//std::map<int, glm::vec3> normalsForVertices = model->getNormalForVertices();
 		Utils::Normals whichNormal = store.getModelNormalStatus(index);
 		float maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
 		if (faces.size() > 0) {
@@ -622,6 +622,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			int v3 = face.GetVertexIndex(2);
 			float x3 = vertices[v3].x, y3 = vertices[v3].y , z3 = vertices[v3].z;
 			
+
 			glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
 			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
 			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
@@ -629,7 +630,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
 			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
-			
+
 			//drawTriangle(p1, p2, p3, triangleColor);
 
 			colorTriangle(p1, p2, p3, modelColor,store);
