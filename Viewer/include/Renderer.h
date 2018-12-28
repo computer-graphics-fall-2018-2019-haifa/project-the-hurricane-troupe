@@ -47,6 +47,8 @@ private:
 	glm::vec3 Color256ToMinimizedScaling(const glm::vec3 & color, float variation);
 	float getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y2, float z2);
 	glm::vec3 generateColorFromFog(int x, int y, float pixelZ, const glm::vec3& originalColor, const GUIStore& store) const;
+	glm::vec3 generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const GUIStore& store) const;
+	void generateColorFromShading(const ShadingType& shade) const;
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	~Renderer();

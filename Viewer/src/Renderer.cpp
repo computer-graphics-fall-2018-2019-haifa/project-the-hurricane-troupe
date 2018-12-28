@@ -272,19 +272,8 @@ void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& poi
 	for (int y = maxY; y >= minY; --y) {
 		float pixelZ = -1000.0f;
 		if (isPointInTriangle(x, y, point1, point2, point3, &pixelZ)) {
-			glm::vec3 finalColor = generateColorFromFog(x, y, pixelZ, color, store);
+			glm::vec3 finalColor = generateColorCorrectly(x, y, pixelZ, color, store);
 			colorPixel(x, y, pixelZ, finalColor);
-			if (store.getShading() == ShadingType::FLAT) {
-
-			}
-			if (store.getShading() == ShadingType::GOURAUD)
-			{
-
-			}
-			if (store.getShading() == ShadingType::PHONG)
-			{
-
-			}
 		}
 	}
 }
@@ -350,6 +339,28 @@ glm::vec3 Renderer::generateColorFromFog(int x, int y, float pixelZ, const glm::
 		return finalColor;
 	}
 	return originalColor;
+}
+
+glm::vec3 Renderer::generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const GUIStore & store) const
+{
+	ShadingType shading = store.getShading();
+	generateColorFromShading(shading);
+	return generateColorFromFog(x, y, pixelZ, originalColor, store);
+}
+
+void Renderer::generateColorFromShading(const ShadingType & shade) const
+{
+	if (shade == ShadingType::FLAT) {
+		// manipulatecolor
+	}
+	else if (shade == ShadingType::GOURAUD)
+	{
+		//manipulate color
+	}
+	else if (shade == ShadingType::PHONG)
+	{
+		// manipulate color
+	}
 }
 
 void Renderer::plotLineHigh(int x1, int y1, float z1, int x2, int y2, float z2, const glm::vec3& color) {
