@@ -1,10 +1,6 @@
 #include "..\include\ClosestPixel.h"
 
 
-bool ZColor::isColorLegal(const glm::vec3 & color) const
-{
-	return (0.0f <= color.x && color.x <= 1.0f) && (0.0f <= color.y && color.y <= 1.0f) && (0.0f <= color.z && color.z <= 1.0f);
-}
 
 ZColor::ZColor(): _z(0.0f), _color()
 {
@@ -22,7 +18,7 @@ void ZColor::setZAndColor(float z, const glm::vec3 & color)
 
 void ZColor::setColor(const glm::vec3 & color)
 {
-	if (isColorLegal(color) == false) return;
+	if (Utils::isColorLegal(color) == false) return;
 	_color = color;
 }
 

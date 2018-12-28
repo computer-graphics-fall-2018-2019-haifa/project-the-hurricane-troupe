@@ -46,9 +46,6 @@ public:
 	virtual ~MeshModel();
 
 
-	const glm::vec4& GetColor() const;
-	void SetColor(const glm::vec4& color);
-
 	const std::string& GetModelName();
 	std::vector<glm::vec2> getTextures();
 	std::vector<glm::vec3> getNormals();

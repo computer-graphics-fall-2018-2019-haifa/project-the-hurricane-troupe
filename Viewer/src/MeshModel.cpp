@@ -43,13 +43,7 @@ const glm::mat4x4& MeshModel::GetWorldTransformation() {
 	return worldTransform;
 }
 
-void MeshModel::SetColor(const glm::vec4& color) {
-	this->color = color;
-}
 
-const glm::vec4& MeshModel::GetColor() const {
-	return color;
-}
 
 const std::string& MeshModel::GetModelName() {
 	return modelName;
@@ -128,11 +122,13 @@ void MeshModel::resetPosition()
 void MeshModel::resetRotation()
 {
 	rotateTransform.resetToOrginalRotation();
+	isTransformUpdated = false;
 }
 
 void MeshModel::resetRotationAroundWorld()
 {
 	worldRotationTransform.resetToOrginalRotation();
+	isTransformUpdated = false;
 }
 
 void MeshModel::rotate(const RotationRules& rotation) {

@@ -64,6 +64,7 @@ public:
 	void drawMeshModels(const Scene& scene, const GUIStore& store);
 	void drawChess();
 	void drawCameraModels(const Scene& scene);
+	void drawLightModels(const Scene& scene, const GUIStore& store);
 	void updatePixelValues();
 	// Add more methods/functionality as needed...
 };

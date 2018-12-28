@@ -129,6 +129,11 @@ glm::mat4x4 Utils::IdentityMat()
 		});
 }
 
+bool Utils::isColorLegal(const glm::vec3 & color)
+{
+	return (0.0f <= color.x && color.x <= 1.0f) && (0.0f <= color.y && color.y <= 1.0f) && (0.0f <= color.z && color.z <= 1.0f);
+}
+
 std::string Utils::GetFileName(const std::string& filePath)
 {
 	if (filePath.empty()) {
