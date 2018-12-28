@@ -73,8 +73,8 @@ public:
 	void setAtVector(glm::vec4& vec);	
 	glm::vec4 getUpVector();
 	void setUpVector(glm::vec4& vec);
-	void getPerspectiveProjStuff(float* const projNear, float* const projFar, float* const projFovy, float* const projAspectRatio) const;
-	void getOrthographicProjStuff(float* const projNear, float* const projFar, float* const projTop, float* const projBottom, float* const projLeft, float* const projRight) const;
+	void getPerspectiveProjParameters(float* const projNear, float* const projFar, float* const projFovy, float* const projAspectRatio) const;
+	void getOrthographicProjParameters(float* const projNear, float* const projFar, float* const projTop, float* const projBottom, float* const projLeft, float* const projRight) const;
 	// Add more methods/functionality as needed...
 };
 

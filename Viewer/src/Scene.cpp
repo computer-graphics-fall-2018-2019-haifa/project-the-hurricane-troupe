@@ -102,11 +102,6 @@ void Scene::resetRotationAroundWorldActiveModel()
 	models[GetActiveModelIndex()]->resetRotationAroundWorld();
 }
 
-void Scene::matchFovyToWindowSize(int viewportHeight, int viewportWidth)
-{
-	ProjectionType a = this->getActiveCamera().whichProjection();
-	// TODO: Should we do this for all cameras at once? Or just for the active camera? What if changing only for one camera will ruin the view for the rest of the cameras?
-}
 
 void Scene::setCameraVectors(glm::vec4& eye, glm::vec4& at, glm::vec4& up, int index)
 {
@@ -155,7 +150,7 @@ void Scene::setActiveCameraAspectRatio(int oldWidth, int oldHeight, int newWidth
 	Camera activeCam = getActiveCamera();
 	ProjectionType which = activeCam.whichProjection();
 	float pNear = -1.0f, pFar = -1.0f, pFovy = -1.0f, pAspectRatio = -1.0f;
-	activeCam.getPerspectiveProjStuff(&pNear, &pFar, &pFovy, &pAspectRatio);
+	activeCam.getPerspectiveProjParameters(&pNear, &pFar, &pFovy, &pAspectRatio);
 	pAspectRatio = (float)(newWidth) / (float)(newHeight);
 
 	setPerspectiveParameters(pNear, pFar, pFovy, pAspectRatio, activeCameraIndex, AngleUnits::RADIANS);

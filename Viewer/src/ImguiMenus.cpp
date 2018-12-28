@@ -419,7 +419,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						float projBottom;
 						float projLeft;
 						float projRight;
-						cam.getOrthographicProjStuff(&projNear, &projFar, &projTop, &projBottom, &projLeft, &projRight);
+						cam.getOrthographicProjParameters(&projNear, &projFar, &projTop, &projBottom, &projLeft, &projRight);
 						ImGui::Columns(6, "mixed");
 						ImGui::InputFloat(stringToCharSeq("Near##" + std::to_string(camIndex)), &projNear, 1.0f, 0, "%.1f");
 						ImGui::NextColumn();
@@ -441,7 +441,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 						float projFar;
 						float projFovy;
 						float projAspectRatio;
-						cam.getPerspectiveProjStuff(&projNear, &projFar, &projFovy, &projAspectRatio);
+						cam.getPerspectiveProjParameters(&projNear, &projFar, &projFovy, &projAspectRatio);
 						ImGui::Columns(4, "mixed");
 						ImGui::InputFloat(stringToCharSeq("Near##" + std::to_string(camIndex)), &projNear, 1.0f, 0, "%.1f");
 						ImGui::NextColumn();

@@ -51,8 +51,6 @@ public:
 	void resetRotationActiveModel();
 	void resetRotationAroundWorldActiveModel();
 
-	void matchFovyToWindowSize(int viewportHeight, int viewportWidth);
-
 
 	//Camera controls:
 	void AddCamera(Camera& camera);
