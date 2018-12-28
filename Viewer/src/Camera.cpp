@@ -231,7 +231,8 @@ void Camera::setUpVector(glm::vec4& vec)
 	up = vec;
 }
 
-void Camera::getPerspectiveProjStuff(float * projNear, float * projFar, float * projFovy, float * projAspectRatio) const
+
+void Camera::getPerspectiveProjStuff(float* const projNear, float* const projFar, float* const projFovy, float* const projAspectRatio) const
 {
 	*projNear = _projNear;
 	*projFar = _projFar;
@@ -239,7 +240,7 @@ void Camera::getPerspectiveProjStuff(float * projNear, float * projFar, float * 
 	*projAspectRatio = _projAspectRatio;
 }
 
-void Camera::getOrthographicProjStuff(float * projNear, float * projFar, float * projTop, float * projBottom, float * projLeft, float * projRight) const
+void Camera::getOrthographicProjStuff(float* const projNear, float* const projFar, float* const projTop, float* const projBottom, float* const projLeft, float* const projRight) const
 {
 	*projNear = _projNear;
 	*projFar = _projFar;

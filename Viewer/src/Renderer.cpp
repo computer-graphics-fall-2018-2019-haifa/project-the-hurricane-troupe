@@ -17,7 +17,7 @@ Renderer::Renderer(int viewportWidth, int viewportHeight, int viewportX, int vie
 	zBuffer(GetClearColor())
 {
 	initOpenGLRendering();
-	SetViewport(viewportWidth, viewportHeight, viewportX, viewportY);
+	SetViewport(nullptr, viewportWidth, viewportHeight, viewportX, viewportY);
 }
 
 Renderer::~Renderer()
@@ -70,10 +70,13 @@ void Renderer::ClearColorBuffer(const glm::vec3& color)
 	}
 }
 
-void Renderer::SetViewport(int viewportWidth, int viewportHeight, int viewportX, int viewportY)
+void Renderer::SetViewport(Scene* const scene, int viewportWidth, int viewportHeight, int viewportX, int viewportY)
 {
 	this->viewportX = viewportX;
 	this->viewportY = viewportY;
+	if (scene != nullptr) {
+		scene->setActiveCameraAspectRatio(this->viewportWidth, this->viewportHeight, viewportWidth, viewportHeight);
+	}
 	this->viewportWidth = viewportWidth;
 	this->viewportHeight = viewportHeight;
 	createBuffers(viewportWidth, viewportHeight);

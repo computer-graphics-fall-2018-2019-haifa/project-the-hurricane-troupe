@@ -56,7 +56,7 @@ public:
 	void Render(const Scene& scene, const GUIStore& store);
 	void SwapBuffers();
 	void ClearColorBuffer(const glm::vec3& color);
-	void SetViewport(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
+	void SetViewport(Scene* const scene, int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	void drawLine(const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& color);
 	void colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const GUIStore& store);
 	void drawTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color);

@@ -122,9 +122,9 @@ void Scene::setOrthographicParameters(float top, float bottom, float right, floa
 	cameras[index].setActiveProjection(ProjectionType::ORTHOGRAPHIC);
 }
 
-void Scene::setPerspectiveParameters(float _near, float _far, float fovy, float aspect,int index)
+void Scene::setPerspectiveParameters(float _near, float _far, float fovy, float aspect,int index, AngleUnits unit)
 {
-	cameras[index].setPerspectiveProjection(fovy, aspect, _near, _far);
+	cameras[index].setPerspectiveProjection(fovy, aspect, _near, _far, unit);
 	cameras[index].setActiveProjection(ProjectionType::PERSPECTIVE);
 }
 
@@ -148,6 +148,18 @@ void Scene::SetActiveCameraIndex(int index)
 const int Scene::GetActiveCameraIndex() const
 {
 	return activeCameraIndex;
+}
+
+void Scene::setActiveCameraAspectRatio(int oldWidth, int oldHeight, int newWidth, int newHeight)
+{
+	Camera activeCam = getActiveCamera();
+	ProjectionType which = activeCam.whichProjection();
+	float pNear = -1.0f, pFar = -1.0f, pFovy = -1.0f, pAspectRatio = -1.0f;
+	activeCam.getPerspectiveProjStuff(&pNear, &pFar, &pFovy, &pAspectRatio);
+	pAspectRatio = (float)(newWidth) / (float)(newHeight);
+
+	setPerspectiveParameters(pNear, pFar, pFovy, pAspectRatio, activeCameraIndex, AngleUnits::RADIANS);
+	cameras[activeCameraIndex].setActiveProjection(which);
 }
 
 int Scene::getLightCount() const
