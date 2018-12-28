@@ -14,6 +14,7 @@ public:
 	static glm::vec2 Vec2fFromStream(std::istream& issLine);
 	static MeshModel LoadMeshModel(const std::string& filePath);
 	static glm::mat4x4 IdentityMat();
+	static bool isColorLegal(const glm::vec3 & color);
 	enum class Normals { PerVERTEX, PerFACE, NONE };
 
 	// Add here more static utility functions...

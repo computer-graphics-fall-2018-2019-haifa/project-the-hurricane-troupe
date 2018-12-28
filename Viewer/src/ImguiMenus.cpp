@@ -37,7 +37,7 @@ char* const stringToCharSeq(const std::string& str)
 
 char* stringIntConcatenate(char* str, int i) { return stringToCharSeq(std::string(str) + std::to_string(i)); }
 
-void showScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int index) {
+void showModelScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int index, bool isLight = false) {
 	float* xFactor = new float(0.0f);
 	float* yFactor = new float(0.0f);
 	float* zFactor = new float(0.0f);
@@ -74,7 +74,44 @@ void showScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int index) {
 	return;
 }
 
-void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scene, GUIStore& store, ImGuiIO& io, float moveStrength) {
+void showLightScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int index, bool isLight = false) {
+	float* xFactor = new float(0.0f);
+	float* yFactor = new float(0.0f);
+	float* zFactor = new float(0.0f);
+	ImGui::Text("Scale:");
+	ImGui::SameLine();
+	if (ImGui::RadioButton(stringToCharSeq(std::string("Altogether##Light") + std::to_string(index)), store.isLightSymmetricScaled(index))) store.setLightSymmetricScaled(index, true);
+	ImGui::SameLine();
+	if (ImGui::RadioButton(stringToCharSeq(std::string("Seperate##Light") + std::to_string(index)), !store.isLightSymmetricScaled(index))) store.setLightSymmetricScaled(index, false);
+	ImGui::SameLine();
+	char* lightReset = stringIntConcatenate("Reset##AllAxisResetLight", index);
+	if (ImGui::Button(lightReset)) { *xFactor = 1.0f; *yFactor = 1.0f; *zFactor = 1.0f; scene.symmetricScaleActiveLight(1.0f); }
+
+	scene.getScalingFactorsActiveLight(xFactor, yFactor, zFactor);
+	if (isSymmetric) {
+		char* allScale = stringIntConcatenate("Scale##AllAxisScaleLight", index);
+		ImGui::SliderFloat(allScale, xFactor, -4.0f, 4.0f);
+		*zFactor = *xFactor; *yFactor = *xFactor;
+	}
+	else {
+		char* xScaleText = stringIntConcatenate("X Scale##XScaleLight", index);
+		char* yScaleText = stringIntConcatenate("Y Scale##YScaleLight", index);
+		char* zScaleText = stringIntConcatenate("z Scale##ZScaleLight", index);
+
+		char* xReset = stringIntConcatenate("Reset##XResetScaleLight", index);
+		char* yReset = stringIntConcatenate("Reset##YResetScaleLight", index);
+		char* zReset = stringIntConcatenate("Reset##ZResetScaleLight", index);
+
+		ImGui::SliderFloat(xScaleText, xFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(xReset)) { *xFactor = 1.0f; }
+		ImGui::SliderFloat(yScaleText, yFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(yReset)) { *yFactor = 1.0f; }
+		ImGui::SliderFloat(zScaleText, zFactor, -4.0f, 4.0f); ImGui::SameLine(); if (ImGui::Button(zReset)) { *zFactor = 1.0f; }
+	}
+
+	scene.scaleActiveLight(*xFactor, *yFactor, *zFactor);
+	return;
+}
+
+void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scene, GUIStore& store, ImGuiIO& io, float moveStrength, bool isLight = false) {
 	float xAddition = 0.0f, yAddition = 0.0f, zAddition = 0.0f;
 	bool changed = false;
 	int left = io.KeyMap[ImGuiKey_::ImGuiKey_LeftArrow];
@@ -98,7 +135,12 @@ void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scen
 		changed = true;
 	}
 	if (changed) {
-		scene.moveActiveModel(xAddition, yAddition, zAddition);
+		if (isLight == true) {
+			scene.moveActiveLight(xAddition, yAddition, zAddition);
+		}
+		else {
+			scene.moveActiveModel(xAddition, yAddition, zAddition);
+		}
 	}
 }
 
@@ -112,26 +154,105 @@ void showTranslationGUI(Scene& scene, GUIStore& store, int index, float* moveSpe
 	}
 }
 
-void showRotationGUI(Scene& scene, GUIStore& store, int index) {
+void resetActiveObjectRotation(Scene& scene, bool rotationAroundSelf, bool isLight) 
+{
+	if (isLight == true) {
+		if (rotationAroundSelf == true) {
+			scene.resetRotationActiveLight();
+		}
+		else {
+			scene.resetRotationAroundWorldActiveLight();
+		}
+	}
+	else {
+		if (rotationAroundSelf == true) {
+			scene.resetRotationActiveModel();
+		}
+		else {
+			scene.resetRotationAroundWorldActiveModel();
+		}
+	}
+}
+
+void rotateObject(Scene& scene, const RotationRules& rotation, bool rotationAroundSelf, bool isLight) 
+{
+	if (rotationAroundSelf) {
+		if (isLight == true) {
+			scene.rotateActiveLight(rotation);
+		}
+		else {
+			scene.rotateActiveModel(rotation);
+		}
+	}
+	else {
+		if (isLight == true) {
+			scene.rotateActiveLightAroundWorld(rotation);
+		}
+		else {
+			scene.rotateActiveModelAroundWorld(rotation);
+		}
+	}
+}
+
+
+void setRotationAroundModel(GUIStore& store, int index, bool isLight)
+{
+	if (isLight == true) {
+		store.setLightRotationAround(index, RotationType::MODEL);
+	}
+	else {
+		store.setModelRotationAround(index, RotationType::MODEL);
+	}
+}
+
+void setRotationAroundWorld(GUIStore& store, int index, bool isLight)
+{
+	if (isLight == true) {
+		store.setLightRotationAround(index, RotationType::WORLD);
+	}
+	else {
+		store.setModelRotationAround(index, RotationType::WORLD);
+	}
+}
+
+bool isRotationAroundSelf(const GUIStore& store, int index, bool isLight)
+{
+	if (isLight == true) {
+		return store.isLightRotationAroundModel(index);
+	}
+	return store.isModelRotationAroundModel(index);
+}
+
+bool isRotationAroundWorld(GUIStore& store, int index, bool isLight)
+{
+	if (isLight == true) {
+		return store.isLightRotationAroundWorld(index);
+	}
+	return store.isModelRotationAroundWorld(index);
+}
+
+void showRotationGUI(Scene& scene, GUIStore& store, int index, bool isLight = false) {
 	float xAngle = 0.0f;
 	float yAngle = 0.0f;
 	float zAngle = 0.0f;
 	bool modifiedRotation = false;
-	bool isModelRotation = store.isModelRotationAroundModel(index);
-	bool isWorldRotation = store.isModelRotationAroundWorld(index);
+	bool isModelRotation = isRotationAroundSelf(store, index, isLight);
+	bool isWorldRotation = isRotationAroundWorld(store, index, isLight);
 
 	ImGui::Text("Rotate Controls:");
 	if (ImGui::RadioButton(stringIntConcatenate("Model##ModelRotation", index), isModelRotation)) {
-		store.setRotationAround(index, RotationType::MODEL);
+		setRotationAroundModel(store, index, isLight);
 	}
 	ImGui::SameLine();
 	if (ImGui::RadioButton(stringIntConcatenate("World##WorldRotation", index), isWorldRotation)) {
-		store.setRotationAround(index, RotationType::WORLD);
+		setRotationAroundWorld(store, index, isLight);
 	}
 	ImGui::PushButtonRepeat(true);
 	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_Up)) { zAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
-	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXPlus", index), ImGuiDir_Up)) { xAngle = 15.0f; modifiedRotation = true; }
+	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXPlus", index), ImGuiDir_Up)) { 
+		xAngle = 15.0f; modifiedRotation = true; 
+	}
 	ImGui::SameLine();
 	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZPlus", index), ImGuiDir_Up)) { zAngle = 15.0f; modifiedRotation = true; }
 
@@ -140,24 +261,14 @@ void showRotationGUI(Scene& scene, GUIStore& store, int index) {
 	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXMinus", index), ImGuiDir_Down)) { xAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
 	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYPlus", index), ImGuiDir_Right)) { yAngle = 15.0f; modifiedRotation = true; }
-	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) { 
 	
-		if (isModelRotation == true) {
-			scene.resetRotationActiveModel();
-		}
-		else {
-			scene.resetRotationAroundWorldActiveModel();
-		}
+	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) {
+		resetActiveObjectRotation(scene, isModelRotation, isLight);
 	}
 	ImGui::PopButtonRepeat();
 	
 	if (modifiedRotation) {
-		if (isModelRotation) {
-			scene.rotateActiveModel(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
-		}
-		else {
-			scene.rotateActiveModelAroundWorld(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
-		}
+		rotateObject(scene, RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES), isModelRotation, isLight);
 	}
 }
 
@@ -183,7 +294,7 @@ void showModelColoringGUI(const Scene & scene, GUIStore & store, int index) {
 	}
 }
 
-void showLightningGUI(const Scene & scene, GUIStore & store)
+void showShadingGUI(const Scene & scene, GUIStore & store)
 {
 	ShadingType shade = store.getShading();
 	bool isFlatShading = shade == ShadingType::FLAT;
@@ -207,7 +318,7 @@ void showLightningGUI(const Scene & scene, GUIStore & store)
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
 	showModelColoringGUI(scene, store, index);
-	showScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
+	showModelScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
 	showTranslationGUI(scene, store, index, moveSpeed);
 	ImGui::Columns(3, "##Manipulation");
 	showRotationGUI(scene, store, index);
@@ -419,6 +530,67 @@ void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& sce
 	}
 }
 
+void showAddLightGUI(Scene& scene) {
+	if (ImGui::Button("+Add Point Light Source##AddLightningPoint")) {
+		LightPointSource light;
+		scene.AddLight(std::make_shared<LightPointSource>(light));
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("+Add Parallel Light Source##AddLightningParallel")) {
+		LightParallelSource light;
+		scene.AddLight(std::make_shared<LightParallelSource>(light));
+	}
+}
+
+std::string generateLightName(const Light& light, int index) {
+	switch (light.getLightType()) {
+	case LightType::PARALLEL: {
+		return stringIntConcatenate("Parallel", index);
+	}
+							  break;
+	case LightType::POINT: {
+		return stringIntConcatenate("Point", index);
+	}
+	 break;
+	default: {
+		return "";
+	}
+	}
+}
+
+
+void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io) {
+	std::vector<std::shared_ptr<Light>> lights = scene.getLights();
+	for each (std::shared_ptr<Light> light in lights)
+	{
+		int index = light->getLightIndex();
+		std::string lightName = generateLightName(*light, index);
+		char* name = stringToCharSeq(lightName);
+		bool isSelected = store.isLightActive(index);
+		if (ImGui::Checkbox(name, &isSelected)) {
+			store.setActiveLight(index);
+		}
+		if (isSelected) {
+			scene.SetActiveLight(index);
+			glm::vec3 newColor = light->getLightColor();
+			if (ImGui::ColorEdit3(stringIntConcatenate("Color##", index), (float*)&newColor)) {
+				store.setLightColor(index, newColor);
+				light->setLightColor(newColor);
+			}
+			float moveSpeed = store.getLightSpeed(index);
+			showLightScaleGUI(scene, store, store.isLightSymmetricScaled(index), index, true);
+			showRotationGUI(scene, store, index, true);
+			handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed, true);
+		}
+	}
+}
+
+void showLightningGUI(Scene& scene, GUIStore& store, ImGuiIO& io)
+{
+	showAddLightGUI(scene);
+	showLightManipulationGUI(scene, store, io);
+}
+
 void showBoundingBoxGUI(Scene& scene, GUIStore& store, int index)
 {
 	bool isBoundingBoxDisplayed = store.isModelBoundingBoxOn(index);
@@ -448,7 +620,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 			store.setFog(shouldFog);
 		}
 		if (shouldFog) {
-						glm::vec3 newColor = store.getFogColor();
+			glm::vec3 newColor = store.getFogColor();
 			float fogDensity = store.getFogDensity();
 			if (ImGui::ColorEdit3("FogColor##FogColor", (float*)&newColor)) {
 				store.setFogColor(newColor);
@@ -461,16 +633,25 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 		if (ImGui::Checkbox("Check me for supersampling anti-aliasing", &shouldAntiAlias)) {
 			store.setAntiAlias(shouldAntiAlias);
 		}
-		showLightningGUI(scene, store);
+		showShadingGUI(scene, store);
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
 			showModelsListed(models, scene, store, io);
 		}
+
 		if (ImGui::CollapsingHeader("Cameras")) {
 			// List All Loaded Cameras
 			showCamerasListed(cameras, scene, store);
 		}
+		ImGui::Begin("Lights Menu");
+		if (ImGui::CollapsingHeader("Lights")) {
+			// List All Lights
+			showLightningGUI(scene, store, io);
+		}
+		ImGui::End();
 
+		ImGui::NewLine();
+		ImGui::Separator();
 		ImGui::End();
 	}
 
@@ -629,7 +810,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	_modelCount(scene.GetModelCount()),
 	_modelSpeed(scene.GetModelCount(), INITIALMODELSPEED),
 	_isModelBoundingBoxOn(scene.GetModelCount(), false),
-	_modelColor(scene.GetModelCount(), INITIALCOLOR),
+	_modelColor(scene.GetModelCount(), INITIALMESHMODELCOLOR),
 	_modelRotationType(scene.GetModelCount(), RotationType::MODEL),
 	projModeForCams(scene.GetCameraCount(), Mode::Perspective),
 	cameraCount(scene.GetCameraCount()),
@@ -638,7 +819,14 @@ GUIStore::GUIStore(const Scene & scene) :
 	fog(false),
 	fogColor(GetClearColor()),
 	fogDensity(1.0f),
-	_antiAliased(false)
+	_antiAliased(false),
+	_activeLightIndex(ERRORINDEX),
+	_lightsCount(scene.getLightCount()),
+	_isLightActive(scene.getLightCount(), false),
+	_lightsColors(scene.getLightCount(), INITIALLIGHTCOLOR),
+	_lightSpeeds(scene.getLightCount(), INITIALMODELSPEED),
+	_lightRotationType(scene.getLightCount(), RotationType::MODEL),
+	_isLightSymmetricScaled(scene.getLightCount(), true)
 {
 }
 
@@ -654,7 +842,7 @@ void GUIStore::sync(const Scene& scene)
 		_whichNormals.push_back(Utils::Normals::NONE);
 		_modelNormalLength.push_back(INITIALMODELNORMALLENGTH);
 		_isModelBoundingBoxOn.push_back(false);
-		_modelColor.push_back(INITIALCOLOR);
+		_modelColor.push_back(INITIALMESHMODELCOLOR);
 		_modelRotationType.push_back(RotationType::MODEL);
 	}
 	_modelCount = newSize;
@@ -666,6 +854,18 @@ void GUIStore::sync(const Scene& scene)
 		projModeForCams.push_back(Mode::Perspective);
 	}
 	cameraCount = camCount;
+
+	int lightCount = scene.getLightCount();
+	if (lightCount > _lightsCount) {
+		if (_activeLightIndex == ERRORINDEX)
+			_activeLightIndex = 0;
+		_isLightActive.push_back(false);
+		_lightsColors.push_back(INITIALLIGHTCOLOR);
+		_lightSpeeds.push_back(INITIALMODELSPEED);
+		_lightRotationType.push_back(RotationType::MODEL);
+		_isLightSymmetricScaled.push_back(true);
+	}
+	_lightsCount = lightCount;
 }
 
 void GUIStore::setModelManipulated(int i, bool isManipulated)
@@ -700,7 +900,7 @@ void GUIStore::setModelSpeed(int i, float newSpeed)
 
 float GUIStore::getModelSpeed(int i) const
 {
-	if (i < 0 || i >= _modelCount) return false;
+	if (i < 0 || i >= _modelCount) return ERRORSPEED;
 	return _modelSpeed[i];
 }
 
@@ -730,7 +930,7 @@ float GUIStore::getModelNormalLength(int i) const
 
 glm::vec3 GUIStore::getModelColor(int i) const
 {
-	if (i < 0 || i >= _modelCount) return INITIALCOLOR;
+	if (i < 0 || i >= _modelCount) return INITIALMESHMODELCOLOR;
 	return _modelColor[i];
 }
 
@@ -752,7 +952,7 @@ bool GUIStore::isModelRotationAroundWorld(int i) const
 	return _modelRotationType[i] == RotationType::WORLD;
 }
 
-void GUIStore::setRotationAround(int i, const RotationType& rotType)
+void GUIStore::setModelRotationAround(int i, const RotationType& rotType)
 {
 	if (i < 0 || i >= _modelCount) return;
 	_modelRotationType[i] = rotType;
@@ -807,6 +1007,76 @@ void GUIStore::setAntiAlias(bool isAliased)
 {
 	_antiAliased = isAliased;
 }
+
+void GUIStore::setActiveLight(int index)
+{
+	if (index < 0 || index >= _lightsCount) return;
+	_isLightActive[_activeLightIndex] = false;
+	_isLightActive[index] = true;
+	_activeLightIndex = index;
+}
+
+bool GUIStore::isLightActive(int index) const
+{
+	if (index < 0 || index > _lightsCount) return false;
+	return _activeLightIndex == index;
+}
+
+glm::vec3 GUIStore::getLightColor(int index) const
+{
+	if (index < 0 || index > _lightsCount) return INITIALLIGHTCOLOR;
+	return _lightsColors[index];
+}
+
+void GUIStore::setLightColor(int index, const glm::vec3& color)
+{
+
+	if (index < 0 || index > _lightsCount) return;
+	_lightsColors[index] = color;
+}
+
+float GUIStore::getLightSpeed(int index) const
+{
+	if (index < 0 || index > _lightsCount) return ERRORSPEED;
+	return _lightSpeeds[index];
+}
+
+void GUIStore::setLightSpeed(int index, const float speed)
+{
+	if (index < 0 || index > _lightsCount) return;
+	_lightSpeeds[index] = speed;
+}
+
+bool GUIStore::isLightRotationAroundModel(int index) const
+{
+	if (index < 0 || index >= _lightsCount) return false;
+	return _lightRotationType[index] == RotationType::MODEL;
+}
+
+bool GUIStore::isLightRotationAroundWorld(int index) const
+{
+	if (index < 0 || index >= _lightsCount) return false;
+	return _lightRotationType[index] == RotationType::WORLD;
+}
+
+void GUIStore::setLightRotationAround(int index, const RotationType & type)
+{
+	if (index < 0 || index >= _lightsCount) return;
+	_lightRotationType[index] = type;
+}
+
+bool GUIStore::isLightSymmetricScaled(int index) const
+{
+	if (index < 0 || index >= _lightsCount) return false;
+	return _isLightSymmetricScaled[index];
+}
+
+void GUIStore::setLightSymmetricScaled(int index, bool isSymmetric)
+{
+	if (index < 0 || index >= _lightsCount) return;
+	_isLightSymmetricScaled[index] = isSymmetric;
+}
+
 
 void GUIStore::setCamsProjMode(int i, Mode mode)
 {

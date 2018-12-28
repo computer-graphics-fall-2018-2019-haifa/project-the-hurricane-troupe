@@ -4,7 +4,8 @@
 
 Scene::Scene() :
 	activeCameraIndex(-1),
-	activeModelIndex(0)
+	activeModelIndex(0),
+	activeLightIndex(0)
 {
 
 }
@@ -29,11 +30,22 @@ void Scene::AddCamera(Camera& camera)
 Camera Scene::getActiveCamera() const {
 	return cameras[GetActiveCameraIndex()];
 }
+void Scene::rotateActiveLight(const RotationRules & rotation)
+{
+	lights[activeLightIndex]->rotate(rotation);
+}
 
 void Scene::rotateActiveModel(const RotationRules & rotation)
 {
 	models[GetActiveModelIndex()]->rotate(rotation);
 }
+
+
+void Scene::rotateActiveLightAroundWorld(const RotationRules & rotation)
+{
+	lights[activeLightIndex]->rotateAroundWorld(rotation);
+}
+
 
 void Scene::rotateActiveModelAroundWorld(const RotationRules & rotation)
 {
@@ -43,6 +55,11 @@ void Scene::rotateActiveModelAroundWorld(const RotationRules & rotation)
 void Scene::moveActiveModel(const float const xAddition, const float const yAddition, const float const zAdddition)
 {
 	models[GetActiveModelIndex()]->move(&xAddition, &yAddition, &zAdddition);
+}
+
+void Scene::moveActiveLight(const float const xAddition, const float const yAddition, const float const zAdddition) 
+{
+	lights[activeLightIndex]->move(&xAddition, &yAddition, &zAdddition);
 }
 
 void Scene::symmetricMoveActiveModel(const float addition)
@@ -124,15 +141,59 @@ const int Scene::GetCameraCount() const
 
 void Scene::SetActiveCameraIndex(int index)
 {
-	// implementation suggestion...
-	if (index < 0 || index > cameras.size()) return;
-	
+	if (index < 0 || index >= cameras.size()) return;
 	activeCameraIndex = index;
 }
 
 const int Scene::GetActiveCameraIndex() const
 {
 	return activeCameraIndex;
+}
+
+int Scene::getLightCount() const
+{
+	return lights.size();
+}
+
+void Scene::SetActiveLight(int index)
+{
+	if (index < 0 || index >= lights.size()) return;
+	activeLightIndex = index;
+}
+
+std::vector<std::shared_ptr<Light>> Scene::getLights() const
+{
+	return lights;
+}
+
+void Scene::symmetricScaleActiveLight(const float scalingFactor)
+{
+	lights[activeLightIndex]->symmetricScale(scalingFactor);
+}
+
+void Scene::getScalingFactorsActiveLight(float * const xFactor, float * const yFactor, float * const zFactor) const
+{
+	lights[activeLightIndex]->getScalingFactors(xFactor, yFactor, zFactor);
+}
+
+void Scene::scaleActiveLight(const float const xScale, const float const yScale, const float const zScale)
+{
+	lights[activeLightIndex]->scale(xScale, yScale, zScale);
+}
+
+void Scene::AddLight(const std::shared_ptr<Light>& light)
+{
+	lights.push_back(light);
+}
+
+void Scene::resetRotationActiveLight()
+{
+	lights[activeLightIndex]->resetRotation();
+}
+
+void Scene::resetRotationAroundWorldActiveLight()
+{
+	lights[activeLightIndex]->resetRotationAroundWorld();
 }
 
 std::vector<Camera> Scene::GetCameras() const
@@ -143,7 +204,6 @@ std::vector<Camera> Scene::GetCameras() const
 void Scene::SetActiveModelIndex(int index)
 {
 	if (index < 0 || index >= models.size()) return;
-	// implementation suggestion...
 	activeModelIndex = index;
 }
 

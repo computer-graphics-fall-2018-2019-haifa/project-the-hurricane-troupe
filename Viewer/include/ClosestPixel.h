@@ -3,12 +3,12 @@
 #include <vector>
 #include <functional>
 #include <glm/glm.hpp>
+#include "Utils.h"
 
 class ZColor {
 private:
 	float _z;
 	glm::vec3 _color;
-	bool isColorLegal(const glm::vec3& color) const;
 public:
 	ZColor();
 	ZColor(float z, const glm::vec3& color);

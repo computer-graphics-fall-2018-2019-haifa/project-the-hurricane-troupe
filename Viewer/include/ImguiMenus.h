@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include "Scene.h"
 #include "PrimMeshModel.h"
+#include "Light.h"
 enum class Mode { Orthographic, Perspective };
 enum class RotationType { MODEL, WORLD };
 enum class ShadingType { FLAT, GOURAUD, PHONG };
@@ -12,12 +13,16 @@ private:
 	const int SYNCERROR = -50;
 	const float INITIALMODELSPEED = 1.0f; //pixels
 	const float INITIALMODELNORMALLENGTH = 0.5f;
-	const glm::vec3 INITIALCOLOR = glm::vec3(1.0f, 0.0f, 0.0f); //red color
+	const glm::vec3 INITIALMESHMODELCOLOR = glm::vec3(1.0f, 0.0f, 0.0f); //red color
 	const ShadingType INITIALSHADING = ShadingType::FLAT;
+	const int ERRORINDEX = -1;
+	const float ERRORSPEED = -1.0f;
+	const glm::vec3 INITIALLIGHTCOLOR = glm::vec3(1.0f, 1.0f, 1.0f);
 	Scene _scene;
 
 	//Model variables
 	std::vector<std::shared_ptr<MeshModel>> _models;
+	int _modelCount;
 	std::vector<bool> _isModelBeingManipulated;
 	std::vector<bool> _isCameraBeingManipulated;
 	std::vector<bool> _isModelSymmetricScaled;
@@ -27,14 +32,20 @@ private:
 	std::vector<bool> _isModelBoundingBoxOn;
 	std::vector<glm::vec3> _modelColor;
 	std::vector<RotationType> _modelRotationType;
+	std::vector<float> _lightSpeeds;
 	//Lightning/Color/Shading Variables:
 	ShadingType _shading;
 	bool fog;
 	glm::vec3 fogColor;
 	float fogDensity;
 	bool _antiAliased;
+	std::vector<bool> _isLightActive;
+	std::vector<glm::vec3> _lightsColors;
+	int _activeLightIndex;
+	int _lightsCount;
+	std::vector<RotationType> _lightRotationType;
+	std::vector<bool> _isLightSymmetricScaled;
 	//Camera variables
-	int _modelCount;
 	int cameraCount;
 	std::vector<Mode> projModeForCams;
 
@@ -45,7 +56,7 @@ public:
 	// Model Management functions:
 	void setModelManipulated(int i, bool isManipulated);
 	bool isModelSelected(int i) const;
-	void setModelSymmetricScaled(int i, bool isManipulated);
+	void setModelSymmetricScaled(int i, bool isSymmetric);
 	bool isModelSymmetricScaled(int i) const;
 	void setModelSpeed(int i, float newSpeed);
 	float getModelSpeed(int i) const;
@@ -57,7 +68,9 @@ public:
 	void setModelColor(int i, const glm::vec3& color);
 	bool isModelRotationAroundModel(int i) const;
 	bool isModelRotationAroundWorld(int i) const;
-	void setRotationAround(int i, const RotationType& rotType);
+	void setModelRotationAround(int i, const RotationType& rotType);
+	void setModelNormal(int i, Utils::Normals newNormal);
+	Utils::Normals getModelNormalStatus(int i) const;
 	//Lightning/Color/Shading Management functions:
 	ShadingType getShading() const;
 	void setShading(const ShadingType& type);
@@ -69,22 +82,36 @@ public:
 	void setFogDensity(float density);
 	bool isAntiAliased() const;
 	void setAntiAlias(bool isAliased);
+	void setActiveLight(int index);
+	bool isLightActive(int index) const;
+	glm::vec3 getLightColor(int index) const;
+	void setLightColor(int index, const glm::vec3& color);
+	float getLightSpeed(int index) const;
+	void setLightSpeed(int index, const float speed);
+	bool isLightRotationAroundModel(int index) const;
+	bool isLightRotationAroundWorld(int index) const;
+	void setLightRotationAround(int index, const RotationType& type);
+	bool isLightSymmetricScaled(int index) const;
+	void setLightSymmetricScaled(int index, bool isSymmetric);
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);
 	Mode getProjModeForCam(int i) const;
 	void setCameraManipulated(int i, bool isManipulated);
 	bool isCameraManipulated(int i) const;
-	void setModelNormal(int i, Utils::Normals newNormal);
-	Utils::Normals getModelNormalStatus(int i) const;
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
 void showModelsListed(std::vector<std::shared_ptr<MeshModel>> models, Scene& scene, GUIStore& store, ImGuiIO& io);
+void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& store);
+void showLightningGUI(Scene& scene, GUIStore& store, ImGuiIO& io);
 void showBoundingBoxGUI(Scene& scene, GUIStore& store, int index);
 void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store);
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed);
 void showNormalGUI(Scene& scene, GUIStore& store, int index);
 void showModelColoringGUI(const Scene& scene, GUIStore& store, int index);
-void showLightningGUI(const Scene& scene, GUIStore& store);
+void showShadingGUI(const Scene& scene, GUIStore& store);
 const glm::vec4& GetClearColor();
 void showFocusButton(const char* const modelName, Scene& scene, GUIStore& store);
+void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io);
+void showAddLightGUI(Scene& scene);
+std::string generateLightName(const Light& light, int index);
