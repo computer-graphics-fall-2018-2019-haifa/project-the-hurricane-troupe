@@ -74,7 +74,7 @@ void showModelScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int inde
 	return;
 }
 
-void showLightScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int index, bool isLight = false) {
+void showLightScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int index) {
 	float* xFactor = new float(0.0f);
 	float* yFactor = new float(0.0f);
 	float* zFactor = new float(0.0f);
@@ -154,98 +154,76 @@ void showTranslationGUI(Scene& scene, GUIStore& store, int index, float* moveSpe
 	}
 }
 
-void resetActiveObjectRotation(Scene& scene, bool rotationAroundSelf, bool isLight) 
-{
-	if (isLight == true) {
-		if (rotationAroundSelf == true) {
+
+void showLightRotationGUI(Scene& scene, GUIStore& store, int index) 
+{ 
+	float xAngle = 0.0f;
+	float yAngle = 0.0f;
+	float zAngle = 0.0f;
+	bool modifiedRotation = false;
+	bool isRotationAroundSelf = store.isLightRotationAroundModel(index);
+	bool isWorldRotation = store.isLightRotationAroundWorld(index);
+
+	ImGui::Text("Rotate Controls:");
+	if (ImGui::RadioButton(stringIntConcatenate("Model##ModelRotation", index), isRotationAroundSelf)) {
+		store.setLightRotationAround(index, RotationType::MODEL);
+	}
+	ImGui::SameLine();
+	if (ImGui::RadioButton(stringIntConcatenate("World##WorldRotation", index), isWorldRotation)) {
+		store.setLightRotationAround(index, RotationType::WORLD);
+	}
+	ImGui::PushButtonRepeat(true);
+	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_Up)) { zAngle = -15.0f; modifiedRotation = true; }
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXPlus", index), ImGuiDir_Up)) {
+		xAngle = 15.0f; modifiedRotation = true;
+	}
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZPlus", index), ImGuiDir_Up)) { zAngle = 15.0f; modifiedRotation = true; }
+
+	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYMinus", index), ImGuiDir_Left)) { yAngle = -15.0f; modifiedRotation = true; }
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXMinus", index), ImGuiDir_Down)) { xAngle = -15.0f; modifiedRotation = true; }
+	ImGui::SameLine();
+	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYPlus", index), ImGuiDir_Right)) { yAngle = 15.0f; modifiedRotation = true; }
+
+	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) {
+		if (isRotationAroundSelf == true) {
 			scene.resetRotationActiveLight();
 		}
 		else {
 			scene.resetRotationAroundWorldActiveLight();
 		}
 	}
-	else {
-		if (rotationAroundSelf == true) {
-			scene.resetRotationActiveModel();
+	ImGui::PopButtonRepeat();
+
+	if (modifiedRotation) {
+		if (isRotationAroundSelf) {
+			scene.rotateActiveLight(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
 		}
 		else {
-			scene.resetRotationAroundWorldActiveModel();
-		}
-	}
-}
-
-void rotateObject(Scene& scene, const RotationRules& rotation, bool rotationAroundSelf, bool isLight) 
-{
-	if (rotationAroundSelf) {
-		if (isLight == true) {
-			scene.rotateActiveLight(rotation);
-		}
-		else {
-			scene.rotateActiveModel(rotation);
-		}
-	}
-	else {
-		if (isLight == true) {
-			scene.rotateActiveLightAroundWorld(rotation);
-		}
-		else {
-			scene.rotateActiveModelAroundWorld(rotation);
+			scene.rotateActiveLightAroundWorld(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
 		}
 	}
 }
 
 
-void setRotationAroundModel(GUIStore& store, int index, bool isLight)
+void showModelRotationGUI(Scene& scene, GUIStore& store, int index) 
 {
-	if (isLight == true) {
-		store.setLightRotationAround(index, RotationType::MODEL);
-	}
-	else {
-		store.setModelRotationAround(index, RotationType::MODEL);
-	}
-}
-
-void setRotationAroundWorld(GUIStore& store, int index, bool isLight)
-{
-	if (isLight == true) {
-		store.setLightRotationAround(index, RotationType::WORLD);
-	}
-	else {
-		store.setModelRotationAround(index, RotationType::WORLD);
-	}
-}
-
-bool isRotationAroundSelf(const GUIStore& store, int index, bool isLight)
-{
-	if (isLight == true) {
-		return store.isLightRotationAroundModel(index);
-	}
-	return store.isModelRotationAroundModel(index);
-}
-
-bool isRotationAroundWorld(GUIStore& store, int index, bool isLight)
-{
-	if (isLight == true) {
-		return store.isLightRotationAroundWorld(index);
-	}
-	return store.isModelRotationAroundWorld(index);
-}
-
-void showRotationGUI(Scene& scene, GUIStore& store, int index, bool isLight = false) {
 	float xAngle = 0.0f;
 	float yAngle = 0.0f;
 	float zAngle = 0.0f;
 	bool modifiedRotation = false;
-	bool isModelRotation = isRotationAroundSelf(store, index, isLight);
-	bool isWorldRotation = isRotationAroundWorld(store, index, isLight);
+	bool isRotationAroundSelf = store.isModelRotationAroundModel(index);
+	bool isRotationAroundWorld = store.isModelRotationAroundWorld(index);
 
 	ImGui::Text("Rotate Controls:");
-	if (ImGui::RadioButton(stringIntConcatenate("Model##ModelRotation", index), isModelRotation)) {
-		setRotationAroundModel(store, index, isLight);
+	if (ImGui::RadioButton(stringIntConcatenate("Model##ModelRotation", index), isRotationAroundSelf)) {
+		store.setModelRotationAround(index, RotationType::MODEL);
 	}
 	ImGui::SameLine();
-	if (ImGui::RadioButton(stringIntConcatenate("World##WorldRotation", index), isWorldRotation)) {
-		setRotationAroundWorld(store, index, isLight);
+	if (ImGui::RadioButton(stringIntConcatenate("World##WorldRotation", index), isRotationAroundWorld)) {
+		store.setModelRotationAround(index, RotationType::WORLD);
 	}
 	ImGui::PushButtonRepeat(true);
 	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_Up)) { zAngle = -15.0f; modifiedRotation = true; }
@@ -263,12 +241,22 @@ void showRotationGUI(Scene& scene, GUIStore& store, int index, bool isLight = fa
 	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYPlus", index), ImGuiDir_Right)) { yAngle = 15.0f; modifiedRotation = true; }
 	
 	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) {
-		resetActiveObjectRotation(scene, isModelRotation, isLight);
+		if (isRotationAroundSelf == true) {
+			scene.resetRotationActiveModel();
+		}
+		else {
+			scene.resetRotationAroundWorldActiveModel();
+		}
 	}
 	ImGui::PopButtonRepeat();
 	
 	if (modifiedRotation) {
-		rotateObject(scene, RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES), isModelRotation, isLight);
+		if (isRotationAroundSelf) {
+			scene.rotateActiveModel(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
+		}
+		else {
+			scene.rotateActiveModelAroundWorld(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
+		}
 	}
 }
 
@@ -321,7 +309,7 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	showModelScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
 	showTranslationGUI(scene, store, index, moveSpeed);
 	ImGui::Columns(3, "##Manipulation");
-	showRotationGUI(scene, store, index);
+	showModelRotationGUI(scene, store, index);
 	ImGui::NextColumn();
 	showNormalGUI(scene, store, index);
 	ImGui::NextColumn();
@@ -578,8 +566,8 @@ void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io) {
 				light->setLightColor(newColor);
 			}
 			float moveSpeed = store.getLightSpeed(index);
-			showLightScaleGUI(scene, store, store.isLightSymmetricScaled(index), index, true);
-			showRotationGUI(scene, store, index, true);
+			showLightScaleGUI(scene, store, store.isLightSymmetricScaled(index), index);
+			showLightRotationGUI(scene, store, index);
 			handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed, true);
 		}
 	}
