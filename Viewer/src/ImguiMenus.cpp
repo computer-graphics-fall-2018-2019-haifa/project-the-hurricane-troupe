@@ -23,9 +23,9 @@ const glm::vec4& GetClearColor()
 	return clearColor;
 }
 
-char* const stringToCharSeq(const std::string& str) 
+char* const stringToCharSeq(const std::string& str)
 {
-	int len = (int)str.length()+1;
+	int len = (int)str.length() + 1;
 	char** seq = new char*[1];
 	seq[0] = new char[len];
 	for (int i = 0; i < len; ++i)
@@ -49,7 +49,7 @@ void showModelScaleGUI(Scene& scene, GUIStore& store, bool isSymmetric, int inde
 	ImGui::SameLine();
 	char* modelsReset = stringIntConcatenate("Reset##AllAxisReset", index);
 	if (ImGui::Button(modelsReset)) { *xFactor = 1.0f; *yFactor = 1.0f; *zFactor = 1.0f; scene.symmetricScaleActiveModel(1.0f); }
-	
+
 	scene.getScalingFactorsActiveModel(xFactor, yFactor, zFactor);
 	if (isSymmetric) {
 		char* allScale = stringIntConcatenate("Scale##AllAxisScale", index);
@@ -129,9 +129,9 @@ void handleTranslationFromKeyboardInput(const char* const modelName, Scene& scen
 		else { yAddition -= moveStrength; }
 		changed = true;
 	}
-	else if (ImGui::IsKeyDown(left)) { xAddition -= moveStrength; changed = true;}
+	else if (ImGui::IsKeyDown(left)) { xAddition -= moveStrength; changed = true; }
 	else if (ImGui::IsKeyDown(right)) {
-		xAddition += moveStrength; 
+		xAddition += moveStrength;
 		changed = true;
 	}
 	if (changed) {
@@ -155,8 +155,8 @@ void showTranslationGUI(Scene& scene, GUIStore& store, int index, float* moveSpe
 }
 
 
-void showLightRotationGUI(Scene& scene, GUIStore& store, int index) 
-{ 
+void showLightRotationGUI(Scene& scene, GUIStore& store, int index)
+{
 	float xAngle = 0.0f;
 	float yAngle = 0.0f;
 	float zAngle = 0.0f;
@@ -208,7 +208,7 @@ void showLightRotationGUI(Scene& scene, GUIStore& store, int index)
 }
 
 
-void showModelRotationGUI(Scene& scene, GUIStore& store, int index) 
+void showModelRotationGUI(Scene& scene, GUIStore& store, int index)
 {
 	float xAngle = 0.0f;
 	float yAngle = 0.0f;
@@ -228,8 +228,8 @@ void showModelRotationGUI(Scene& scene, GUIStore& store, int index)
 	ImGui::PushButtonRepeat(true);
 	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZMinus", index), ImGuiDir_Up)) { zAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
-	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXPlus", index), ImGuiDir_Up)) { 
-		xAngle = 15.0f; modifiedRotation = true; 
+	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXPlus", index), ImGuiDir_Up)) {
+		xAngle = 15.0f; modifiedRotation = true;
 	}
 	ImGui::SameLine();
 	if (ImGui::ArrowButton(stringIntConcatenate("Z##RotateZPlus", index), ImGuiDir_Up)) { zAngle = 15.0f; modifiedRotation = true; }
@@ -239,7 +239,7 @@ void showModelRotationGUI(Scene& scene, GUIStore& store, int index)
 	if (ImGui::ArrowButton(stringIntConcatenate("X##RotateXMinus", index), ImGuiDir_Down)) { xAngle = -15.0f; modifiedRotation = true; }
 	ImGui::SameLine();
 	if (ImGui::ArrowButton(stringIntConcatenate("Y##RotateYPlus", index), ImGuiDir_Right)) { yAngle = 15.0f; modifiedRotation = true; }
-	
+
 	if (ImGui::Button(stringIntConcatenate("Clear Rotation##ClearRotation", index))) {
 		if (isRotationAroundSelf == true) {
 			scene.resetRotationActiveModel();
@@ -249,7 +249,7 @@ void showModelRotationGUI(Scene& scene, GUIStore& store, int index)
 		}
 	}
 	ImGui::PopButtonRepeat();
-	
+
 	if (modifiedRotation) {
 		if (isRotationAroundSelf) {
 			scene.rotateActiveModel(RotationRules(xAngle, yAngle, zAngle, AngleUnits::DEGREES));
@@ -267,7 +267,8 @@ void showNormalGUI(Scene& scene, GUIStore& store, int index) {
 	bool isPerFace = whichNormal == Utils::Normals::PerFACE;
 	bool isNone = whichNormal == Utils::Normals::NONE;
 	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Vertex##VertexNormals", index), &isPerVertex)) {
-		store.setModelNormal(index, Utils::Normals::PerVERTEX); }
+		store.setModelNormal(index, Utils::Normals::PerVERTEX);
+	}
 	if (ImGui::Checkbox(stringIntConcatenate("Show Normals Per Face##FaceNormals", index), &isPerFace)) { store.setModelNormal(index, Utils::Normals::PerFACE); }
 	if (ImGui::Checkbox(stringIntConcatenate("No Normals##FaceNormals", index), &isNone)) { store.setModelNormal(index, Utils::Normals::NONE); }
 	if (isNone == false) {
@@ -316,7 +317,49 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	showBoundingBoxGUI(scene, store, index);
 	ImGui::Columns(1);
 	ImGui::Separator();
-	showFocusButton(modelName,scene,store);
+	showFocusButton(modelName, scene, store);
+	ImGui::Columns(3, "##LightsSettings");
+	//Ambient settings
+	{
+		float ambientReflection = store.getAmbientReflectionIntinsety();
+		if (ImGui::SliderFloat("ambient light intensity", &ambientReflection, 0.0f, 1.0f)) {
+			store.setAmbientReflectionIntinsety(ambientReflection);
+		}
+		float ambient = store.getALightReflection();
+		if (ImGui::SliderFloat("ambient light reflected from surface", &ambient, 0.0f, 1.0f)) {
+			store.setAlightReflection(ambient);
+		}
+	}
+	ImGui::NextColumn();
+	//Defuse settings
+	{
+		float defuse = store.getDefuseReflectionIntinsety();
+		if (ImGui::SliderFloat("defuse light intensity", &defuse, 0.0f, 1.0f)) {
+			store.setDefuseReflectionIntinsety(defuse);
+		}
+		float defuseLightReflection = store.getDLightReflection();
+		if (ImGui::SliderFloat("defuse light reflected from surface", &defuseLightReflection, 0.0f, 1.0f)) {
+			store.setDlightReflection(defuseLightReflection);
+		}
+	}
+	ImGui::NextColumn();
+	//Specular settings
+	{
+		float defuse = store.getDefuseReflectionIntinsety();
+		if (ImGui::SliderFloat("defuse light intensity", &defuse, 0.0f, 1.0f)) {
+			store.setDefuseReflectionIntinsety(defuse);
+		}
+		float shine = store.getShine();
+		if (ImGui::SliderFloat("Shine", &shine, 0.0f, 1.0f)) {
+			store.setShine(shine);
+		}
+
+		float specularLightReflection = store.getDLightReflection();
+		if (ImGui::SliderFloat("specular light reflected from surface", &specularLightReflection, 0.0f, 1.0f)) {
+			store.setSlightReflection(specularLightReflection);
+		}
+	}
+	ImGui::Columns(1);
 }
 
 void showFocusButton(const char* const modelName, Scene& scene, GUIStore& store) {
@@ -328,7 +371,7 @@ void showFocusButton(const char* const modelName, Scene& scene, GUIStore& store)
 		float xAvg = (min.x + max.x) / 2.0f;
 		float yAvg = (min.y + max.y) / 2.0f;
 		float zAvg = (min.z + max.z) / 2.0f;
-		scene.setCameraVectors(glm::vec4(xAvg,yAvg,5.0,1), glm::vec4(xAvg, yAvg, zAvg, 1.0f), scene.getActiveCamera().getUpVector(), scene.GetActiveCameraIndex());
+		scene.setCameraVectors(glm::vec4(xAvg, yAvg, 5.0, 1), glm::vec4(xAvg, yAvg, zAvg, 1.0f), scene.getActiveCamera().getUpVector(), scene.GetActiveCameraIndex());
 	}
 }
 
@@ -347,12 +390,12 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 			store.setCameraManipulated(camIndex, true);
 			scene.SetActiveCameraIndex(camIndex);
 		}
-		if(scene.getActiveCamera().getIndex()==camIndex){
+		if (scene.getActiveCamera().getIndex() == camIndex) {
 			ImGui::SameLine();
 			if (ImGui::TreeNode(nameInString)) {
-				 glm::vec4 eye = cam.getEyeVector(); 
-				 glm::vec4 at = cam.getAtVector();
-				 glm::vec4 up = cam.getUpVector();
+				glm::vec4 eye = cam.getEyeVector();
+				glm::vec4 at = cam.getAtVector();
+				glm::vec4 up = cam.getUpVector();
 				//eye of the cams
 				{
 					ImGui::Columns(3, "mixed");
@@ -384,7 +427,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 				//up of the cam
 				{
 					ImGui::Columns(3, "mixed");
-					
+
 					ImGui::Text("UpOfCam");
 					ImGui::SameLine();
 					ImGui::InputFloat(stringToCharSeq("x##up" + std::to_string(camIndex)), &up.x, 1.0f, 0, "%.3f");
@@ -399,13 +442,13 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 				scene.setCameraVectors(eye, at, up, camIndex);
 				ImGui::TreePop();
 				ImGui::SameLine();
-				
+
 
 				//projection stuff
 				{
 					Mode mode = store.getProjModeForCam(camIndex);
 					ImGui::Text("Please select a projection type...");
-					if (ImGui::RadioButton("Orthographic",  mode == Mode::Orthographic)) {
+					if (ImGui::RadioButton("Orthographic", mode == Mode::Orthographic)) {
 						store.setCamsProjMode(camIndex, Mode::Orthographic);
 					}
 					ImGui::SameLine();
@@ -463,7 +506,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 					ImGui::Separator();
 
 					if (ImGui::Button("Look at ORIGIN")) {
-						
+
 						glm::vec4 eye = cam.getOrigEye();
 						glm::vec4 at = cam.getOrigAt();
 						glm::vec4 up = cam.getOrigUp();
@@ -482,7 +525,7 @@ void showCamerasListed(std::vector<Camera>& cameras, Scene& scene, GUIStore& sto
 					}
 				}
 			}
-		
+
 		}
 	}
 }
@@ -539,7 +582,7 @@ std::string generateLightName(const Light& light, int index) {
 	case LightType::POINT: {
 		return stringIntConcatenate("Point", index);
 	}
-	 break;
+						   break;
 	default: {
 		return "";
 	}
@@ -594,7 +637,6 @@ void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io) {
 					scene.updateLightDirection(index, x, y, z);
 				}
 			}
-
 		}
 	}
 }
@@ -842,7 +884,7 @@ GUIStore::GUIStore(const Scene & scene) :
 	_modelRotationType(scene.GetModelCount(), RotationType::MODEL),
 	projModeForCams(scene.GetCameraCount(), Mode::Perspective),
 	cameraCount(scene.GetCameraCount()),
-	_isCameraBeingManipulated(scene.GetCameraCount(),false),
+	_isCameraBeingManipulated(scene.GetCameraCount(), false),
 	_shading(INITIALSHADING),
 	fog(false),
 	fogColor(GetClearColor()),
@@ -857,7 +899,13 @@ GUIStore::GUIStore(const Scene & scene) :
 	_isLightSymmetricScaled(scene.getLightCount(), true),
 	_ambientLightColor(INITIALAMBIENTLIGHTCOLOR),
 	_ambientLightIntensity(INITIALAMBIENTLIGHTINTENSITY),
-	_Lights_actualDirection_UserDirection(scene.getLightCount())
+	_Lights_actualDirection_UserDirection(scene.getLightCount()),
+	ambientReflectionIntinsety(0.5f),
+	defuseReflectionIntinsety(0.5f),
+	shine(0.5f),
+	aLightReflect(0.5f),
+	dLightReflect(0.5f),
+	sLightReflect(0.5f)
 {
 }
 
@@ -877,8 +925,8 @@ void GUIStore::sync(const Scene& scene)
 		_modelRotationType.push_back(RotationType::MODEL);
 	}
 	_modelCount = newSize;
-	
-	
+
+
 	int camCount = scene.GetCameras().size();
 	if (camCount > cameraCount) {
 		_isCameraBeingManipulated.push_back(false);
@@ -1174,6 +1222,66 @@ void GUIStore::setCameraManipulated(int i, bool isManipulated)
 bool GUIStore::isCameraManipulated(int i) const
 {
 	return _isCameraBeingManipulated[i];
+}
+
+float GUIStore::getAmbientReflectionIntinsety() const
+{
+	return ambientReflectionIntinsety;
+}
+
+void GUIStore::setAmbientReflectionIntinsety(float number)
+{
+	ambientReflectionIntinsety = number;
+}
+
+float GUIStore::getDefuseReflectionIntinsety() const
+{
+	return defuseReflectionIntinsety;
+}
+
+void GUIStore::setDefuseReflectionIntinsety(float number)
+{
+	defuseReflectionIntinsety = number;
+}
+
+float GUIStore::getShine() const
+{
+	return shine;
+}
+
+void GUIStore::setShine(float number)
+{
+	shine = number;
+}
+
+float GUIStore::getALightReflection() const
+{
+	return aLightReflect;
+}
+
+void GUIStore::setAlightReflection(float number)
+{
+	aLightReflect = number;
+}
+
+float GUIStore::getDLightReflection() const
+{
+	return dLightReflect;
+}
+
+void GUIStore::setDlightReflection(float number)
+{
+	dLightReflect = number;
+}
+
+float GUIStore::getSLightReflection() const
+{
+	return sLightReflect;
+}
+
+void GUIStore::setSlightReflection(float number)
+{
+	sLightReflect = number;
 }
 
 void GUIStore::setModelNormal(int i, Utils::Normals newNormal)

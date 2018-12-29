@@ -74,4 +74,5 @@ public:
 	void rotateActiveLight(const RotationRules& rotation);
 	void rotateActiveLightAroundWorld(const RotationRules & rotation);
 	void updateLightDirection(int index, float x, float y, float z);
+	Light getActiveLight() const;
 };

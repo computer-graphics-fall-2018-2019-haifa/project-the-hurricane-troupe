@@ -52,7 +52,7 @@ public:
 	std::vector<glm::vec3> getVertices();
 	std::vector<Face> getFaces();
 	// Add more methods/functionality as needed...
-
+	glm::vec3 getMEshModelCente();
 	/* returns the updated transformation as a result of rotations, scalings and translations */
 	const glm::mat4x4& GetWorldTransformation();
 	/* scales model in the following way:

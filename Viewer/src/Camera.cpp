@@ -201,7 +201,7 @@ glm::vec4 Camera::getOrigAt()
 }
 
 
-glm::vec4 Camera::getEyeVector()
+glm::vec4 Camera::getEyeVector() const
 {
 	return eye;
 }

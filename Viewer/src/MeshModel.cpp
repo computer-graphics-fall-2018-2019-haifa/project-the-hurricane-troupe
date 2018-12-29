@@ -65,6 +65,16 @@ std::vector<Face> MeshModel::getFaces() {
 	return faces;
 }
 
+glm::vec3 MeshModel::getMEshModelCente()
+{
+	glm::vec3 min = minBoundingBoxVec;
+	glm::vec3 max = maxBoundingBoxVec;
+	float xAvg = (min.x + max.x) / 2.0f;
+	float yAvg = (min.y + max.y) / 2.0f;
+	float zAvg = (min.z + max.z) / 2.0f;
+	return glm::vec3(xAvg, yAvg, zAvg);
+}
+
 void MeshModel::_scale(float xFactor, float yFactor, float zFactor) {
 	_xScale = xFactor; _yScale = yFactor; _zScale = zFactor;
 	scaleTransform = glm::mat4x4({

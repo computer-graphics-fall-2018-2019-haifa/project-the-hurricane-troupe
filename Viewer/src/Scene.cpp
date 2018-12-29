@@ -163,6 +163,11 @@ void Scene::setActiveCameraAspectRatio(int oldWidth, int oldHeight, int newWidth
 	cameras[activeCameraIndex].setActiveProjection(which);
 }
 
+Light Scene::getActiveLight() const
+{
+	return *lights[activeLightIndex];
+}
+
 int Scene::getLightCount() const
 {
 	return lights.size();

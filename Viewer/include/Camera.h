@@ -67,7 +67,7 @@ public:
 	glm::vec4 getOrigEye();
 	glm::vec4 getOrigUp();
 	glm::vec4 getOrigAt();
-	glm::vec4 getEyeVector();
+	glm::vec4 getEyeVector() const ;
 	void setEyeVector(glm::vec4& vec);	
 	glm::vec4 getAtVector();
 	void setAtVector(glm::vec4& vec);	

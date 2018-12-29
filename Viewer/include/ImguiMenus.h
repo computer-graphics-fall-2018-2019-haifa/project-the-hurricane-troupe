@@ -51,6 +51,12 @@ private:
 	glm::vec3 _ambientLightColor;
 	float _ambientLightIntensity;
 	std::vector<std::pair<glm::vec3, glm::vec3>> _Lights_actualDirection_UserDirection;
+	float ambientReflectionIntinsety;
+	float defuseReflectionIntinsety;
+	float shine;
+	float aLightReflect;
+	float dLightReflect;
+	float sLightReflect;
 	//Camera variables
 	int cameraCount;
 	std::vector<Mode> projModeForCams;
@@ -112,6 +118,18 @@ public:
 	Mode getProjModeForCam(int i) const;
 	void setCameraManipulated(int i, bool isManipulated);
 	bool isCameraManipulated(int i) const;
+	float getAmbientReflectionIntinsety() const;
+	void setAmbientReflectionIntinsety(float number);
+	float getDefuseReflectionIntinsety() const;
+	void setDefuseReflectionIntinsety(float number);
+	float getShine() const;
+	void setShine(float number);
+	float getALightReflection() const;
+	void setAlightReflection(float number);
+	float getDLightReflection() const;
+	void setDlightReflection(float number);
+	float getSLightReflection() const;
+	void setSlightReflection(float number);
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);
