@@ -306,6 +306,7 @@ void showShadingGUI(const Scene & scene, GUIStore & store)
 
 void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIStore& store, int index, float* moveSpeed) {
 	ImGui::Text("What would you like to do to %s?", modelName);
+	showFocusButton(modelName, scene, store);
 	showModelColoringGUI(scene, store, index);
 	showModelScaleGUI(scene, store, store.isModelSymmetricScaled(index), index);
 	showTranslationGUI(scene, store, index, moveSpeed);
@@ -317,45 +318,47 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	showBoundingBoxGUI(scene, store, index);
 	ImGui::Columns(1);
 	ImGui::Separator();
-	showFocusButton(modelName, scene, store);
 	ImGui::Columns(3, "##LightsSettings");
 	//Ambient settings
 	{
+		ImGui::Text("Ambient Light:");
 		float ambientReflection = store.getAmbientReflectionIntinsety();
-		if (ImGui::SliderFloat("ambient light intensity", &ambientReflection, 0.0f, 1.0f)) {
+		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##AmbientIntensity", index), &ambientReflection, 0.0f, 1.0f)) {
 			store.setAmbientReflectionIntinsety(ambientReflection);
 		}
-		float ambient = store.getALightReflection();
-		if (ImGui::SliderFloat("ambient light reflected from surface", &ambient, 0.0f, 1.0f)) {
-			store.setAlightReflection(ambient);
+		float ambientReflected = store.getALightReflection();
+		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##AmbientReflection", index), &ambientReflected, 0.0f, 1.0f)) {
+			store.setAlightReflection(ambientReflected);
 		}
 	}
 	ImGui::NextColumn();
 	//Defuse settings
 	{
-		float defuse = store.getDefuseReflectionIntinsety();
-		if (ImGui::SliderFloat("defuse light intensity", &defuse, 0.0f, 1.0f)) {
-			store.setDefuseReflectionIntinsety(defuse);
+		ImGui::Text("Diffuse Light:");
+		float diffuseIntensity = store.getDefuseReflectionIntinsety();
+		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##DiffuseIntensity", index), &diffuseIntensity, 0.0f, 1.0f)) {
+			store.setDefuseReflectionIntinsety(diffuseIntensity);
 		}
-		float defuseLightReflection = store.getDLightReflection();
-		if (ImGui::SliderFloat("defuse light reflected from surface", &defuseLightReflection, 0.0f, 1.0f)) {
-			store.setDlightReflection(defuseLightReflection);
+		float diffuseLightReflection = store.getDLightReflection();
+		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##DiffuseReflection", index), &diffuseLightReflection, 0.0f, 1.0f)) {
+			store.setDlightReflection(diffuseLightReflection);
 		}
 	}
 	ImGui::NextColumn();
 	//Specular settings
 	{
+		ImGui::Text("Specular:");
 		float defuse = store.getDefuseReflectionIntinsety();
-		if (ImGui::SliderFloat("defuse light intensity", &defuse, 0.0f, 1.0f)) {
+		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##SpecularIntensity", index), &defuse, 0.0f, 1.0f)) {
 			store.setDefuseReflectionIntinsety(defuse);
 		}
 		float shine = store.getShine();
-		if (ImGui::SliderFloat("Shine", &shine, 0.0f, 1.0f)) {
+		if (ImGui::SliderFloat(stringIntConcatenate("Shine##SpecularShine", index), &shine, 0.0f, 1.0f)) {
 			store.setShine(shine);
 		}
 
 		float specularLightReflection = store.getDLightReflection();
-		if (ImGui::SliderFloat("specular light reflected from surface", &specularLightReflection, 0.0f, 1.0f)) {
+		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##LightReflection", index), &specularLightReflection, 0.0f, 1.0f)) {
 			store.setSlightReflection(specularLightReflection);
 		}
 	}
