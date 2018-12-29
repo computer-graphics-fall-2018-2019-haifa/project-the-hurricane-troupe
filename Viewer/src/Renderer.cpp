@@ -426,7 +426,7 @@ glm::vec3 Renderer::generateColorCorrectly(int x, int y, float pixelZ, const glm
 	return newColor;
 }
 
-glm::vec3 Renderer::generateColorFromShading(const ShadingType & shade, const glm::vec3& color,float) const
+glm::vec3 Renderer::generateColorFromShading(const ShadingType & shade, const glm::vec3& color,float& flatI) const
 {
 	if (shade == ShadingType::FLAT) {
 		// manipulatecolor

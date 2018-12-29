@@ -49,7 +49,7 @@ private:
 	float getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y2, float z2);
 	glm::vec3 generateColorFromFog(int x, int y, float pixelZ, const glm::vec3& originalColor, const GUIStore& store) const;
 	glm::vec3 generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const Scene& scene, const GUIStore& store,float& flaiI) const;
-	glm::vec3 generateColorFromShading(const ShadingType& shade, const glm::vec3& color) const;
+	glm::vec3 generateColorFromShading(const ShadingType& shade, const glm::vec3& color,float& flatI) const;
 	glm::vec3 generateColorFromAmbientLighting(const glm::vec3& ambientColor, const float intensity, const glm::vec3& color) const;
 	glm::vec3 generateColorFromLightSources(const glm::vec3& color, std::vector<std::shared_ptr<Light>> lights) const;
 	void filterLightSources(const std::vector<std::shared_ptr<Light>>& allLights, std::vector<std::shared_ptr<LightParallelSource>>* const parallelLights, std::vector<std::shared_ptr<LightPointSource>>* const pointLights) const;
