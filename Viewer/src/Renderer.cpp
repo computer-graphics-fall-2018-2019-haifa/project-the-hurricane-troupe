@@ -750,6 +750,8 @@ void Renderer::drawLightModels(const Scene & scene, const GUIStore& store)
 	std::vector<std::shared_ptr<Light>> lights = scene.getLights();
 	for each (std::shared_ptr<Light> light in lights) {
 
+		if (light->getLightType() == LightType::PARALLEL) continue;
+
 		glm::vec3 color = light->getLightColor();
 		std::vector<glm::vec2> textures = light->getTextures();
 		std::vector<glm::vec3> normals = light->getNormals();

@@ -62,11 +62,8 @@ public:
 	void setActiveCameraAspectRatio(int oldWidth, int oldHeight, int newWidth, int newHeight);
 
 	////Light controls:
-	Light getActiveLight() const;
 	int getLightCount() const;
 	void SetActiveLight(int index);
-	void SetLightIntensity(int index, bool on); // TODO: Should be changed to Intensity
-	void SwitchLight(int index, bool on_off);
 	std::vector<std::shared_ptr<Light>> getLights() const;
 	void symmetricScaleActiveLight(const float scalingFactor);
 	void getScalingFactorsActiveLight(float* const xFactor, float* const yFactor, float* const zFactor) const;
@@ -76,4 +73,5 @@ public:
 	void resetRotationAroundWorldActiveLight();
 	void rotateActiveLight(const RotationRules& rotation);
 	void rotateActiveLightAroundWorld(const RotationRules & rotation);
+	void updateLightDirection(int index, float x, float y, float z);
 };

@@ -46,6 +46,12 @@ void Scene::rotateActiveLightAroundWorld(const RotationRules & rotation)
 	lights[activeLightIndex]->rotateAroundWorld(rotation);
 }
 
+void Scene::updateLightDirection(int index, float x, float y, float z)
+{
+	if (index < 0 || index > lights.size()) return;
+	lights[index]->setDirection(glm::vec3(x, y, z));
+}
+
 
 void Scene::rotateActiveModelAroundWorld(const RotationRules & rotation)
 {

@@ -565,10 +565,36 @@ void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io) {
 				store.setLightColor(index, newColor);
 				light->setLightColor(newColor);
 			}
-			float moveSpeed = store.getLightSpeed(index);
-			showLightScaleGUI(scene, store, store.isLightSymmetricScaled(index), index);
-			showLightRotationGUI(scene, store, index);
-			handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed, true);
+			if (light->getLightType() == LightType::POINT) {
+				float moveSpeed = store.getLightSpeed(index);
+				showLightScaleGUI(scene, store, store.isLightSymmetricScaled(index), index);
+				showLightRotationGUI(scene, store, index);
+				handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed, true);
+			}
+			else if (light->getLightType() == LightType::PARALLEL) {
+				glm::vec3 direction = store.getActualLightDirection(index);
+				glm::vec3 userDirection = store.getUserSettingLightDirection(index);
+				float x = userDirection.x, y = userDirection.y, z = userDirection.z;
+				float actualX = direction.x, actualY = direction.y, actualZ = direction.z;
+				ImGui::Text("Current Direction: ");
+				ImGui::Text(stringToCharSeq("X: " + std::to_string(actualX)));
+				ImGui::SameLine();
+				ImGui::Text(stringToCharSeq("Y: " + std::to_string(actualY)));
+				ImGui::SameLine();
+				ImGui::Text(stringToCharSeq("Z: " + std::to_string(actualZ)));
+
+				ImGui::InputFloat(stringIntConcatenate("X##", index), &x);
+				ImGui::InputFloat(stringIntConcatenate("Y##", index), &y);
+				ImGui::InputFloat(stringIntConcatenate("Z##", index), &z);
+
+				store.updateUserSettingLightDirection(index, x, y, z);
+
+				if (ImGui::Button(stringIntConcatenate("Set New Direction##", index))) {
+					store.updateActualLightDirection(index, x, y, z);
+					scene.updateLightDirection(index, x, y, z);
+				}
+			}
+
 		}
 	}
 }
@@ -830,7 +856,8 @@ GUIStore::GUIStore(const Scene & scene) :
 	_lightRotationType(scene.getLightCount(), RotationType::MODEL),
 	_isLightSymmetricScaled(scene.getLightCount(), true),
 	_ambientLightColor(INITIALAMBIENTLIGHTCOLOR),
-	_ambientLightIntensity(INITIALAMBIENTLIGHTINTENSITY)
+	_ambientLightIntensity(INITIALAMBIENTLIGHTINTENSITY),
+	_Lights_actualDirection_UserDirection(scene.getLightCount())
 {
 }
 
@@ -868,6 +895,7 @@ void GUIStore::sync(const Scene& scene)
 		_lightSpeeds.push_back(INITIALMODELSPEED);
 		_lightRotationType.push_back(RotationType::MODEL);
 		_isLightSymmetricScaled.push_back(true);
+		_Lights_actualDirection_UserDirection.push_back(std::make_pair(scene.getLights().back()->getDirection(), scene.getLights().back()->getDirection()));
 	}
 	_lightsCount = lightCount;
 }
@@ -1101,6 +1129,30 @@ void GUIStore::setAmbientLightIntensity(const float intensity)
 {
 	if (intensity < 0.0f || intensity > 1.0f) return;
 	_ambientLightIntensity = intensity;
+}
+
+void GUIStore::updateUserSettingLightDirection(int index, float x, float y, float z)
+{
+	if (index < 0 || index >= _lightsCount) return;
+	_Lights_actualDirection_UserDirection[index].second = glm::vec3(x, y, z);
+}
+
+glm::vec3 GUIStore::getUserSettingLightDirection(int index) const
+{
+	if (index < 0 || index >= _lightsCount) return ERRORDIRECTION;
+	return _Lights_actualDirection_UserDirection[index].second;
+}
+
+void GUIStore::updateActualLightDirection(int index, float x, float y, float z)
+{
+	if (index < 0 || index >= _lightsCount) return;
+	_Lights_actualDirection_UserDirection[index].first = glm::vec3(x, y, z);
+}
+
+glm::vec3 GUIStore::getActualLightDirection(int index) const
+{
+	if (index < 0 || index >= _lightsCount) return ERRORDIRECTION;
+	return _Lights_actualDirection_UserDirection[index].first;
 }
 
 

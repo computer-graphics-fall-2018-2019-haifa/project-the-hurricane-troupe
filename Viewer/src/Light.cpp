@@ -45,6 +45,16 @@ LightType Light::getLightType() const
 	return _lightType;
 }
 
+void Light::setDirection(const glm::vec3 & dir)
+{
+	return;
+}
+
+glm::vec3 Light::getDirection() const
+{
+	return NODIRECTION;
+}
+
 LightPointSource::LightPointSource(): Light(LightType::POINT)
 {
 }
@@ -53,8 +63,23 @@ LightPointSource::~LightPointSource()
 {
 }
 
-LightParallelSource::LightParallelSource(): Light(LightType::PARALLEL)
+LightParallelSource::LightParallelSource(): Light(LightType::PARALLEL), _direction(SUNDIRECTION)
 {
+}
+
+void LightParallelSource::resetDirectionDefault()
+{
+	_direction = SUNDIRECTION;
+}
+
+glm::vec3 LightParallelSource::getDirection() const
+{
+	return _direction;
+}
+
+void LightParallelSource::setDirection(const glm::vec3 & dir)
+{
+	_direction = glm::normalize(dir);
 }
 
 LightParallelSource::~LightParallelSource()

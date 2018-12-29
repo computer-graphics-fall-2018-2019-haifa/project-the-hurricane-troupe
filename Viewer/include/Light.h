@@ -6,6 +6,7 @@ enum class LightType { POINT, PARALLEL };
 
 class Light: public MeshModel {
 private:
+	const glm::vec3 NODIRECTION = glm::vec3(-1.0f, -1.0f, -1.0f);
 	const glm::vec3 BLACKCOLOR = glm::vec3(0.0f, 0.0f, 0.0f);
 	float _intensity; //between 0.0f and 1.0f
 	glm::vec3 _lightColor;
@@ -22,6 +23,8 @@ public:
 	float getLightIntensity() const;
 	void setLightIntensity(const float intensity);
 	LightType getLightType() const;
+	virtual void setDirection(const glm::vec3& dir);
+	virtual glm::vec3 getDirection() const;
 };
 
 class LightPointSource : public Light {
@@ -34,9 +37,13 @@ public:
 
 class LightParallelSource : public Light {
 private:
-
+	const glm::vec3 SUNDIRECTION = glm::vec3(0.0f, -1.0f, 0.0f);
+	glm::vec3 _direction;
 public:
 	LightParallelSource();
+	void resetDirectionDefault();
+	glm::vec3 getDirection() const override;
+	void setDirection(const glm::vec3& dir) override;
 	~LightParallelSource();
 };
 

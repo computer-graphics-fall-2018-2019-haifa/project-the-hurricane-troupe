@@ -20,6 +20,7 @@ private:
 	const glm::vec3 INITIALLIGHTCOLOR = glm::vec3(1.0f, 1.0f, 1.0f);
 	const glm::vec3 INITIALAMBIENTLIGHTCOLOR = glm::vec3(1.0f, 1.0f, 1.0f); // white
 	const float INITIALAMBIENTLIGHTINTENSITY = 0.0f;
+	const glm::vec3 ERRORDIRECTION = glm::vec3(-2.0f, -2.0f, -2.0f);
 	Scene _scene;
 
 	//Model variables
@@ -49,6 +50,7 @@ private:
 	std::vector<bool> _isLightSymmetricScaled;
 	glm::vec3 _ambientLightColor;
 	float _ambientLightIntensity;
+	std::vector<std::pair<glm::vec3, glm::vec3>> _Lights_actualDirection_UserDirection;
 	//Camera variables
 	int cameraCount;
 	std::vector<Mode> projModeForCams;
@@ -101,6 +103,10 @@ public:
 	void setAmbientLightColor(const glm::vec3& color);
 	float getAmbientLightIntensity() const;
 	void setAmbientLightIntensity(const float intensity);
+	void updateUserSettingLightDirection(int index, float x, float y, float z);
+	glm::vec3 getUserSettingLightDirection(int index) const;
+	void updateActualLightDirection(int index, float x, float y, float z);
+	glm::vec3 getActualLightDirection(int index) const;
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);
 	Mode getProjModeForCam(int i) const;
