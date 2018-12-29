@@ -270,12 +270,12 @@ float Renderer::getMin(float a, float b, float c, float d)
 }
 
 
-void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const GUIStore& store)
+void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const Scene& scene, const GUIStore& store)
 {
 	for (int y = maxY; y >= minY; --y) {
 		float pixelZ = -1000.0f;
 		if (isPointInTriangle(x, y, point1, point2, point3, &pixelZ)) {
-			glm::vec3 finalColor = generateColorCorrectly(x, y, pixelZ, color, store);
+			glm::vec3 finalColor = generateColorCorrectly(x, y, pixelZ, color, scene, store);
 			colorPixel(x, y, pixelZ, finalColor);
 		}
 	}
@@ -346,20 +346,49 @@ glm::vec3 Renderer::generateColorFromFog(int x, int y, float pixelZ, const glm::
 
 glm::vec3 Renderer::generateColorFromAmbientLighting(const glm::vec3& ambientColor, const float intensity, const glm::vec3& color) const
 {
+	if (intensity < 0.0f || intensity > 1.0f) return color;
 	return intensity * ambientColor + (1.0f - intensity) * color;
 }
 
-glm::vec3 Renderer::generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const GUIStore & store) const
+glm::vec3 Renderer::generateColorFromLightSources(const glm::vec3& color, std::vector<std::shared_ptr<Light>> lights) const
+{
+	std::vector<std::shared_ptr<LightParallelSource>> parallelLights(0);
+	std::vector<std::shared_ptr<LightPointSource>> pointLights(0);
+	filterLightSources(lights, &parallelLights, &pointLights);
+	//computeColorsFromParallelLights();
+	//computeColorsFromLightSources();
+	return color;
+}
+
+void Renderer::filterLightSources(const std::vector<std::shared_ptr<Light>>& allLights, std::vector<std::shared_ptr<LightParallelSource>>* const parallelLights, std::vector<std::shared_ptr<LightPointSource>>* const pointLights) const
+{
+	for each (std::shared_ptr<Light> light in allLights)
+	{
+		std::shared_ptr<LightParallelSource> PLS = std::dynamic_pointer_cast<LightParallelSource>(light);
+		if (PLS != nullptr) {
+			parallelLights->push_back(PLS);
+		}
+		std::shared_ptr<LightPointSource> LPS = std::dynamic_pointer_cast<LightPointSource>(light);
+		if (LPS != nullptr) {
+			pointLights->push_back(LPS);
+		}
+	}
+}
+
+glm::vec3 Renderer::generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const Scene& scene, const GUIStore & store) const
 {
 	glm::vec3 newColor = originalColor;
 	ShadingType shading = store.getShading();
-	generateColorFromShading(shading);
+	// Order of these calls is important!
+	newColor = generateColorFromShading(shading, newColor);
 	newColor = generateColorFromAmbientLighting(store.getAmbientLightColor(), store.getAmbientLightIntensity(), newColor);
+	newColor = generateColorFromLightSources(newColor, scene.getLights());
 	newColor = generateColorFromFog(x, y, pixelZ, newColor, store);
+	// Do not change the above order of these calls!
 	return newColor;
 }
 
-void Renderer::generateColorFromShading(const ShadingType & shade) const
+glm::vec3 Renderer::generateColorFromShading(const ShadingType & shade, const glm::vec3& color) const
 {
 	if (shade == ShadingType::FLAT) {
 		// manipulatecolor
@@ -372,6 +401,7 @@ void Renderer::generateColorFromShading(const ShadingType & shade) const
 	{
 		// manipulate color
 	}
+	return color;
 }
 
 void Renderer::plotLineHigh(int x1, int y1, float z1, int x2, int y2, float z2, const glm::vec3& color) {
@@ -459,7 +489,7 @@ void Renderer::drawLine(const glm::vec3& point1, const glm::vec3& point2, const 
 	}
 }
 
-void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const GUIStore& store)
+void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const Scene& scene, const GUIStore& store)
 {
 	//steps:
 	/*
@@ -473,7 +503,7 @@ void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm
 	int minY = getMin(p1.y, p2.y, p3.y);
 	int maxY = getMax(p1.y, p2.y, p3.y);
 	for (int x = minX; x <= maxX; ++x) {
-		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color,store);
+		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color, scene, store);
 	}
 }
 
@@ -654,7 +684,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
-			colorTriangle(p1, p2, p3, modelColor,store);
+			colorTriangle(p1, p2, p3, modelColor, scene, store);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);
@@ -746,7 +776,7 @@ void Renderer::drawLightModels(const Scene & scene, const GUIStore& store)
 			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
-			colorTriangle(p1, p2, p3, color, store);
+			colorTriangle(p1, p2, p3, color, scene, store);
 		}
 	}
 }

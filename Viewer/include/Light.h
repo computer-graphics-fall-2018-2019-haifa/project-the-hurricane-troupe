@@ -22,10 +22,6 @@ public:
 	float getLightIntensity() const;
 	void setLightIntensity(const float intensity);
 	LightType getLightType() const;
-
-	//TODO: Might need to change the signarture
-	//virtual void getLightDirection() const =0;
-	//virtual void setLightDirection(const glm::vec3& direction)=0;
 };
 
 class LightPointSource : public Light {

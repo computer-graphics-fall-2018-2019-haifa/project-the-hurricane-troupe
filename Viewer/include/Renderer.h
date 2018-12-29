@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 #include "ClosestPixel.h"
+#include <memory>
 
 /*
  * Renderer class.
@@ -41,15 +42,17 @@ private:
 	float getMin(float a, float b);
 	float getMin(float a, float b, float c);
 	float getMin(float a, float b, float c, float d);
-	void colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const GUIStore& store);
+	void colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const Scene& scene, const GUIStore& store);
 	bool isPointInTriangle(int x, int y, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, float* const pixelZ);
 	glm::vec3 generateColorVariation(const glm::vec3& color, float variation);
 	glm::vec3 Color256ToMinimizedScaling(const glm::vec3 & color, float variation);
 	float getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y2, float z2);
 	glm::vec3 generateColorFromFog(int x, int y, float pixelZ, const glm::vec3& originalColor, const GUIStore& store) const;
-	glm::vec3 generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const GUIStore& store) const;
-	void generateColorFromShading(const ShadingType& shade) const;
+	glm::vec3 generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const Scene& scene, const GUIStore& store) const;
+	glm::vec3 generateColorFromShading(const ShadingType& shade, const glm::vec3& color) const;
 	glm::vec3 generateColorFromAmbientLighting(const glm::vec3& ambientColor, const float intensity, const glm::vec3& color) const;
+	glm::vec3 generateColorFromLightSources(const glm::vec3& color, std::vector<std::shared_ptr<Light>> lights) const;
+	void filterLightSources(const std::vector<std::shared_ptr<Light>>& allLights, std::vector<std::shared_ptr<LightParallelSource>>* const parallelLights, std::vector<std::shared_ptr<LightPointSource>>* const pointLights) const;
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	~Renderer();
@@ -59,7 +62,7 @@ public:
 	void ClearColorBuffer(const glm::vec3& color);
 	void SetViewport(Scene* const scene, int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	void drawLine(const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& color);
-	void colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const GUIStore& store);
+	void colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const Scene& scene, const GUIStore& store);
 	void drawTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color);
 	void handleFaceNormalsDrawing(Utils::Normals normalType, const GUIStore& store, const Face& face, std::vector<glm::vec3>& normalsPerPoint, const glm::vec4& originalPoint1, const glm::vec3& pixelPoint1, const glm::vec4& originalPoint2, const glm::vec3& pixelPoint2, const glm::vec4& originalPoint3, const glm::vec3& pixelPoint3, const glm::mat4x4& transform, int modelGUIIndex, const glm::vec3& colorPerFaceNormal, const glm::vec3& colorPerVertexNormal);
 	void handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex, float x1, float y1, float z1, float x2, float y2, float z2, const glm::mat4x4& transform, const glm::vec3& color);
