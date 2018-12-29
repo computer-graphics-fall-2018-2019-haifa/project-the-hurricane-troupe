@@ -18,6 +18,8 @@ private:
 	const int ERRORINDEX = -1;
 	const float ERRORSPEED = -1.0f;
 	const glm::vec3 INITIALLIGHTCOLOR = glm::vec3(1.0f, 1.0f, 1.0f);
+	const glm::vec3 INITIALAMBIENTLIGHTCOLOR = glm::vec3(1.0f, 1.0f, 1.0f); // white
+	const float INITIALAMBIENTLIGHTINTENSITY = 0.0f;
 	Scene _scene;
 
 	//Model variables
@@ -45,6 +47,8 @@ private:
 	int _lightsCount;
 	std::vector<RotationType> _lightRotationType;
 	std::vector<bool> _isLightSymmetricScaled;
+	glm::vec3 _ambientLightColor;
+	float _ambientLightIntensity;
 	//Camera variables
 	int cameraCount;
 	std::vector<Mode> projModeForCams;
@@ -93,6 +97,10 @@ public:
 	void setLightRotationAround(int index, const RotationType& type);
 	bool isLightSymmetricScaled(int index) const;
 	void setLightSymmetricScaled(int index, bool isSymmetric);
+	glm::vec3 getAmbientLightColor() const;
+	void setAmbientLightColor(const glm::vec3& color);
+	float getAmbientLightIntensity() const;
+	void setAmbientLightIntensity(const float intensity);
 	//Camera Management functions:
 	void setCamsProjMode(int i, Mode mode);
 	Mode getProjModeForCam(int i) const;

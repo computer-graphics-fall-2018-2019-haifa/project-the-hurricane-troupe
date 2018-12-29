@@ -587,8 +587,21 @@ void showBoundingBoxGUI(Scene& scene, GUIStore& store, int index)
 	}
 }
 
-void addFogToTheWorld() {
+void showAmbientLightGUI(GUIStore& store)
+{
+	glm::vec3 newColor = store.getAmbientLightColor();
+	float intensity = store.getAmbientLightIntensity();
+	ImGui::Text("Ambient Light:");
+	ImGui::SameLine();
+	if (ImGui::ColorEdit3("##AmbientLight", (float*)&newColor)) {
+		store.setAmbientLightColor(newColor);
+	}
 
+	ImGui::Text("Intensity:");
+	ImGui::SameLine();
+	if (ImGui::SliderFloat("##AmbientIntensity", &intensity, 0.0f, 1.0f)) {
+		store.setAmbientLightIntensity(intensity);
+	}
 }
 
 void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
@@ -632,6 +645,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 			showCamerasListed(cameras, scene, store);
 		}
 		ImGui::Begin("Lights Menu");
+		showAmbientLightGUI(store);
 		if (ImGui::CollapsingHeader("Lights")) {
 			// List All Lights
 			showLightningGUI(scene, store, io);
@@ -814,7 +828,9 @@ GUIStore::GUIStore(const Scene & scene) :
 	_lightsColors(scene.getLightCount(), INITIALLIGHTCOLOR),
 	_lightSpeeds(scene.getLightCount(), INITIALMODELSPEED),
 	_lightRotationType(scene.getLightCount(), RotationType::MODEL),
-	_isLightSymmetricScaled(scene.getLightCount(), true)
+	_isLightSymmetricScaled(scene.getLightCount(), true),
+	_ambientLightColor(INITIALAMBIENTLIGHTCOLOR),
+	_ambientLightIntensity(INITIALAMBIENTLIGHTINTENSITY)
 {
 }
 
@@ -1063,6 +1079,28 @@ void GUIStore::setLightSymmetricScaled(int index, bool isSymmetric)
 {
 	if (index < 0 || index >= _lightsCount) return;
 	_isLightSymmetricScaled[index] = isSymmetric;
+}
+
+glm::vec3 GUIStore::getAmbientLightColor() const
+{
+	return _ambientLightColor;
+}
+
+void GUIStore::setAmbientLightColor(const glm::vec3& color)
+{
+	if (Utils::isColorLegal(color) == false) return;
+	_ambientLightColor = color;
+}
+
+float GUIStore::getAmbientLightIntensity() const
+{
+	return _ambientLightIntensity;
+}
+
+void GUIStore::setAmbientLightIntensity(const float intensity)
+{
+	if (intensity < 0.0f || intensity > 1.0f) return;
+	_ambientLightIntensity = intensity;
 }
 
 

@@ -344,11 +344,19 @@ glm::vec3 Renderer::generateColorFromFog(int x, int y, float pixelZ, const glm::
 	return originalColor;
 }
 
+glm::vec3 Renderer::generateColorFromAmbientLighting(const glm::vec3& ambientColor, const float intensity, const glm::vec3& color) const
+{
+	return intensity * ambientColor + (1.0f - intensity) * color;
+}
+
 glm::vec3 Renderer::generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const GUIStore & store) const
 {
+	glm::vec3 newColor = originalColor;
 	ShadingType shading = store.getShading();
 	generateColorFromShading(shading);
-	return generateColorFromFog(x, y, pixelZ, originalColor, store);
+	newColor = generateColorFromAmbientLighting(store.getAmbientLightColor(), store.getAmbientLightIntensity(), newColor);
+	newColor = generateColorFromFog(x, y, pixelZ, newColor, store);
+	return newColor;
 }
 
 void Renderer::generateColorFromShading(const ShadingType & shade) const
@@ -645,8 +653,6 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
 			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
-
-			//drawTriangle(p1, p2, p3, triangleColor);
 
 			colorTriangle(p1, p2, p3, modelColor,store);
 			/* --------------------------------------------------------------------------------------------- */

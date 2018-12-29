@@ -49,6 +49,7 @@ private:
 	glm::vec3 generateColorFromFog(int x, int y, float pixelZ, const glm::vec3& originalColor, const GUIStore& store) const;
 	glm::vec3 generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const GUIStore& store) const;
 	void generateColorFromShading(const ShadingType& shade) const;
+	glm::vec3 generateColorFromAmbientLighting(const glm::vec3& ambientColor, const float intensity, const glm::vec3& color) const;
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	~Renderer();
