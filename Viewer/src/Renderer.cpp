@@ -270,41 +270,42 @@ float Renderer::getMin(float a, float b, float c, float d)
 }
 
 float Renderer::getFlatReflectionIllumination(const GUIStore& store, const glm::vec3& lightCenter, const glm::vec3& faceNormal, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye) const {
-	float Ia, Id, Is;
-	//========= Ambient
-	{
-		Ia = store.getALightReflection()*store.getAmbientReflectionIntinsety();
-	}
+	//float Ia, Id, Is;
+	////========= Ambient
+	//{
+	//	Ia = store.getALightReflection()*store.getAmbientReflectionIntinsety();
+	//}
 
-	glm::vec3 pixelFaceNormal = translatePointIndicesToPixels(glm::vec4(faceNormal, 1.0f), transform);
-	//========= defuse reflection
-	{
-		float Kd = store.getDefuseReflectionIntinsety();
-		float Kl = store.getDLightReflection();
-		glm::vec2 finalL = glm::vec2(x - lightCenter.x, y - lightCenter.y);
-		glm::vec2 finalN = glm::vec2(pixelFaceNormal.x - x, pixelFaceNormal.y - y);
-		float lLen = glm::distance(glm::vec2(x, y), glm::vec2(lightCenter.x, lightCenter.y));
-		float nLen = glm::distance(glm::vec2(x, y), glm::vec2(pixelFaceNormal.x, pixelFaceNormal.y));
-		Id =  (Kd*Kl*glm::dot(finalL, finalN)) / (nLen*lLen);
-	}
+	//glm::vec3 pixelFaceNormal = translatePointIndicesToPixels(glm::vec4(faceNormal, 1.0f), transform);
+	////========= defuse reflection
+	//{
+	//	float Kd = store.getDefuseReflectionIntinsety();
+	//	float Kl = store.getDLightReflection();
+	//	glm::vec2 finalL = glm::vec2(x - lightCenter.x, y - lightCenter.y);
+	//	glm::vec2 finalN = glm::vec2(pixelFaceNormal.x - x, pixelFaceNormal.y - y);
+	//	float lLen = glm::distance(glm::vec2(x, y), glm::vec2(lightCenter.x, lightCenter.y));
+	//	float nLen = glm::distance(glm::vec2(x, y), glm::vec2(pixelFaceNormal.x, pixelFaceNormal.y));
+	//	Id =  (Kd*Kl*glm::dot(finalL, finalN)) / (nLen*lLen);
+	//}
 
-	//========= specular reflection
-	{
+	////========= specular reflection
+	//{
 
-		float d = pixelFaceNormal.x - lightCenter.x;
-		float Kd = store.getDefuseReflectionIntinsety();
-		float Ks = store.getSLightReflection();
-		float shine = store.getShine();
-		glm::vec2 reflectionPoint((lightCenter.x + abs(2*d)), lightCenter.y);
-		glm::vec2 finalR = glm::vec2(reflectionPoint.x - x, reflectionPoint.y - y);
-		glm::vec2 finalV = glm::vec2(x - cameraEye.x, y - cameraEye.y);
-		float rLen = glm::distance(glm::vec2(x, y), reflectionPoint);
-		float vLen = glm::distance(glm::vec2(x, y), glm::vec2(cameraEye.x, cameraEye.y));
-		float cosTeta = glm::dot(finalR, finalV) / (rLen*vLen);
-		float _pow = pow(abs(cosTeta), shine);
-		Is= (Kd*Ks*_pow);
-	}
-	return Ia + Id + Is;
+	//	float d = pixelFaceNormal.x - lightCenter.x;
+	//	float Kd = store.getDefuseReflectionIntinsety();
+	//	float Ks = store.getSLightReflection();
+	//	float shine = store.getShine();
+	//	glm::vec2 reflectionPoint((lightCenter.x + abs(2*d)), lightCenter.y);
+	//	glm::vec2 finalR = glm::vec2(reflectionPoint.x - x, reflectionPoint.y - y);
+	//	glm::vec2 finalV = glm::vec2(x - cameraEye.x, y - cameraEye.y);
+	//	float rLen = glm::distance(glm::vec2(x, y), reflectionPoint);
+	//	float vLen = glm::distance(glm::vec2(x, y), glm::vec2(cameraEye.x, cameraEye.y));
+	//	float cosTeta = glm::dot(finalR, finalV) / (rLen*vLen);
+	//	float _pow = pow(abs(cosTeta), shine);
+	//	Is= (Kd*Ks*_pow);
+	//}
+	//return Ia + Id + Is;
+	return 0;
 }
 
 void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const GUIStore& store, const Face& face, const glm::mat4x4& transform, const Scene& scene, const MeshModel& model)

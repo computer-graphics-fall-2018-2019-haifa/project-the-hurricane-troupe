@@ -322,44 +322,44 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	//Ambient settings
 	{
 		ImGui::Text("Ambient Light:");
-		float ambientReflection = store.getAmbientReflectionIntinsety();
+		float ambientReflection = store.getAmbientReflectionIntinsety(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##AmbientIntensity", index), &ambientReflection, 0.0f, 1.0f)) {
-			store.setAmbientReflectionIntinsety(ambientReflection);
+			store.setAmbientReflectionIntinsety(index, ambientReflection);
 		}
-		float ambientReflected = store.getALightReflection();
+		float ambientReflected = store.getALightReflection(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##AmbientReflection", index), &ambientReflected, 0.0f, 1.0f)) {
-			store.setAlightReflection(ambientReflected);
+			store.setAlightReflection(index, ambientReflected);
 		}
 	}
 	ImGui::NextColumn();
 	//Defuse settings
 	{
 		ImGui::Text("Diffuse Light:");
-		float diffuseIntensity = store.getDefuseReflectionIntinsety();
+		float diffuseIntensity = store.getDefuseReflectionIntinsety(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##DiffuseIntensity", index), &diffuseIntensity, 0.0f, 1.0f)) {
-			store.setDefuseReflectionIntinsety(diffuseIntensity);
+			store.setDefuseReflectionIntinsety(index, diffuseIntensity);
 		}
-		float diffuseLightReflection = store.getDLightReflection();
+		float diffuseLightReflection = store.getDLightReflection(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##DiffuseReflection", index), &diffuseLightReflection, 0.0f, 1.0f)) {
-			store.setDlightReflection(diffuseLightReflection);
+			store.setDlightReflection(index, diffuseLightReflection);
 		}
 	}
 	ImGui::NextColumn();
 	//Specular settings
 	{
 		ImGui::Text("Specular:");
-		float defuse = store.getDefuseReflectionIntinsety();
+		float defuse = store.getDefuseReflectionIntinsety(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##SpecularIntensity", index), &defuse, 0.0f, 1.0f)) {
-			store.setDefuseReflectionIntinsety(defuse);
+			store.setDefuseReflectionIntinsety(index, defuse);
 		}
-		float shine = store.getShine();
+		float shine = store.getShine(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Shine##SpecularShine", index), &shine, 0.0f, 1.0f)) {
-			store.setShine(shine);
+			store.setShine(index, shine);
 		}
 
-		float specularLightReflection = store.getDLightReflection();
+		float specularLightReflection = store.getSLightReflection(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##LightReflection", index), &specularLightReflection, 0.0f, 1.0f)) {
-			store.setSlightReflection(specularLightReflection);
+			store.setSlightReflection(index, specularLightReflection);
 		}
 	}
 	ImGui::Columns(1);
@@ -903,12 +903,12 @@ GUIStore::GUIStore(const Scene & scene) :
 	_ambientLightColor(INITIALAMBIENTLIGHTCOLOR),
 	_ambientLightIntensity(INITIALAMBIENTLIGHTINTENSITY),
 	_Lights_actualDirection_UserDirection(scene.getLightCount()),
-	ambientReflectionIntinsety(0.5f),
-	defuseReflectionIntinsety(0.5f),
-	shine(0.5f),
-	aLightReflect(0.5f),
-	dLightReflect(0.5f),
-	sLightReflect(0.5f)
+	ambientReflectionIntinsety(scene.GetModelCount(), 0.5f),
+	defuseReflectionIntinsety(scene.GetModelCount(), 0.5f),
+	shine(scene.GetModelCount(), 0.5f),
+	aLightReflect(scene.GetModelCount(), 0.5f),
+	dLightReflect(scene.GetModelCount(), 0.5f),
+	sLightReflect(scene.GetModelCount(), 0.5f)
 {
 }
 
@@ -926,6 +926,12 @@ void GUIStore::sync(const Scene& scene)
 		_isModelBoundingBoxOn.push_back(false);
 		_modelColor.push_back(INITIALMESHMODELCOLOR);
 		_modelRotationType.push_back(RotationType::MODEL);
+		ambientReflectionIntinsety.push_back(0.5f);
+		defuseReflectionIntinsety.push_back(0.5f);
+		shine.push_back(0.5f);
+		aLightReflect.push_back(0.5f);
+		dLightReflect.push_back(0.5f);
+		sLightReflect.push_back(0.5f);;
 	}
 	_modelCount = newSize;
 
@@ -1227,64 +1233,64 @@ bool GUIStore::isCameraManipulated(int i) const
 	return _isCameraBeingManipulated[i];
 }
 
-float GUIStore::getAmbientReflectionIntinsety() const
+float GUIStore::getAmbientReflectionIntinsety(int index) const
 {
-	return ambientReflectionIntinsety;
+	return ambientReflectionIntinsety[index];
 }
 
-void GUIStore::setAmbientReflectionIntinsety(float number)
+void GUIStore::setAmbientReflectionIntinsety(int i, float number)
 {
-	ambientReflectionIntinsety = number;
+	ambientReflectionIntinsety[i] = number;
 }
 
-float GUIStore::getDefuseReflectionIntinsety() const
+float GUIStore::getDefuseReflectionIntinsety(int i) const
 {
-	return defuseReflectionIntinsety;
+	return defuseReflectionIntinsety[i];
 }
 
-void GUIStore::setDefuseReflectionIntinsety(float number)
+void GUIStore::setDefuseReflectionIntinsety(int i, float number)
 {
-	defuseReflectionIntinsety = number;
+	defuseReflectionIntinsety[i] = number;
 }
 
-float GUIStore::getShine() const
+float GUIStore::getShine(int i) const
 {
-	return shine;
+	return shine[i];
 }
 
-void GUIStore::setShine(float number)
+void GUIStore::setShine(int i, float number)
 {
-	shine = number;
+	shine[i] = number;
 }
 
-float GUIStore::getALightReflection() const
+float GUIStore::getALightReflection(int i) const
 {
-	return aLightReflect;
+	return aLightReflect[i];
 }
 
-void GUIStore::setAlightReflection(float number)
+void GUIStore::setAlightReflection(int i, float number)
 {
-	aLightReflect = number;
+	aLightReflect[i] = number;
 }
 
-float GUIStore::getDLightReflection() const
+float GUIStore::getDLightReflection(int i) const
 {
-	return dLightReflect;
+	return dLightReflect[i];
 }
 
-void GUIStore::setDlightReflection(float number)
+void GUIStore::setDlightReflection(int i, float number)
 {
-	dLightReflect = number;
+	dLightReflect[i] = number;
 }
 
-float GUIStore::getSLightReflection() const
+float GUIStore::getSLightReflection(int i) const
 {
-	return sLightReflect;
+	return sLightReflect[i];
 }
 
-void GUIStore::setSlightReflection(float number)
+void GUIStore::setSlightReflection(int i, float number)
 {
-	sLightReflect = number;
+	sLightReflect[i] = number;
 }
 
 void GUIStore::setModelNormal(int i, Utils::Normals newNormal)
