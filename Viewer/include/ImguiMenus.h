@@ -11,6 +11,7 @@ class GUIStore
 {
 private:
 	const int SYNCERROR = -50;
+	const float ERRORREFLECTION = -1.0f;
 	const float INITIALMODELSPEED = 1.0f; //pixels
 	const float INITIALMODELNORMALLENGTH = 0.5f;
 	const glm::vec3 INITIALMESHMODELCOLOR = glm::vec3(1.0f, 0.0f, 0.0f); //red color

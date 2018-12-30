@@ -931,7 +931,7 @@ void GUIStore::sync(const Scene& scene)
 		shine.push_back(0.5f);
 		aLightReflect.push_back(0.5f);
 		dLightReflect.push_back(0.5f);
-		sLightReflect.push_back(0.5f);;
+		sLightReflect.push_back(0.5f);
 	}
 	_modelCount = newSize;
 
@@ -1233,63 +1233,75 @@ bool GUIStore::isCameraManipulated(int i) const
 	return _isCameraBeingManipulated[i];
 }
 
-float GUIStore::getAmbientReflectionIntinsety(int index) const
+float GUIStore::getAmbientReflectionIntinsety(int i) const
 {
-	return ambientReflectionIntinsety[index];
+	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
+	return ambientReflectionIntinsety[i];
 }
 
 void GUIStore::setAmbientReflectionIntinsety(int i, float number)
 {
+	if (i < 0 || i >= _modelCount) return;
 	ambientReflectionIntinsety[i] = number;
 }
 
 float GUIStore::getDefuseReflectionIntinsety(int i) const
 {
+	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return defuseReflectionIntinsety[i];
 }
 
 void GUIStore::setDefuseReflectionIntinsety(int i, float number)
 {
+	if (i < 0 || i >= _modelCount) return;
 	defuseReflectionIntinsety[i] = number;
 }
 
 float GUIStore::getShine(int i) const
 {
+	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return shine[i];
 }
 
 void GUIStore::setShine(int i, float number)
 {
+	if (i < 0 || i >= _modelCount) return;
 	shine[i] = number;
 }
 
 float GUIStore::getALightReflection(int i) const
 {
+	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return aLightReflect[i];
 }
 
 void GUIStore::setAlightReflection(int i, float number)
 {
+	if (i < 0 || i >= _modelCount) return;
 	aLightReflect[i] = number;
 }
 
 float GUIStore::getDLightReflection(int i) const
 {
+	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return dLightReflect[i];
 }
 
 void GUIStore::setDlightReflection(int i, float number)
 {
+	if (i < 0 || i >= _modelCount) return;
 	dLightReflect[i] = number;
 }
 
 float GUIStore::getSLightReflection(int i) const
 {
+	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return sLightReflect[i];
 }
 
 void GUIStore::setSlightReflection(int i, float number)
 {
+	if (i < 0 || i >= _modelCount) return;
 	sLightReflect[i] = number;
 }
 
