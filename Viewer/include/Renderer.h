@@ -54,6 +54,7 @@ private:
 	void filterLightSources(const std::vector<std::shared_ptr<Light>>& allLights, std::vector<std::shared_ptr<LightParallelSource>>* const parallelLights, std::vector<std::shared_ptr<LightPointSource>>* const pointLights) const;
 	glm::vec3 computeColorsFromPointLights(const std::vector<std::shared_ptr<LightPointSource>>& lights, const glm::vec3& color, const ShadingType& shade, const GUIStore& store, const Face& face, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye, const MeshModel& model, int& index) const;
 	glm::vec3 getLightCenter(const LightPointSource& light, const glm::mat4x4& transform) const;
+	bool Renderer::getLinearInterpolationOfPoints(int x, int y, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, float* const alpha, float* const beta, float* const gama, bool* const changed) const;
 
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);

@@ -318,8 +318,11 @@ void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& poi
 	}
 }
 
-bool Renderer::isPointInTriangle(int x, int y, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, float* const pixelZ)
+bool Renderer::getLinearInterpolationOfPoints(int x, int y, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, float* const alpha, float* const beta, float* const gama, bool* const changed) const
 {
+	if (changed != nullptr) {
+		*changed = false;
+	}
 	//source: http://totologic.blogspot.com/2014/01/accurate-point-in-triangle-test.html
 	int x1 = point1.x, x2 = point2.x, x3 = point3.x;
 	int y1 = point1.y, y2 = point2.y, y3 = point3.y;
@@ -334,6 +337,26 @@ bool Renderer::isPointInTriangle(int x, int y, const glm::vec3& point1, const gl
 	if (b < 0.0f || b > 1.0f) return false;
 	float c = 1.0f - a - b;
 	if (c < 0.0f || c > 1.0f) return false;
+	if (alpha == nullptr || beta == nullptr || gama == nullptr) {
+		//do nothing
+	}
+	else {
+		*alpha = a;
+		*beta = b;
+		*gama = c;
+		if (changed != nullptr) {
+			*changed = true;
+		}
+	}
+	return true;
+}
+
+bool Renderer::isPointInTriangle(int x, int y, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, float* const pixelZ)
+{
+	float a = 0.0f, b = 0.0f, c = 0.0f;
+	bool value = getLinearInterpolationOfPoints(x, y, point1, point2, point3, &a, &b, &c, nullptr);
+	if (value == false) return false;
+	float z1 = point1.z, z2 = point2.z, z3 = point3.z;
 	if (pixelZ != nullptr) {
 		*pixelZ = a * z1 + b * z2 + c * z3;
 	}
@@ -420,7 +443,7 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 	for each (std::shared_ptr<LightPointSource> light in lights)
 	{
 		if (shade == ShadingType::FLAT) {
-			float finalFlatI = getFlatReflectionIllumination(store, getLightCenter(*light, transform), face.getFaceNormal(), transform, x, y, cameraEye,index);
+			float finalFlatI = getFlatReflectionIllumination(store, getLightCenter(*light, transform), face.getFaceNormal(), transform, x, y, cameraEye, index);
 			currentColor = finalFlatI * (light->getLightColor()) + (1.0f - finalFlatI) * currentColor;
 			// manipulatecolor
 		}
@@ -430,6 +453,18 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 		}
 		else if (shade == ShadingType::PHONG)
 		{
+			std::map<int, glm::vec3> normals = model.getNormalForVertices();
+			if (normals.size() != 3) continue;
+			glm::vec3 normal1 = translatePointIndicesToPixels(glm::vec4(normals.at(face.GetVertexIndex(0)), 1.0f), transform);
+			glm::vec3 normal2 = translatePointIndicesToPixels(glm::vec4(normals.at(face.GetVertexIndex(1)), 1.0f), transform);
+			glm::vec3 normal3 = translatePointIndicesToPixels(glm::vec4(normals.at(face.GetVertexIndex(2)), 1.0f), transform);
+			float a = 0.0f, b = 0.0f, c = 0.0f;
+			bool changed = false;
+			getLinearInterpolationOfPoints(x, y, normal1, normal2, normal3, &a, &b, &c, &changed);
+			if (!changed) continue;
+			glm::vec3 pixelNormal = a*normal1 + b*normal2 + c*normal3;
+			float finalFlatI = getFlatReflectionIllumination(store, getLightCenter(*light, transform), pixelNormal, transform, x, y, cameraEye, index);
+			currentColor = finalFlatI * (light->getLightColor()) + (1.0f - finalFlatI) * currentColor;
 			// manipulate color
 		}
 	}
@@ -740,7 +775,7 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
-			colorTriangle(p1, p2, p3, modelColor, store, face, completeTransform, scene, *model,index);
+			colorTriangle(p1, p2, p3, modelColor, store, face, completeTransform, scene, *model, index);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);

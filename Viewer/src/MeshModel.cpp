@@ -174,7 +174,7 @@ void MeshModel::setMaxBoundingBoxVec(glm::vec4 max)
 	maxBoundingBoxVec = max;
 }
 
-std::map<int, glm::vec3> MeshModel::getNormalForVertices()
+std::map<int, glm::vec3> MeshModel::getNormalForVertices() const
 {
 	return finalNormalPerVertex;
 }

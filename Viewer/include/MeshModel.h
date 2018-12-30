@@ -98,5 +98,5 @@ public:
 	glm::vec4 getMaxBoundingBoxVec() const;
 	void setMinBoundingBoxVec(glm::vec4 min);
 	void setMaxBoundingBoxVec(glm::vec4 max);
-	std::map<int, glm::vec3> getNormalForVertices();
+	std::map<int, glm::vec3> getNormalForVertices() const;
 };
