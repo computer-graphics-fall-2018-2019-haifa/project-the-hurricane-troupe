@@ -52,7 +52,6 @@ public:
 	std::vector<glm::vec3> getVertices();
 	std::vector<Face> getFaces();
 	// Add more methods/functionality as needed...
-	glm::vec3 getMEshModelCente();
 	/* returns the updated transformation as a result of rotations, scalings and translations */
 	const glm::mat4x4& GetWorldTransformation();
 	/* scales model in the following way:
@@ -95,8 +94,8 @@ public:
 
 	void getScalingFactors(float* xFactor, float* yFactor, float* zFactor) const;
 	void getCoordinateDifference(float* const xDelta, float* const yDelta, float* const zDelta) const;
-	glm::vec4 getMinBoundingBoxVec();
-	glm::vec4 getMaxBoundingBoxVec();
+	glm::vec4 getMinBoundingBoxVec() const;
+	glm::vec4 getMaxBoundingBoxVec() const;
 	void setMinBoundingBoxVec(glm::vec4 min);
 	void setMaxBoundingBoxVec(glm::vec4 max);
 	std::map<int, glm::vec3> getNormalForVertices();

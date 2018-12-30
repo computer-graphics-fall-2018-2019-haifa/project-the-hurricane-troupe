@@ -82,8 +82,6 @@ int main(int argc, char **argv)
 	scene.AddCamera(mainCam);
 	scene.SetActiveCameraIndex(0);
 
-	LightPointSource light;
-	scene.AddLight(std::make_shared<LightPointSource>(light));
 	// This is the main game loop..
     while (!glfwWindowShouldClose(window))
     {

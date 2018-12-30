@@ -269,29 +269,29 @@ float Renderer::getMin(float a, float b, float c, float d)
 	return getMin(getMin(a, b), getMin(c, d));
 }
 
-float Renderer::getFinalReflectionI(const GUIStore& store, glm::vec3& faceNormal, glm::vec3& lightCenter,int x,int y, glm::vec3 cameraEye) {
+float Renderer::getFlatReflectionIllumination(const GUIStore& store, const glm::vec3& lightCenter, const glm::vec3& faceNormal, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye) const {
 	float Ia, Id, Is;
 	//========= Ambient
 	{
 		Ia = store.getALightReflection()*store.getAmbientReflectionIntinsety();
 	}
 
-
+	glm::vec3 pixelFaceNormal = translatePointIndicesToPixels(glm::vec4(faceNormal, 1.0f), transform);
 	//========= defuse reflection
 	{
 		float Kd = store.getDefuseReflectionIntinsety();
 		float Kl = store.getDLightReflection();
 		glm::vec2 finalL = glm::vec2(x - lightCenter.x, y - lightCenter.y);
-		glm::vec2 finalN = glm::vec2(faceNormal.x - x, faceNormal.y - y);
+		glm::vec2 finalN = glm::vec2(pixelFaceNormal.x - x, pixelFaceNormal.y - y);
 		float lLen = glm::distance(glm::vec2(x, y), glm::vec2(lightCenter.x, lightCenter.y));
-		float nLen = glm::distance(glm::vec2(x, y), glm::vec2(faceNormal.x, faceNormal.y));
+		float nLen = glm::distance(glm::vec2(x, y), glm::vec2(pixelFaceNormal.x, pixelFaceNormal.y));
 		Id =  (Kd*Kl*glm::dot(finalL, finalN)) / (nLen*lLen);
 	}
 
 	//========= specular reflection
 	{
 
-		float d = faceNormal.x - lightCenter.x;
+		float d = pixelFaceNormal.x - lightCenter.x;
 		float Kd = store.getDefuseReflectionIntinsety();
 		float Ks = store.getSLightReflection();
 		float shine = store.getShine();
@@ -307,13 +307,12 @@ float Renderer::getFinalReflectionI(const GUIStore& store, glm::vec3& faceNormal
 	return Ia + Id + Is;
 }
 
-void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const GUIStore& store, glm::vec3& faceNormal, glm::vec3& lightCenter,glm::vec3 cameraEye, const Scene& scene)
+void Renderer::colorYsInTriangle(int x, int minY, int maxY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const GUIStore& store, const Face& face, const glm::mat4x4& transform, const Scene& scene)
 {
 	for (int y = maxY; y >= minY; --y) {
 		float pixelZ = -1000.0f;
 		if (isPointInTriangle(x, y, point1, point2, point3, &pixelZ)) {
-			float finalFlatI = getFinalReflectionI(store, faceNormal, lightCenter,x,y,cameraEye);
-			glm::vec3 finalColor = generateColorCorrectly(x, y, pixelZ, color, scene, store, finalFlatI);
+			glm::vec3 finalColor = generateColorCorrectly(x, y, pixelZ, color, scene, store, transform, face.getFaceNormal());
 			colorPixel(x, y, pixelZ, finalColor);
 		}
 	}
@@ -388,14 +387,16 @@ glm::vec3 Renderer::generateColorFromAmbientLighting(const glm::vec3& ambientCol
 	return intensity * ambientColor + (1.0f - intensity) * color;
 }
 
-glm::vec3 Renderer::generateColorFromLightSources(const glm::vec3& color, std::vector<std::shared_ptr<Light>> lights) const
+glm::vec3 Renderer::generateColorFromLightSources(const glm::vec3& color, std::vector<std::shared_ptr<Light>> lights, const ShadingType& shade, const GUIStore& store, const glm::vec3& faceNormal, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye) const
 {
 	std::vector<std::shared_ptr<LightParallelSource>> parallelLights(0);
 	std::vector<std::shared_ptr<LightPointSource>> pointLights(0);
 	filterLightSources(lights, &parallelLights, &pointLights);
-	//computeColorsFromParallelLights();
-	//computeColorsFromLightSources();
-	return color;
+
+	glm::vec3 currentColor = color;
+	//currentColor = computeColorsFromParallelLights();
+	currentColor = computeColorsFromPointLights(pointLights, currentColor, shade, store, faceNormal, transform, x, y, cameraEye);
+	return currentColor;
 }
 
 void Renderer::filterLightSources(const std::vector<std::shared_ptr<Light>>& allLights, std::vector<std::shared_ptr<LightParallelSource>>* const parallelLights, std::vector<std::shared_ptr<LightPointSource>>* const pointLights) const
@@ -413,34 +414,42 @@ void Renderer::filterLightSources(const std::vector<std::shared_ptr<Light>>& all
 	}
 }
 
-glm::vec3 Renderer::generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const Scene& scene, const GUIStore & store,float& flatI) const
+glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_ptr<LightPointSource>>& lights, const glm::vec3& color, const ShadingType& shade, const GUIStore& store, const glm::vec3& faceNormal, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye) const
+{
+	glm::vec3 currentColor = color;
+	for each (std::shared_ptr<LightPointSource> light in lights)
+	{
+		if (shade == ShadingType::FLAT) {
+			float finalFlatI = getFlatReflectionIllumination(store, getLightCenter(*light, transform), faceNormal, transform, x, y, cameraEye);
+			currentColor = finalFlatI * (light->getLightColor()) + (1.0f - finalFlatI) * currentColor;
+			// manipulatecolor
+		}
+		else if (shade == ShadingType::GOURAUD)
+		{
+			//manipulate color
+		}
+		else if (shade == ShadingType::PHONG)
+		{
+			// manipulate color
+		}
+	}
+
+	return currentColor;
+}
+
+glm::vec3 Renderer::generateColorCorrectly(int x, int y, float pixelZ, const glm::vec3 originalColor, const Scene& scene, const GUIStore & store, const glm::mat4x4& transform, const glm::vec3& faceNormal) const
 {
 	glm::vec3 newColor = originalColor;
 	ShadingType shading = store.getShading();
 	// Order of these calls is important!
-	newColor = generateColorFromShading(shading, newColor,flatI);
 	newColor = generateColorFromAmbientLighting(store.getAmbientLightColor(), store.getAmbientLightIntensity(), newColor);
-	newColor = generateColorFromLightSources(newColor, scene.getLights());
+	glm::vec3 pixelCameraEye = translatePointIndicesToPixels(scene.getActiveCamera().getEyeVector(), transform);
+	newColor = generateColorFromLightSources(newColor, scene.getLights(), shading, store, faceNormal, transform, x, y, pixelCameraEye);
 	newColor = generateColorFromFog(x, y, pixelZ, newColor, store);
 	// Do not change the above order of these calls!
 	return newColor;
 }
 
-glm::vec3 Renderer::generateColorFromShading(const ShadingType & shade, const glm::vec3& color,float& flatI) const
-{
-	if (shade == ShadingType::FLAT) {
-		// manipulatecolor
-	}
-	else if (shade == ShadingType::GOURAUD)
-	{
-		//manipulate color
-	}
-	else if (shade == ShadingType::PHONG)
-	{
-		// manipulate color
-	}
-	return color;
-}
 
 void Renderer::plotLineHigh(int x1, int y1, float z1, int x2, int y2, float z2, const glm::vec3& color) {
 	int deltaX = x2 - x1;
@@ -488,7 +497,7 @@ void Renderer::plotLineLow(int x1, int y1, float z1, int x2, int y2, float z2, c
 	}
 }
 
-glm::vec3 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform)
+glm::vec3 Renderer::translatePointIndicesToPixels(const glm::vec4 & _point, const glm::mat4x4 & fullTransform) const
 {
 	glm::vec4 point = fullTransform * _point;
 
@@ -527,7 +536,7 @@ void Renderer::drawLine(const glm::vec3& point1, const glm::vec3& point2, const 
 	}
 }
 
-void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const GUIStore& store, glm::vec3& faceNormal,glm::vec3 lightCenter, glm::vec3 cameraEye, const Scene& scene)
+void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const GUIStore& store, const Face& face, const glm::mat4x4& completeTransform, const Scene& scene)
 {
 	//steps:
 	/*
@@ -541,7 +550,7 @@ void Renderer::colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm
 	int minY = getMin(p1.y, p2.y, p3.y);
 	int maxY = getMax(p1.y, p2.y, p3.y);
 	for (int x = minX; x <= maxX; ++x) {
-		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color,store, faceNormal,lightCenter,cameraEye,scene);
+		colorYsInTriangle(x, minY, maxY, p1, p2, p3, color, store, face, completeTransform, scene);
 	}
 }
 
@@ -673,14 +682,14 @@ void Renderer::handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex
 	drawLine(point7, point8, color);
 }
 
-glm::vec4 Renderer::getLightCenter(const Scene& scene){
-	Light activeLight = scene.getActiveLight();
-	glm::vec3 min = activeLight.getMinBoundingBoxVec();
-	glm::vec3 max = activeLight.getMaxBoundingBoxVec();
+glm::vec3 Renderer::getLightCenter(const LightPointSource& light, const glm::mat4x4& transform) const {
+	glm::vec3 min = light.getMinBoundingBoxVec();
+	glm::vec3 max = light.getMaxBoundingBoxVec();
 	float xAvg = (min.x + max.x) / 2.0f;
 	float yAvg = (min.y + max.y) / 2.0f;
 	float zAvg = (min.z + max.z) / 2.0f;
-	return glm::vec4(xAvg, yAvg, zAvg,1.0f);
+	glm::vec4 point = glm::vec4(xAvg, yAvg, zAvg, 1.0f);
+	return translatePointIndicesToPixels(point, transform);
 }
 
 void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
@@ -690,7 +699,6 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	glm::vec3 yellowColor(1.0f, 1.0f, 0.0f);
 	glm::vec3 pinkColor(1.0f, 20.0f/255.0f, 147.0f/255.0f);
 	Camera activeCam = scene.getActiveCamera();
-	glm::vec4 lightCenter = getLightCenter(scene);
 	glm::vec3 cameraEye = activeCam.getEyeVector();
 	glm::mat4x4 camTransformation = activeCam.getProjectionTransformation() * activeCam.getViewTransformationInverse();
 	int index = -1;
@@ -706,7 +714,6 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 		std::vector<Face> faces = model->getFaces();
 		glm::mat4x4 modelTransform = model->GetWorldTransformation();
 		glm::mat4x4 completeTransform =  camTransformation * modelTransform;
-		//std::map<int, glm::vec3> normalsForVertices = model->getNormalForVertices();
 		Utils::Normals whichNormal = store.getModelNormalStatus(index);
 		float maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
 		if (faces.size() > 0) {
@@ -732,11 +739,8 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 			glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
 			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
-			glm::vec3 lightCenterInPixel = translatePointIndicesToPixels(lightCenter, completeTransform);
-			//drawTriangle(p1, p2, p3, triangleColor);
-			glm::vec3 faceNormalInPixel = translatePointIndicesToPixels(glm::vec4(face.getFaceNormal(), 1.0f), completeTransform);
-			glm::vec3 cameraEyeInPixel = translatePointIndicesToPixels(glm::vec4(cameraEye, 1.0f), completeTransform);
-			colorTriangle(p1, p2, p3, modelColor,store, faceNormalInPixel, lightCenterInPixel,cameraEyeInPixel,scene);
+
+			colorTriangle(p1, p2, p3, modelColor,store, face, completeTransform, scene);
 			/* --------------------------------------------------------------------------------------------- */
 			/* Normal calculations */
 			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);
@@ -837,7 +841,7 @@ void Renderer::drawLightModels(const Scene & scene, const GUIStore& store)
 			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
 
 
-			colorTriangle(p1, p2, p3, color, store,face.getFaceNormal(),light->getMEshModelCente(),scene.getActiveCamera().getEyeVector(),scene);
+			colorTriangle(p1, p2, p3, color, store, face, completeTransform, scene);
 
 			maxX = getMax(x1, x2, x3, maxX); minX = getMin(x1, x2, x3, minX);
 			maxY = getMax(y1, y2, y3, maxY); minY = getMin(y1, y2, y3, minY);
