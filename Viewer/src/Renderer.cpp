@@ -453,14 +453,39 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 		else if (shade == ShadingType::GOURAUD)
 		{
 			//manipulate color
-		}
-		else if (shade == ShadingType::PHONG)
-		{
 			std::map<int, glm::vec3> normals = model.getNormalForVertices();
 			if (face.hasNormals() == false) continue;
 			glm::vec3 normal1 = translatePointIndicesToPixels(glm::vec4(normals.at(face.GetVertexIndex(0)), 1.0f), transform);
 			glm::vec3 normal2 = translatePointIndicesToPixels(glm::vec4(normals.at(face.GetVertexIndex(1)), 1.0f), transform);
 			glm::vec3 normal3 = translatePointIndicesToPixels(glm::vec4(normals.at(face.GetVertexIndex(2)), 1.0f), transform);
+			
+			float finalFlatI1 = getFlatReflectionIllumination(store, getLightCenter(*light, transform), normal1, transform, x, y, cameraEye, index,false);
+			glm::vec3 colorForVertex1 = finalFlatI1 * (light->getLightColor()) + (1.0f - finalFlatI1) * currentColor;
+
+
+
+			float finalFlatI2 = getFlatReflectionIllumination(store, getLightCenter(*light, transform), normal2, transform, x, y, cameraEye, index,false);
+			glm::vec3 colorForVertex2 = finalFlatI2 * (light->getLightColor()) + (1.0f - finalFlatI2) * currentColor;
+
+
+			float finalFlatI = getFlatReflectionIllumination(store, getLightCenter(*light, transform), normal3, transform, x, y, cameraEye, index,false);
+			glm::vec3 colorForVertex3 = finalFlatI * (light->getLightColor()) + (1.0f - finalFlatI) * currentColor;
+	
+			
+			float a = 0.0f, b = 0.0f, c = 0.0f;
+			bool changed = false;
+			getLinearInterpolationOfPoints(x, y, originalPoint1, originalPoint2, originalPoint3, &a, &b, &c, &changed);
+			if (changed == false) continue;
+
+			currentColor = a * colorForVertex1 + b * colorForVertex2 + c * colorForVertex3;
+		}
+		else if (shade == ShadingType::PHONG)
+		{
+			std::map<int, glm::vec3> normals = model.getNormalForVertices();
+			if (face.hasNormals() == false) continue;
+			glm::vec3 normal1 = translatePointIndicesToPixels(glm::vec4(normals[face.GetVertexIndex(0)], 1.0f), transform);
+			glm::vec3 normal2 = translatePointIndicesToPixels(glm::vec4(normals[face.GetVertexIndex(1)], 1.0f), transform);
+			glm::vec3 normal3 = translatePointIndicesToPixels(glm::vec4(normals[face.GetVertexIndex(2)], 1.0f), transform);
 			float a = 0.0f, b = 0.0f, c = 0.0f;
 			bool changed = false;
 			getLinearInterpolationOfPoints(x, y, originalPoint1, originalPoint2, originalPoint3, &a, &b, &c, &changed);
