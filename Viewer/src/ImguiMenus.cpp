@@ -618,11 +618,11 @@ void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io) {
 				handleTranslationFromKeyboardInput(name, scene, store, io, moveSpeed, true);
 			}
 			else if (light->getLightType() == LightType::PARALLEL) {
-				glm::vec3 direction = store.getActualLightDirection(index);
+				glm::vec3 actualDirection = store.getActualLightDirection(index);
 				glm::vec3 userDirection = store.getUserSettingLightDirection(index);
 				float x = userDirection.x, y = userDirection.y, z = userDirection.z;
-				float actualX = direction.x, actualY = direction.y, actualZ = direction.z;
-				ImGui::Text("Current Direction: ");
+				float actualX = actualDirection.x, actualY = actualDirection.y, actualZ = actualDirection.z;
+				ImGui::Text("Current Direction (Normalized): ");
 				ImGui::Text(stringToCharSeq("X: " + std::to_string(actualX)));
 				ImGui::SameLine();
 				ImGui::Text(stringToCharSeq("Y: " + std::to_string(actualY)));
@@ -636,8 +636,12 @@ void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io) {
 				store.updateUserSettingLightDirection(index, x, y, z);
 
 				if (ImGui::Button(stringIntConcatenate("Set New Direction##", index))) {
-					store.updateActualLightDirection(index, x, y, z);
-					scene.updateLightDirection(index, x, y, z);
+					glm::vec3 normalizedDirection = glm::normalize(glm::vec3(x, y, z));
+					float a = normalizedDirection.x;
+					float b = normalizedDirection.y;
+					float c = normalizedDirection.z;
+					store.updateActualLightDirection(index, a, b, c);
+					scene.updateLightDirection(index, a, b, c);
 				}
 			}
 		}
