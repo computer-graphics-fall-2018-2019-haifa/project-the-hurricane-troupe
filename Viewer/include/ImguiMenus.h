@@ -11,7 +11,7 @@ class GUIStore
 {
 private:
 	const int SYNCERROR = -50;
-	const float ERRORREFLECTION = -1.0f;
+	const glm::vec3 ERRORREFLECTION = glm::vec3(0.0f,0.0f,0.0f);
 	const float INITIALMODELSPEED = 1.0f; //pixels
 	const float INITIALMODELNORMALLENGTH = 0.5f;
 	const glm::vec3 INITIALMESHMODELCOLOR = glm::vec3(1.0f, 0.0f, 0.0f); //red color
@@ -52,12 +52,14 @@ private:
 	glm::vec3 _ambientLightColor;
 	float _ambientLightIntensity;
 	std::vector<std::pair<glm::vec3, glm::vec3>> _Lights_actualDirection_UserDirection;
-	std::vector<float> ambientReflectionIntinsety;
-	std::vector<float> defuseReflectionIntinsety;
+	std::vector<glm::vec3> ambientReflectionIntinsety;
+	std::vector<glm::vec3> defuseReflectionIntinsety;
+	std::vector<glm::vec3> specularReflectionIntinsety;
 	std::vector<float> shine;
-	std::vector<float> aLightReflect;
-	std::vector<float> dLightReflect;
-	std::vector<float> sLightReflect;
+	std::vector<glm::vec3> aLightReflect;
+	std::vector<glm::vec3> dLightReflect;
+	std::vector<glm::vec3> sLightReflect;
+	bool nonUniformMaterial;
 	//Camera variables
 	int cameraCount;
 	std::vector<Mode> projModeForCams;
@@ -119,18 +121,22 @@ public:
 	Mode getProjModeForCam(int i) const;
 	void setCameraManipulated(int i, bool isManipulated);
 	bool isCameraManipulated(int i) const;
-	float getAmbientReflectionIntinsety(int index) const;
-	void setAmbientReflectionIntinsety(int index,float number);
-	float getDefuseReflectionIntinsety(int index) const;
-	void setDefuseReflectionIntinsety(int index, float number);
+	glm::vec3 getAmbientReflectionIntinsety(int index) const;
+	void setAmbientReflectionIntinsety(int index,glm::vec3 color);
+	glm::vec3 getDefuseReflectionIntinsety(int index) const;
+	void setDefuseReflectionIntinsety(int index, glm::vec3 color);
+	glm::vec3 getSpecularReflectionIntinsety(int index) const;
+	void setSpecularReflectionIntinsety(int index, glm::vec3 color);
 	float getShine(int index) const;
 	void setShine(int index, float number);
-	float getALightReflection(int index) const;
-	void setAlightReflection(int index, float number);
-	float getDLightReflection(int index) const;
-	void setDlightReflection(int index, float number);
-	float getSLightReflection(int index) const;
-	void setSlightReflection(int index, float number);
+	glm::vec3 getALightReflection(int index) const;
+	void setAlightReflection(int index, glm::vec3 color);
+	glm::vec3 getDLightReflection(int index) const;
+	void setDlightReflection(int index, glm::vec3 color);
+	glm::vec3 getSLightReflection(int index) const;
+	void setSlightReflection(int index, glm::vec3 color);
+	bool getNonUniformMaterial() const;
+	void setNonUniformMaterial(bool _bool);
 };
 
 void DrawImguiMenus(ImGuiIO& io, Scene& scene);

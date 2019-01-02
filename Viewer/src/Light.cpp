@@ -5,7 +5,10 @@ Light::Light(const LightType& type):
 	MeshModel(Utils::LoadMeshModel(".\\..\\..\\project-the-hurricane-troupe\\Data\\obj_examples\\demo.obj")), 
 	_lightType(type),
 	_lightIndex(lightObjectsAmount++),
-	_lightColor(BLACKCOLOR)
+	_lightColor(glm::vec3(1.0f, 1.0f, 1.0f)),
+	specularColor(glm::vec3(1.0f,1.0f,1.0f)),
+	diffuseColor(glm::vec3(1.0f,1.0f,1.0f)),
+	ambientColor(glm::vec3(1.0f,1.0f,1.0f))
 {
 }
 
@@ -43,6 +46,36 @@ void Light::setLightIntensity(const float intensity)
 LightType Light::getLightType() const
 {
 	return _lightType;
+}
+
+void Light::setLightAmbientColor(glm::vec3 color)
+{
+	ambientColor = color;
+}
+
+glm::vec3 Light::getLightAmbientColor() const
+{
+	return ambientColor;
+}
+
+void Light::setLightDiffuseColor(glm::vec3 color)
+{
+	diffuseColor = color;
+}
+
+glm::vec3 Light::getLightDiffuseColor() const
+{
+	 return diffuseColor;
+}
+
+void Light::setLightSpecularColor(glm::vec3 color)
+{
+	specularColor = color;
+}
+
+glm::vec3 Light::getLightSpecularColor() const
+{
+	return specularColor;
 }
 
 void Light::setDirection(const glm::vec3 & dir)

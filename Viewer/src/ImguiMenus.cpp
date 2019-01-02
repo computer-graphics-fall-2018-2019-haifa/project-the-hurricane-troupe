@@ -322,25 +322,29 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	//Ambient settings
 	{
 		ImGui::Text("Ambient Light:");
-		float ambientReflection = store.getAmbientReflectionIntinsety(index);
-		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##AmbientIntensity", index), &ambientReflection, 0.0f, 1.0f)) {
-			store.setAmbientReflectionIntinsety(index, ambientReflection);
+		glm::vec3 ambientReflection = store.getALightReflection(index);
+		if (ImGui::ColorEdit3(stringIntConcatenate("Ambient##", index), (float*)&ambientReflection)) {
+			store.setAlightReflection(index, ambientReflection);
 		}
-		float ambientReflected = store.getALightReflection(index);
-		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##AmbientReflection", index), &ambientReflected, 0.0f, 1.0f)) {
-			store.setAlightReflection(index, ambientReflected);
-		}
+		//float ambientReflected = store.getALightReflection(index);
+		//if (ImGui::SliderFloat(stringIntConcatenate("Reflected##AmbientReflection", index), &ambientReflected, 0.0f, 1.0f)) {
+		//	store.setAlightReflection(index, ambientReflected);
+		//}
 	}
 	ImGui::NextColumn();
 	//Defuse settings
 	{
 		ImGui::Text("Diffuse Light:");
-		float diffuseIntensity = store.getDefuseReflectionIntinsety(index);
-		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##DiffuseIntensity", index), &diffuseIntensity, 0.0f, 1.0f)) {
-			store.setDefuseReflectionIntinsety(index, diffuseIntensity);
-		}
-		float diffuseLightReflection = store.getDLightReflection(index);
-		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##DiffuseReflection", index), &diffuseLightReflection, 0.0f, 1.0f)) {
+		//float diffuseIntensity = store.getDefuseReflectionIntinsety(index);
+		//if (ImGui::SliderFloat(stringIntConcatenate("Intensity##DiffuseIntensity", index), &diffuseIntensity, 0.0f, 1.0f)) {
+		//	store.setDefuseReflectionIntinsety(index, diffuseIntensity);
+		//}
+		//float diffuseLightReflection = store.getDLightReflection(index);
+		//if (ImGui::SliderFloat(stringIntConcatenate("Reflected##DiffuseReflection", index), &diffuseLightReflection, 0.0f, 1.0f)) {
+		//	store.setDlightReflection(index, diffuseLightReflection);
+		//}
+		glm::vec3 diffuseLightReflection = store.getDLightReflection(index);
+		if (ImGui::ColorEdit3(stringIntConcatenate("Diffuse##", index), (float*)&diffuseLightReflection)) {
 			store.setDlightReflection(index, diffuseLightReflection);
 		}
 	}
@@ -348,19 +352,22 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 	//Specular settings
 	{
 		ImGui::Text("Specular:");
-		float defuse = store.getDefuseReflectionIntinsety(index);
-		if (ImGui::SliderFloat(stringIntConcatenate("Intensity##SpecularIntensity", index), &defuse, 0.0f, 1.0f)) {
-			store.setDefuseReflectionIntinsety(index, defuse);
-		}
+		//float defuse = store.getDefuseReflectionIntinsety(index);
+		//if (ImGui::SliderFloat(stringIntConcatenate("Intensity##SpecularIntensity", index), &defuse, 0.0f, 1.0f)) {
+		//	store.setDefuseReflectionIntinsety(index, defuse);
+		//}
 		float shine = store.getShine(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Shine##SpecularShine", index), &shine, 0.0f, 1.0f)) {
 			store.setShine(index, shine);
 		}
-
+		glm::vec3 specularLightReflection = store.getSLightReflection(index);
+		if (ImGui::ColorEdit3(stringIntConcatenate("Specular##", index), (float*)&specularLightReflection)) {
+			store.setSlightReflection(index, specularLightReflection);
+		}/*
 		float specularLightReflection = store.getSLightReflection(index);
 		if (ImGui::SliderFloat(stringIntConcatenate("Reflected##LightReflection", index), &specularLightReflection, 0.0f, 1.0f)) {
 			store.setSlightReflection(index, specularLightReflection);
-		}
+		}*/
 	}
 	ImGui::Columns(1);
 }
@@ -606,11 +613,43 @@ void showLightManipulationGUI(Scene& scene, GUIStore& store, ImGuiIO& io) {
 		}
 		if (isSelected) {
 			scene.SetActiveLight(index);
-			glm::vec3 newColor = light->getLightColor();
-			if (ImGui::ColorEdit3(stringIntConcatenate("Color##", index), (float*)&newColor)) {
-				store.setLightColor(index, newColor);
-				light->setLightColor(newColor);
+			//glm::vec3 newColor = light->getLightColor();
+			//if (ImGui::ColorEdit3(stringIntConcatenate("Color##", index), (float*)&newColor)) {
+			//	store.setLightColor(index, newColor);
+			//	light->setLightColor(newColor);
+			//}
+			ImGui::Columns(3, "##LightsSettings");
+			//Ambient settings
+			{
+				ImGui::Text("Ambient Light:");
+				glm::vec3 ambientReflection = light->getLightAmbientColor();
+				if (ImGui::ColorEdit3(stringIntConcatenate("Ambient##", index), (float*)&ambientReflection)) {
+					light->setLightAmbientColor(ambientReflection);
+					store.setAmbientReflectionIntinsety(index, ambientReflection);
+				}
 			}
+			ImGui::NextColumn();
+			//Defuse settings
+			{
+				ImGui::Text("Diffuse Light:");
+				glm::vec3 diffuseLightReflection = light->getLightDiffuseColor();
+				if (ImGui::ColorEdit3(stringIntConcatenate("Diffuse##", index), (float*)&diffuseLightReflection)) {
+					light->setLightDiffuseColor(diffuseLightReflection);
+					store.setDefuseReflectionIntinsety(index, diffuseLightReflection);
+				}
+			}
+			ImGui::NextColumn();
+			//Specular settings
+			{
+				ImGui::Text("Specular:");
+				glm::vec3 specularLightReflection = light->getLightSpecularColor();
+				if (ImGui::ColorEdit3(stringIntConcatenate("Specular##", index), (float*)&specularLightReflection)) {
+					light->setLightSpecularColor(specularLightReflection);
+					store.setSpecularReflectionIntinsety(index, specularLightReflection);
+				}
+			}
+			ImGui::Columns(1);
+
 			if (light->getLightType() == LightType::POINT) {
 				float moveSpeed = store.getLightSpeed(index);
 				showLightScaleGUI(scene, store, store.isLightSymmetricScaled(index), index);
@@ -695,6 +734,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 		if (ImGui::Checkbox("Let's add some fog :O", &shouldFog)) {
 			store.setFog(shouldFog);
 		}
+
 		if (shouldFog) {
 			glm::vec3 newColor = store.getFogColor();
 			float fogDensity = store.getFogDensity();
@@ -709,6 +749,10 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 		if (ImGui::Checkbox("Check me for supersampling anti-aliasing", &shouldAntiAlias)) {
 			store.setAntiAlias(shouldAntiAlias);
 		}
+		bool nonUniform = store.getNonUniformMaterial();
+		if (ImGui::Checkbox("Wanna add a non-uniform material XD? CLICK ME", &nonUniform)) {
+			store.setNonUniformMaterial(nonUniform);
+		}
 		showShadingGUI(scene, store);
 		if (ImGui::CollapsingHeader("Models")) {
 			// List All Loaded Mesh Models
@@ -720,7 +764,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 			showCamerasListed(cameras, scene, store);
 		}
 		ImGui::Begin("Lights Menu");
-		showAmbientLightGUI(store);
+		//showAmbientLightGUI(store);
 		if (ImGui::CollapsingHeader("Lights")) {
 			// List All Lights
 			showLightningGUI(scene, store, io);
@@ -907,12 +951,14 @@ GUIStore::GUIStore(const Scene & scene) :
 	_ambientLightColor(INITIALAMBIENTLIGHTCOLOR),
 	_ambientLightIntensity(INITIALAMBIENTLIGHTINTENSITY),
 	_Lights_actualDirection_UserDirection(scene.getLightCount()),
-	ambientReflectionIntinsety(scene.GetModelCount(), 0.5f),
-	defuseReflectionIntinsety(scene.GetModelCount(), 0.5f),
+	ambientReflectionIntinsety(scene.GetModelCount(), glm::vec3(1.0f,1.0f,1.0f)),
+	defuseReflectionIntinsety(scene.GetModelCount(), glm::vec3(1.0f, 1.0f, 1.0f)),
+	specularReflectionIntinsety(scene.GetModelCount(), glm::vec3(1.0f, 1.0f, 1.0f)),
 	shine(scene.GetModelCount(), 0.5f),
-	aLightReflect(scene.GetModelCount(), 0.5f),
-	dLightReflect(scene.GetModelCount(), 0.5f),
-	sLightReflect(scene.GetModelCount(), 0.5f)
+	aLightReflect(scene.GetModelCount(), glm::vec3(1.0f, 1.0f, 1.0f)),
+	dLightReflect(scene.GetModelCount(), glm::vec3(1.0f, 1.0f, 1.0f)),
+	sLightReflect(scene.GetModelCount(), glm::vec3(1.0f, 1.0f, 1.0f)),
+	nonUniformMaterial(false)
 {
 }
 
@@ -930,12 +976,13 @@ void GUIStore::sync(const Scene& scene)
 		_isModelBoundingBoxOn.push_back(false);
 		_modelColor.push_back(INITIALMESHMODELCOLOR);
 		_modelRotationType.push_back(RotationType::MODEL);
-		ambientReflectionIntinsety.push_back(0.5f);
-		defuseReflectionIntinsety.push_back(0.5f);
+		ambientReflectionIntinsety.push_back(glm::vec3(1.0f,1.0f,1.0f));
+		defuseReflectionIntinsety.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+		specularReflectionIntinsety.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
 		shine.push_back(0.5f);
-		aLightReflect.push_back(0.5f);
-		dLightReflect.push_back(0.5f);
-		sLightReflect.push_back(0.5f);
+		aLightReflect.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+		dLightReflect.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+		sLightReflect.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
 	}
 	_modelCount = newSize;
 
@@ -1237,33 +1284,45 @@ bool GUIStore::isCameraManipulated(int i) const
 	return _isCameraBeingManipulated[i];
 }
 
-float GUIStore::getAmbientReflectionIntinsety(int i) const
+glm::vec3 GUIStore::getAmbientReflectionIntinsety(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return ambientReflectionIntinsety[i];
 }
 
-void GUIStore::setAmbientReflectionIntinsety(int i, float number)
+void GUIStore::setAmbientReflectionIntinsety(int i, glm::vec3 color)
 {
 	if (i < 0 || i >= _modelCount) return;
-	ambientReflectionIntinsety[i] = number;
+	ambientReflectionIntinsety[i] = color;
 }
 
-float GUIStore::getDefuseReflectionIntinsety(int i) const
+glm::vec3 GUIStore::getDefuseReflectionIntinsety(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return defuseReflectionIntinsety[i];
 }
 
-void GUIStore::setDefuseReflectionIntinsety(int i, float number)
+void GUIStore::setDefuseReflectionIntinsety(int i, glm::vec3 color)
 {
 	if (i < 0 || i >= _modelCount) return;
-	defuseReflectionIntinsety[i] = number;
+	defuseReflectionIntinsety[i] = color;
+}
+
+glm::vec3 GUIStore::getSpecularReflectionIntinsety(int i) const
+{
+	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
+	return specularReflectionIntinsety[i];
+}
+
+void GUIStore::setSpecularReflectionIntinsety(int i, glm::vec3 color)
+{
+	if (i < 0 || i >= _modelCount) return;
+	specularReflectionIntinsety[i] = color;
 }
 
 float GUIStore::getShine(int i) const
 {
-	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
+	if (i < 0 || i >= _modelCount) return -1.0f;
 	return shine[i];
 }
 
@@ -1273,40 +1332,50 @@ void GUIStore::setShine(int i, float number)
 	shine[i] = number;
 }
 
-float GUIStore::getALightReflection(int i) const
+glm::vec3 GUIStore::getALightReflection(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return aLightReflect[i];
 }
 
-void GUIStore::setAlightReflection(int i, float number)
+void GUIStore::setAlightReflection(int i, glm::vec3 color)
 {
 	if (i < 0 || i >= _modelCount) return;
-	aLightReflect[i] = number;
+	aLightReflect[i] = color;
 }
 
-float GUIStore::getDLightReflection(int i) const
+glm::vec3 GUIStore::getDLightReflection(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return dLightReflect[i];
 }
 
-void GUIStore::setDlightReflection(int i, float number)
+void GUIStore::setDlightReflection(int i, glm::vec3 color)
 {
 	if (i < 0 || i >= _modelCount) return;
-	dLightReflect[i] = number;
+	dLightReflect[i] = color;
 }
 
-float GUIStore::getSLightReflection(int i) const
+glm::vec3 GUIStore::getSLightReflection(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return sLightReflect[i];
 }
 
-void GUIStore::setSlightReflection(int i, float number)
+void GUIStore::setSlightReflection(int i, glm::vec3 color)
 {
 	if (i < 0 || i >= _modelCount) return;
-	sLightReflect[i] = number;
+	sLightReflect[i] = color;
+}
+
+bool GUIStore::getNonUniformMaterial() const
+{
+	return nonUniformMaterial;
+}
+
+void GUIStore::setNonUniformMaterial(bool _bool)
+{
+	nonUniformMaterial = _bool;
 }
 
 void GUIStore::setModelNormal(int i, Utils::Normals newNormal)
