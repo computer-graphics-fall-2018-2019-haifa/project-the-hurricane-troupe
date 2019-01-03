@@ -20,7 +20,9 @@ MeshModel::MeshModel(std::map<int, glm::vec3>& _finalNormalPerVertex, const std:
 	normals(normals),
 	_xScale(1.0f), _yScale(1.0f), _zScale(1.0f),
 	_xDelta(0.0f), _yDelta(0.0f), _zDelta(0.0f),
-	finalNormalPerVertex(_finalNormalPerVertex)
+	finalNormalPerVertex(_finalNormalPerVertex),
+	minBoundingBoxVec(0.0f), 
+	maxBoundingBoxVec(0.0f)
 {
 	//initialization code only
 	_translate(nullptr, nullptr, nullptr); //no translation
@@ -31,7 +33,7 @@ MeshModel::MeshModel(std::map<int, glm::vec3>& _finalNormalPerVertex, const std:
 	updateWorldTransformation(); //set the transformation.
 }
 
-MeshModel::MeshModel()
+MeshModel::MeshModel(): minBoundingBoxVec(0.0f), maxBoundingBoxVec(0.0f)
 {
 }
 

@@ -269,11 +269,11 @@ float Renderer::getMin(float a, float b, float c, float d)
 	return getMin(getMin(a, b), getMin(c, d));
 }
 
-glm::vec3 Renderer::getFlatReflectionIllumination(const GUIStore& store, const glm::vec3& lightCenter, const glm::vec3& faceNormal, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye,int& index, bool shouldPixel) const {
+glm::vec3 Renderer::getReflectionIllumination(const Light& light, const GUIStore& store, const glm::vec3& lightCenter, const glm::vec3& faceNormal, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye,int& index, bool shouldPixel, bool isParallelLight) const {
 	glm::vec3 Ia, Id, Is;
 	//========= Ambient
 	{
-		Ia = store.getALightReflection(index)*store.getAmbientReflectionIntinsety(index);
+		Ia = store.getALightReflection(index) * store.getAmbientReflectionIntinsety(index);
 	}
 	glm::vec3 pixelFaceNormal = faceNormal;
 	if (shouldPixel) {
@@ -281,9 +281,10 @@ glm::vec3 Renderer::getFlatReflectionIllumination(const GUIStore& store, const g
 	}
 	//========= defuse reflection
 	{
-		glm::vec3 Kd = store.getDefuseReflectionIntinsety(index);
-		glm::vec3 Kl = store.getDLightReflection(index);
+		glm::vec3 Kd = store.getDiffuseReflectionIntensity(index);
+		glm::vec3 Kl = store.getDiffuseLightReflection(index);
 		glm::vec2 finalL = glm::normalize(glm::vec2(x - lightCenter.x, y - lightCenter.y));
+		if (isParallelLight == false) finalL = glm::normalize(translatePointIndicesToPixels(glm::vec4(light.getDirection(), 1.0f), transform));
 		glm::vec2 finalN = glm::normalize(glm::vec2(pixelFaceNormal.x - x, pixelFaceNormal.y - y));
 		Id = (Kd*glm::dot(finalL, finalN))*Kl;
 	}
@@ -292,19 +293,29 @@ glm::vec3 Renderer::getFlatReflectionIllumination(const GUIStore& store, const g
 	{
 
 		float d = pixelFaceNormal.x - lightCenter.x;
-		glm::vec3 Kd = store.getSpecularReflectionIntinsety(index);
+		glm::vec3 Kd = store.getSpecularReflectionIntensity(index);
 		glm::vec3 Ks = store.getSLightReflection(index);
 		float shine = store.getShine(index);
 		glm::vec2 reflectionPoint((lightCenter.x + abs(2 * d)), lightCenter.y);
-		glm::vec2 finalR = glm::vec2(reflectionPoint.x - x, reflectionPoint.y - y);
-		glm::vec2 finalV = glm::vec2(x - cameraEye.x, y - cameraEye.y);
-		float rLen = glm::distance(glm::vec2(x, y), reflectionPoint);
-		float vLen = glm::distance(glm::vec2(x, y), glm::vec2(cameraEye.x, cameraEye.y));
-		float cosTeta = glm::dot(finalR, finalV) / (rLen*vLen);
+		glm::vec2 finalR = glm::normalize(glm::vec2(reflectionPoint.x - x, reflectionPoint.y - y));
+		glm::vec2 finalV = glm::normalize(glm::vec2(x - cameraEye.x, y - cameraEye.y));
+		float cosTeta = glm::dot(finalR, finalV);
 		float _pow = pow(abs(cosTeta), shine);
-		Is = (Kd*Ks*_pow);
+		Is = (Kd*_pow*Ks);
 	}
 	return Ia + Id + Is;
+}
+
+glm::vec3 Renderer::boundColor(const glm::vec3 & color) const
+{
+	glm::vec3 boundedColor = color;
+	if (boundedColor.x >= 1.0f) boundedColor.x = 1.0f;
+	if (boundedColor.x <= 0.0f) boundedColor.x = 0.0f;
+	if (boundedColor.y >= 1.0f) boundedColor.y = 1.0f;
+	if (boundedColor.y <= 0.0f) boundedColor.y = 0.0f;
+	if (boundedColor.z >= 1.0f) boundedColor.z = 1.0f;
+	if (boundedColor.z <= 0.0f) boundedColor.z = 0.0f;
+	return boundedColor;
 }
 
 void Renderer::colorYsInTriangle(int x, int minY, int maxY,int midX, int midY, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, const glm::vec3& color, const GUIStore& store, const Face& face, const glm::mat4x4& transform, const Scene& scene, const MeshModel& model, int index, std::map<int, glm::vec3>& normalsMap)
@@ -414,7 +425,7 @@ glm::vec3 Renderer::generateColorFromLightSources(const glm::vec3& color, std::v
 	filterLightSources(lights, &parallelLights, &pointLights);
 
 	glm::vec3 currentColor = color;
-	//currentColor = computeColorsFromParallelLights();
+	currentColor = computeColorsFromParallelLights(parallelLights, currentColor, shade, store, face, transform, x, y, midX, midY, cameraEye, model, index, originalPoint1, originalPoint2, originalPoint3, normalsMap);
 	currentColor = computeColorsFromPointLights(pointLights, currentColor, shade, store, face, transform, x, y, midX, midY, cameraEye, model, index, originalPoint1, originalPoint2, originalPoint3, normalsMap);
 	return currentColor;
 }
@@ -441,13 +452,8 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 	{
 
 		if (shade == ShadingType::FLAT) {
-			if (store.getNonUniformMaterial()) {
-				currentColor += getFlatReflectionIllumination(store, getLightCenter(*light, transform), face.getFaceNormal(), transform, x, y, cameraEye, index);
-				currentColor = glm::abs(glm::sin(std::rand() / (2.0f*3.14f)))*currentColor;
-			}
-			currentColor += getFlatReflectionIllumination(store, getLightCenter(*light, transform), face.getFaceNormal(), transform, midX, midY, cameraEye, index);
-			//currentColor = finalFlatI * (light->getLightColor()) + (1.0f - finalFlatI) * currentColor;
-			// manipulatecolor
+			x = midX; y = midY;
+			currentColor += getReflectionIllumination(*light, store, getLightCenter(*light, transform), face.getFaceNormal(), transform, midX, midY, cameraEye, index);
 		}
 		else if (shade == ShadingType::GOURAUD)
 		{
@@ -458,15 +464,9 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 			glm::vec3 normal2 = translatePointIndicesToPixels(glm::vec4(normalsMap.at(face.GetVertexIndex(1)), 1.0f), transform);
 			glm::vec3 normal3 = translatePointIndicesToPixels(glm::vec4(normalsMap.at(face.GetVertexIndex(2)), 1.0f), transform);
 			
-			glm::vec3 colorForVertex1 = getFlatReflectionIllumination(store, getLightCenter(*light, transform), normal1, transform, x, y, cameraEye, index,false);
-			//glm::vec3 colorForVertex1 = finalFlatI1 * (light->getLightColor()) + (1.0f - finalFlatI1) * currentColor;
-
-			glm::vec3 colorForVertex2 = getFlatReflectionIllumination(store, getLightCenter(*light, transform), normal2, transform, x, y, cameraEye, index,false);
-			//glm::vec3 colorForVertex2 = finalFlatI2 * (light->getLightColor()) + (1.0f - finalFlatI2) * currentColor;
-
-			glm::vec3 colorForVertex3 = getFlatReflectionIllumination(store, getLightCenter(*light, transform), normal3, transform, x, y, cameraEye, index,false);
-			//glm::vec3 colorForVertex3 = finalFlatI * (light->getLightColor()) + (1.0f - finalFlatI) * currentColor;
-			
+			glm::vec3 colorForVertex1 = getReflectionIllumination(*light, store, getLightCenter(*light, transform), normal1, transform, x, y, cameraEye, index,false);
+			glm::vec3 colorForVertex2 = getReflectionIllumination(*light, store, getLightCenter(*light, transform), normal2, transform, x, y, cameraEye, index,false);
+			glm::vec3 colorForVertex3 = getReflectionIllumination(*light, store, getLightCenter(*light, transform), normal3, transform, x, y, cameraEye, index,false);
 			float a = 0.0f, b = 0.0f, c = 0.0f;
 			bool changed = false;
 			getLinearInterpolationOfPoints(x, y, originalPoint1, originalPoint2, originalPoint3, &a, &b, &c, &changed);
@@ -476,7 +476,6 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 		}
 		else if (shade == ShadingType::PHONG)
 		{
-			//std::map<int, glm::vec3> normals = model.getNormalForVertices();
 			if (face.hasNormals() == false) continue;
 			glm::vec3 normal1 = translatePointIndicesToPixels(glm::vec4(normalsMap[face.GetVertexIndex(0)], 1.0f), transform);
 			glm::vec3 normal2 = translatePointIndicesToPixels(glm::vec4(normalsMap[face.GetVertexIndex(1)], 1.0f), transform);
@@ -486,14 +485,69 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 			getLinearInterpolationOfPoints(x, y, originalPoint1, originalPoint2, originalPoint3, &a, &b, &c, &changed);
 			if (changed == false) continue;
 			glm::vec3 pixelNormal = a*normal1 + b*normal2 + c*normal3;
-			currentColor += getFlatReflectionIllumination(store, getLightCenter(*light, transform), pixelNormal, transform, x, y, cameraEye, index, false);
-			//currentColor = finalFlatI * (light->getLightColor()) + (1.0f - finalFlatI) * currentColor;
-			// manipulate colo
+			currentColor += getReflectionIllumination(*light, store, getLightCenter(*light, transform), pixelNormal, transform, x, y, cameraEye, index, false);
 		}
-		currentColor = glm::vec3((currentColor.x > 1 ? 1 : currentColor.x), (currentColor.y > 1 ? 1 : currentColor.y), (currentColor.z > 1 ? 1 : currentColor.z));
 	}
 
-	return currentColor;
+	if (store.isNonUniformMaterial()) {
+		currentColor = glm::abs(glm::sin(std::rand() / (2.0f*3.14f)))*currentColor;
+	}
+	if (false) { //if beautiful non-uniform material
+		// 1 -> 2.0*3.14
+		// f -> ??
+		//==> ?? = f*2.0*3.14/1
+		float multiplier = 2.0f * 3.14f; // can be changed to 1 to a less beautiful non-uniform material..
+		currentColor = glm::vec3(glm::abs(glm::sin(currentColor.x*multiplier)), glm::abs(glm::sin(currentColor.y*multiplier)), glm::abs(glm::sin(currentColor.z*multiplier)));
+	}
+	return boundColor(currentColor);
+}
+
+glm::vec3 Renderer::computeColorsFromParallelLights(const std::vector<std::shared_ptr<LightParallelSource>>& lights, const glm::vec3 & color, const ShadingType & shade, const GUIStore & store, const Face & face, const glm::mat4x4 & transform, int x, int y, int midX, int midY, const glm::vec3 & cameraEye, const MeshModel & model, int & index, const glm::vec3 & originalPoint1, const glm::vec3 & originalPoint2, const glm::vec3 & originalPoint3, std::map<int, glm::vec3>& normalsMap) const
+{
+	glm::vec3 currentColor = color;
+	for each (std::shared_ptr<LightParallelSource> light in lights)
+	{
+		if (shade == ShadingType::FLAT) {
+			if (store.isNonUniformMaterial()) {
+				currentColor += getReflectionIllumination(*light, store, getLightCenter(*light, transform), face.getFaceNormal(), transform, x, y, cameraEye, index, true);
+				currentColor = glm::abs(glm::sin(std::rand() / (2.0f*3.14f)))*currentColor;
+			}
+			currentColor += getReflectionIllumination(*light, store, getLightCenter(*light, transform), face.getFaceNormal(), transform, midX, midY, cameraEye, index, true);
+		}
+		else if (shade == ShadingType::GOURAUD)
+		{
+			if (face.hasNormals() == false) continue;
+			glm::vec3 normal1 = translatePointIndicesToPixels(glm::vec4(normalsMap.at(face.GetVertexIndex(0)), 1.0f), transform);
+			glm::vec3 normal2 = translatePointIndicesToPixels(glm::vec4(normalsMap.at(face.GetVertexIndex(1)), 1.0f), transform);
+			glm::vec3 normal3 = translatePointIndicesToPixels(glm::vec4(normalsMap.at(face.GetVertexIndex(2)), 1.0f), transform);
+
+			glm::vec3 colorForVertex1 = getReflectionIllumination(*light, store, getLightCenter(*light, transform), normal1, transform, x, y, cameraEye, index, false, true);
+			glm::vec3 colorForVertex2 = getReflectionIllumination(*light, store, getLightCenter(*light, transform), normal2, transform, x, y, cameraEye, index, false, true);
+			glm::vec3 colorForVertex3 = getReflectionIllumination(*light, store, getLightCenter(*light, transform), normal3, transform, x, y, cameraEye, index, false, true);
+
+			float a = 0.0f, b = 0.0f, c = 0.0f;
+			bool changed = false;
+			getLinearInterpolationOfPoints(x, y, originalPoint1, originalPoint2, originalPoint3, &a, &b, &c, &changed);
+			if (changed == false) continue;
+
+			currentColor += a * colorForVertex1 + b * colorForVertex2 + c * colorForVertex3;
+		}
+		else if (shade == ShadingType::PHONG)
+		{
+			if (face.hasNormals() == false) continue;
+			glm::vec3 normal1 = translatePointIndicesToPixels(glm::vec4(normalsMap[face.GetVertexIndex(0)], 1.0f), transform);
+			glm::vec3 normal2 = translatePointIndicesToPixels(glm::vec4(normalsMap[face.GetVertexIndex(1)], 1.0f), transform);
+			glm::vec3 normal3 = translatePointIndicesToPixels(glm::vec4(normalsMap[face.GetVertexIndex(2)], 1.0f), transform);
+			float a = 0.0f, b = 0.0f, c = 0.0f;
+			bool changed = false;
+			getLinearInterpolationOfPoints(x, y, originalPoint1, originalPoint2, originalPoint3, &a, &b, &c, &changed);
+			if (changed == false) continue;
+			glm::vec3 pixelNormal = a * normal1 + b * normal2 + c * normal3;
+			currentColor += getReflectionIllumination(*light, store, getLightCenter(*light, transform), pixelNormal, transform, x, y, cameraEye, index, false, true);
+		}
+	}
+
+	return boundColor(currentColor);
 }
 
 glm::vec3 Renderer::generateColorCorrectly(int x, int y, int midX, int midY, float pixelZ, const glm::vec3 originalColor, const Scene& scene, const GUIStore & store, const glm::mat4x4& transform, const Face& face, const MeshModel& model, int& index, const glm::vec3& originalPoint1, const glm::vec3& originalPoint2, const glm::vec3& originalPoint3, std::map<int, glm::vec3>& normalsMap) const
@@ -742,13 +796,11 @@ void Renderer::handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex
 	drawLine(point7, point8, color);
 }
 
-glm::vec3 Renderer::getLightCenter(const LightPointSource& light, const glm::mat4x4& transform) const {
+glm::vec3 Renderer::getLightCenter(const Light& light, const glm::mat4x4& transform) const {
 	glm::vec3 min = light.getMinBoundingBoxVec();
 	glm::vec3 max = light.getMaxBoundingBoxVec();
-	float xAvg = (min.x + max.x) / 2.0f;
-	float yAvg = (min.y + max.y) / 2.0f;
-	float zAvg = (min.z + max.z) / 2.0f;
-	glm::vec4 point = glm::vec4(xAvg, yAvg, zAvg, 1.0f);
+	glm::vec3 avg = (min + max)*0.5f;
+	glm::vec4 point = glm::vec4(avg, 1.0f);
 	return translatePointIndicesToPixels(point, transform);
 }
 

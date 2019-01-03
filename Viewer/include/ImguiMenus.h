@@ -123,19 +123,19 @@ public:
 	bool isCameraManipulated(int i) const;
 	glm::vec3 getAmbientReflectionIntinsety(int index) const;
 	void setAmbientReflectionIntinsety(int index,glm::vec3 color);
-	glm::vec3 getDefuseReflectionIntinsety(int index) const;
+	glm::vec3 getDiffuseReflectionIntensity(int index) const;
 	void setDefuseReflectionIntinsety(int index, glm::vec3 color);
-	glm::vec3 getSpecularReflectionIntinsety(int index) const;
+	glm::vec3 getSpecularReflectionIntensity(int index) const;
 	void setSpecularReflectionIntinsety(int index, glm::vec3 color);
 	float getShine(int index) const;
 	void setShine(int index, float number);
 	glm::vec3 getALightReflection(int index) const;
 	void setAlightReflection(int index, glm::vec3 color);
-	glm::vec3 getDLightReflection(int index) const;
+	glm::vec3 getDiffuseLightReflection(int index) const;
 	void setDlightReflection(int index, glm::vec3 color);
 	glm::vec3 getSLightReflection(int index) const;
 	void setSlightReflection(int index, glm::vec3 color);
-	bool getNonUniformMaterial() const;
+	bool isNonUniformMaterial() const;
 	void setNonUniformMaterial(bool _bool);
 };
 

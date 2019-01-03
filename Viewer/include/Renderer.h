@@ -49,13 +49,14 @@ private:
 	float getZOnLine(int x, int y, int x1, int y1, float z1, int x2, int y2, float z2);
 	glm::vec3 generateColorFromFog(int x, int y, float pixelZ, const glm::vec3& originalColor, const GUIStore& store) const;
 	glm::vec3 generateColorCorrectly(int x, int y, int midX, int midY, float pixelZ, const glm::vec3 originalColor, const Scene& scene, const GUIStore & store, const glm::mat4x4& transform, const Face& face, const MeshModel& model, int& index, const glm::vec3& originalPoint1, const glm::vec3& originalPoint2, const glm::vec3& originalPoint3, std::map<int, glm::vec3>& normalsMap) const;
-	glm::vec3 generateColorFromAmbientLighting(const glm::vec3& ambientColor, const float intensity, const glm::vec3& color) const;
 	glm::vec3 generateColorFromLightSources(const glm::vec3& color, std::vector<std::shared_ptr<Light>> lights, const ShadingType& shade, const GUIStore& store, const Face& face, const glm::mat4x4& transform, int x, int y, int midX, int midY, const glm::vec3& cameraEye, const MeshModel& model, int& index, const glm::vec3& originalPoint1, const glm::vec3& originalPoint2, const glm::vec3& originalPoint3, std::map<int, glm::vec3>& normalsMap) const;
 	void filterLightSources(const std::vector<std::shared_ptr<Light>>& allLights, std::vector<std::shared_ptr<LightParallelSource>>* const parallelLights, std::vector<std::shared_ptr<LightPointSource>>* const pointLights) const;
 	glm::vec3 computeColorsFromPointLights(const std::vector<std::shared_ptr<LightPointSource>>& lights, const glm::vec3& color, const ShadingType& shade, const GUIStore& store, const Face& face, const glm::mat4x4& transform, int x, int y, int midX, int midY, const glm::vec3& cameraEye, const MeshModel& model, int& index, const glm::vec3& originalPoint1, const glm::vec3& originalPoint2, const glm::vec3& originalPoint3, std::map<int, glm::vec3>& normalsMap) const;
-	glm::vec3 getLightCenter(const LightPointSource& light, const glm::mat4x4& transform) const;
+	glm::vec3 computeColorsFromParallelLights(const std::vector<std::shared_ptr<LightParallelSource>>& lights, const glm::vec3& color, const ShadingType& shade, const GUIStore& store, const Face& face, const glm::mat4x4& transform, int x, int y, int midX, int midY, const glm::vec3& cameraEye, const MeshModel& model, int& index, const glm::vec3& originalPoint1, const glm::vec3& originalPoint2, const glm::vec3& originalPoint3, std::map<int, glm::vec3>& normalsMap) const;
+	glm::vec3 getLightCenter(const Light& light, const glm::mat4x4& transform) const;
 	bool Renderer::getLinearInterpolationOfPoints(int x, int y, const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, float* const alpha, float* const beta, float* const gama, bool* const changed) const;
-	glm::vec3 getFlatReflectionIllumination(const GUIStore& store, const glm::vec3& lightCenter, const glm::vec3& face, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye, int& index, bool shouldPixel = true) const;
+	glm::vec3 getReflectionIllumination(const Light& light, const GUIStore& store, const glm::vec3& lightCenter, const glm::vec3& face, const glm::mat4x4& transform, int x, int y, const glm::vec3& cameraEye, int& index, bool shouldPixel = true, bool isParallelLight = false) const;
+	glm::vec3 boundColor(const glm::vec3& color) const;
 
 public:
 	Renderer(int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
