@@ -343,7 +343,7 @@ void openModelManipulationWindow(const char* const modelName, Scene& scene, GUIS
 		//if (ImGui::SliderFloat(stringIntConcatenate("Reflected##DiffuseReflection", index), &diffuseLightReflection, 0.0f, 1.0f)) {
 		//	store.setDlightReflection(index, diffuseLightReflection);
 		//}
-		glm::vec3 diffuseLightReflection = store.getDLightReflection(index);
+		glm::vec3 diffuseLightReflection = store.getDiffuseLightReflection(index);
 		if (ImGui::ColorEdit3(stringIntConcatenate("Diffuse##", index), (float*)&diffuseLightReflection)) {
 			store.setDlightReflection(index, diffuseLightReflection);
 		}
@@ -749,7 +749,7 @@ void GenerateGUI(ImGuiIO& io, Scene& scene, GUIStore& store)
 		if (ImGui::Checkbox("Check me for supersampling anti-aliasing", &shouldAntiAlias)) {
 			store.setAntiAlias(shouldAntiAlias);
 		}
-		bool nonUniform = store.getNonUniformMaterial();
+		bool nonUniform = store.isNonUniformMaterial();
 		if (ImGui::Checkbox("Wanna add a non-uniform material XD? CLICK ME", &nonUniform)) {
 			store.setNonUniformMaterial(nonUniform);
 		}
@@ -1296,7 +1296,7 @@ void GUIStore::setAmbientReflectionIntinsety(int i, glm::vec3 color)
 	ambientReflectionIntinsety[i] = color;
 }
 
-glm::vec3 GUIStore::getDefuseReflectionIntinsety(int i) const
+glm::vec3 GUIStore::getDiffuseReflectionIntensity(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return defuseReflectionIntinsety[i];
@@ -1308,7 +1308,7 @@ void GUIStore::setDefuseReflectionIntinsety(int i, glm::vec3 color)
 	defuseReflectionIntinsety[i] = color;
 }
 
-glm::vec3 GUIStore::getSpecularReflectionIntinsety(int i) const
+glm::vec3 GUIStore::getSpecularReflectionIntensity(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return specularReflectionIntinsety[i];
@@ -1344,7 +1344,7 @@ void GUIStore::setAlightReflection(int i, glm::vec3 color)
 	aLightReflect[i] = color;
 }
 
-glm::vec3 GUIStore::getDLightReflection(int i) const
+glm::vec3 GUIStore::getDiffuseLightReflection(int i) const
 {
 	if (i < 0 || i >= _modelCount) return ERRORREFLECTION;
 	return dLightReflect[i];
@@ -1368,7 +1368,7 @@ void GUIStore::setSlightReflection(int i, glm::vec3 color)
 	sLightReflect[i] = color;
 }
 
-bool GUIStore::getNonUniformMaterial() const
+bool GUIStore::isNonUniformMaterial() const
 {
 	return nonUniformMaterial;
 }
