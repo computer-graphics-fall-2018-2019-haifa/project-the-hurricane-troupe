@@ -284,19 +284,24 @@ glm::vec3 Renderer::getReflectionIllumination(const Light& light, const GUIStore
 		glm::vec3 Kd = store.getDiffuseReflectionIntensity(index);
 		glm::vec3 Kl = store.getDiffuseLightReflection(index);
 		glm::vec2 finalL = glm::normalize(glm::vec2(x - lightCenter.x, y - lightCenter.y));
-		if (isParallelLight == false) finalL = glm::normalize(translatePointIndicesToPixels(glm::vec4(light.getDirection(), 1.0f), transform));
+		if (isParallelLight) finalL = glm::normalize(translatePointIndicesToPixels(glm::vec4(light.getDirection(), 1.0f), transform));
 		glm::vec2 finalN = glm::normalize(glm::vec2(pixelFaceNormal.x - x, pixelFaceNormal.y - y));
 		Id = (Kd*glm::dot(finalL, finalN))*Kl;
 	}
 	
 	//========= specular reflection
 	{
-
 		float d = pixelFaceNormal.x - lightCenter.x;
+		if (isParallelLight) {
+			d = pixelFaceNormal.x - light.getDirection().x;
+		}
 		glm::vec3 Kd = store.getSpecularReflectionIntensity(index);
 		glm::vec3 Ks = store.getSLightReflection(index);
 		float shine = store.getShine(index);
 		glm::vec2 reflectionPoint((lightCenter.x + abs(2 * d)), lightCenter.y);
+		if (isParallelLight) {
+			reflectionPoint = glm::vec2((light.getDirection().x + abs(2 * d)), light.getDirection().y);
+		}
 		glm::vec2 finalR = glm::normalize(glm::vec2(reflectionPoint.x - x, reflectionPoint.y - y));
 		glm::vec2 finalV = glm::normalize(glm::vec2(x - cameraEye.x, y - cameraEye.y));
 		float cosTeta = glm::dot(finalR, finalV);
@@ -489,10 +494,10 @@ glm::vec3 Renderer::computeColorsFromPointLights(const std::vector<std::shared_p
 		}
 	}
 
-	if (store.isNonUniformMaterial()) {
-		currentColor = glm::abs(glm::sin(std::rand() / (2.0f*3.14f)))*currentColor;
-	}
-	if (false) { //if beautiful non-uniform material
+	//if (store.isNonUniformMaterial()) {
+	//	currentColor = glm::abs(glm::sin(std::rand() / (2.0f*3.14f)))*currentColor;
+	//}
+	if (store.isNonUniformMaterial()) { //if beautiful non-uniform material
 		// 1 -> 2.0*3.14
 		// f -> ??
 		//==> ?? = f*2.0*3.14/1
