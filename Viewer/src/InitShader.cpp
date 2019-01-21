@@ -72,7 +72,7 @@ InitShader(const string& vShaderFile, const string& fShaderFile)
 					{ vShaderFile, GL_VERTEX_SHADER, NULL },
 					{ fShaderFile, GL_FRAGMENT_SHADER, NULL }
 				 };
-
+	
     GLuint program = glCreateProgram();
     
     for ( int i = 0; i < 2; ++i ) {

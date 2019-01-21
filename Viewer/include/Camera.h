@@ -52,7 +52,7 @@ public:
 	bool isPerspectiveProjection() const;
 	ProjectionType whichProjection() const;
 	void setActiveProjection(const ProjectionType& type);
-	void setOrthographicProjection(const float left = -1.0, const float right = 1.0, const float bottom = -1.0, const float top = 1.0, const float near = 1.0, const float far = -1.0);
+	void setOrthographicProjection(const float left = -1.0, const float right = 1.0, const float bottom = -1.0, const float top = 1.0, const float _near = 1.0, const float _far = -1.0);
 	void setPerspectiveProjection(const float fovy, const float aspectRatio, const float _near, const float _far, AngleUnits unit = AngleUnits::DEGREES);
 
 	void SetZoom(const float zoom);

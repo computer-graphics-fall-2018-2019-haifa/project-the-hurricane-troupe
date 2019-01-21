@@ -7,6 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 #include "ClosestPixel.h"
+#include "ShaderProgram.h"
+#include "Texture2D.h"
 #include <memory>
 
 /*
@@ -15,6 +17,13 @@
 class Renderer
 {
 private:
+	ShaderProgram lightShader;
+	ShaderProgram colorShader;
+	//Texture2D texture1;
+
+
+
+	//===============================
 	float *colorBuffer;
 	ClosestPixel zBuffer;
 	int viewportWidth;
@@ -63,8 +72,6 @@ public:
 	~Renderer();
 
 	void Render(const Scene& scene, const GUIStore& store);
-	void SwapBuffers();
-	void ClearColorBuffer(const glm::vec3& color);
 	void SetViewport(Scene* const scene, int viewportWidth, int viewportHeight, int viewportX = 0, int viewportY = 0);
 	void drawLine(const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& color);
 	void colorTriangle(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& color, const GUIStore& store, const Face& face, const glm::mat4x4& completeTransform, const Scene& scene, const MeshModel& model, const int& index, std::map<int, glm::vec3>& normalsMap);
@@ -73,7 +80,6 @@ public:
 	void handleBoundingBoxDrawing(const GUIStore& store, int modelGUIIndex, float x1, float y1, float z1, float x2, float y2, float z2, const glm::mat4x4& transform, const glm::vec3& color);
 
 	void drawMeshModels(const Scene& scene, const GUIStore& store);
-	void drawChess();
 	void drawCameraModels(const Scene& scene);
 	void drawLightModels(const Scene& scene, const GUIStore& store);
 	void updatePixelValues();

@@ -16,7 +16,7 @@ Renderer::Renderer(int viewportWidth, int viewportHeight, int viewportX, int vie
 	colorBuffer(nullptr),
 	zBuffer(GetClearColor())
 {
-	initOpenGLRendering();
+	colorShader.loadShaders(".\\..\\..\\project-the-hurricane-troupe\\Viewer\\shaders\\vshader_color.glsl", ".\\..\\..\\project-the-hurricane-troupe\\Viewer\\shaders\\fshader_color.glsl");
 	SetViewport(nullptr, viewportWidth, viewportHeight, viewportX, viewportY);
 }
 
@@ -59,17 +59,6 @@ void Renderer::createBuffers(int viewportWidth, int viewportHeight)
 	}
 }
 
-void Renderer::ClearColorBuffer(const glm::vec3& color)
-{
-	for (int i = 0; i < viewportWidth; i++)
-	{
-		for (int j = 0; j < viewportHeight; j++)
-		{
-			putPixel(i, j, color);
-		}
-	}
-}
-
 void Renderer::SetViewport(Scene* const scene, int viewportWidth, int viewportHeight, int viewportX, int viewportY)
 {
 	this->viewportX = viewportX;
@@ -92,113 +81,10 @@ void Renderer::Render(const Scene& scene, const GUIStore& store)
 	zBuffer.resetColor();
 	zBuffer.setAntiAliasing(store.isAntiAliased());
 	drawMeshModels(scene, store);
-	drawCameraModels(scene);
-	drawLightModels(scene, store);
-	updatePixelValues();
-}
+	//drawCameraModels(scene);
+	//drawLightModels(scene, store);
+	//updatePixelValues();
 
-
-void Renderer::drawChess() {
-	// Draw a chess board in the middle of the screen
-	/**/
-	for (int i = 100; i < viewportWidth - 100; i++)
-	{
-		for (int j = 100; j < viewportHeight - 100; j++)
-		{
-			int mod_i = i / 50;
-			int mod_j = j / 50;
-
-			int odd = (mod_i + mod_j) % 2;
-			if (odd)
-			{
-				putPixel(i, j, glm::vec3(0, 1, 0));
-			}
-			else
-			{
-				putPixel(i, j, glm::vec3(1, 0, 0));
-			}
-		}
-	}
-
-}
-
-//##############################
-//##OpenGL stuff. Don't touch.##
-//##############################
-
-// Basic tutorial on how opengl works:
-// http://www.opengl-tutorial.org/beginners-tutorials/tutorial-2-the-first-triangle/
-// don't linger here for now, we will have a few tutorials about opengl later.
-void Renderer::initOpenGLRendering()
-{
-	// Creates a unique identifier for an opengl texture.
-	glGenTextures(1, &glScreenTex);
-
-	// Same for vertex array object (VAO). VAO is a set of buffers that describe a renderable object.
-	glGenVertexArrays(1, &glScreenVtc);
-
-	GLuint buffer;
-
-	// Makes this VAO the current one.
-	glBindVertexArray(glScreenVtc);
-
-	// Creates a unique identifier for a buffer.
-	glGenBuffers(1, &buffer);
-
-	// (-1, 1)____(1, 1)
-	//	     |\  |
-	//	     | \ | <--- The exture is drawn over two triangles that stretch over the screen.
-	//	     |__\|
-	// (-1,-1)    (1,-1)
-	const GLfloat vtc[] = {
-		-1, -1,
-		 1, -1,
-		-1,  1,
-		-1,  1,
-		 1, -1,
-		 1,  1
-	};
-
-	const GLfloat tex[] = {
-		0,0,
-		1,0,
-		0,1,
-		0,1,
-		1,0,
-		1,1 };
-
-	// Makes this buffer the current one.
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-
-	// This is the opengl way for doing malloc on the gpu. 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vtc) + sizeof(tex), NULL, GL_STATIC_DRAW);
-
-	// memcopy vtc to buffer[0,sizeof(vtc)-1]
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vtc), vtc);
-
-	// memcopy tex to buffer[sizeof(vtc),sizeof(vtc)+sizeof(tex)]
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vtc), sizeof(tex), tex);
-
-	// Loads and compiles a sheder.
-	GLuint program = InitShader("vshader.glsl", "fshader.glsl");
-
-	// Make this program the current one.
-	glUseProgram(program);
-
-	// Tells the shader where to look for the vertex position data, and the data dimensions.
-	GLint  vPosition = glGetAttribLocation(program, "vPosition");
-	glEnableVertexAttribArray(vPosition);
-	glVertexAttribPointer(vPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	// Same for texture coordinates data.
-	GLint  vTexCoord = glGetAttribLocation(program, "vTexCoord");
-	glEnableVertexAttribArray(vTexCoord);
-	glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid *)sizeof(vtc));
-
-	//glProgramUniform1i( program, glGetUniformLocation(program, "texture"), 0 );
-
-	// Tells the shader to use GL_TEXTURE0 as the texture id.
-	glUniform1i(glGetUniformLocation(program, "texture"), 0);
 }
 
 void Renderer::createOpenGLBuffer()
@@ -214,26 +100,6 @@ void Renderer::createOpenGLBuffer()
 	glViewport(0, 0, viewportWidth, viewportHeight);
 }
 
-void Renderer::SwapBuffers()
-{
-	// Makes GL_TEXTURE0 the current active texture unit
-	glActiveTexture(GL_TEXTURE0);
-
-	// Makes glScreenTex (which was allocated earlier) the current texture.
-	glBindTexture(GL_TEXTURE_2D, glScreenTex);
-
-	// memcopy's colorBuffer into the gpu.
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, viewportWidth, viewportHeight, GL_RGB, GL_FLOAT, colorBuffer);
-
-	// Tells opengl to use mipmapping
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	// Make glScreenVtc current VAO
-	glBindVertexArray(glScreenVtc);
-
-	// Finally renders the data.
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
 
 
 float Renderer::getMax(float a, float b)
@@ -822,56 +688,87 @@ void Renderer::drawMeshModels(const Scene& scene, const GUIStore& store) {
 	std::vector<std::shared_ptr<MeshModel>> models = scene.getSceneModels();
 	for each (std::shared_ptr<MeshModel> model in models)
 	{
-		++index;
-		std::map<int, glm::vec3> normalsMap = model->getNormalForVertices();
-		glm::vec3 modelColor = store.getModelColor(index);
-		glm::vec3 triangleColor = generateColorVariation(modelColor, 30.0f);
-		std::vector<glm::vec2> textures = model->getTextures();
-		std::vector<glm::vec3> normals = model->getNormals();
-		std::vector<glm::vec3> vertices = model->getVertices();
-		std::vector<Face> faces = model->getFaces();
-		glm::mat4x4 modelTransform = model->GetWorldTransformation();
-		glm::mat4x4 completeTransform = camTransformation * modelTransform;
-		Utils::Normals whichNormal = store.getModelNormalStatus(index);
-		float maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
-		if (faces.size() > 0) {
-			int i = faces[0].GetVertexIndex(0);
-			maxX = vertices[i].x; minX = vertices[i].x;
-			maxY = vertices[i].y; minY = vertices[i].y;
-			maxZ = vertices[i].z; minZ = vertices[i].z;
-		}
-		for each (Face face in faces)
+		// Activate the 'colorShader' program (vertex and fragment shaders)
+		colorShader.use();
+
+		// Set the uniform variables
+		colorShader.setUniform("model", model->GetWorldTransformation());
+		colorShader.setUniform("view", activeCam.getViewTransformationInverse());
+		colorShader.setUniform("projection", activeCam.getProjectionTransformation());
+		colorShader.setUniform("material.textureMap", 0);
+
+		// Set 'texture1' as the active texture at slot #0
+		//texture1.bind(0);
+
+		// Drag our model's faces (triangles) in fill mode
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glBindVertexArray(model->GetVAO());
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)model->getModelVertices().size());
+		glBindVertexArray(0);
+
+		// Unset 'texture1' as the active texture at slot #0
+		//texture1.unbind(0);
+
+		colorShader.setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
+
+		// Drag our model's faces (triangles) in line mode (wireframe)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glBindVertexArray(model->GetVAO());
+		glDrawArrays(GL_TRIANGLES, 0, model->getModelVertices().size());
+		glBindVertexArray(0);
+
 		{
-			int v1 = face.GetVertexIndex(0);
-			float x1 = vertices[v1].x, y1 = vertices[v1].y, z1 = vertices[v1].z;
-			int v2 = face.GetVertexIndex(1);
-			float x2 = vertices[v2].x, y2 = vertices[v2].y, z2 = vertices[v2].z;
-			int v3 = face.GetVertexIndex(2);
-			float x3 = vertices[v3].x, y3 = vertices[v3].y, z3 = vertices[v3].z;
+			++index;
+			std::map<int, glm::vec3> normalsMap = model->getNormalForVertices();
+			glm::vec3 modelColor = store.getModelColor(index);
+			glm::vec3 triangleColor = generateColorVariation(modelColor, 30.0f);
+			std::vector<glm::vec2> textures = model->getTextures();
+			std::vector<glm::vec3> normals = model->getNormals();
+			std::vector<glm::vec3> vertices = model->getVertices();
+			std::vector<Face> faces = model->getFaces();
+			glm::mat4x4 modelTransform = model->GetWorldTransformation();
+			glm::mat4x4 completeTransform = camTransformation * modelTransform;
+			Utils::Normals whichNormal = store.getModelNormalStatus(index);
+			float maxX = 0, maxY = 0, maxZ = 0, minX = 0, minY = 0, minZ = 0;
+			if (faces.size() > 0) {
+				int i = faces[0].GetVertexIndex(0);
+				maxX = vertices[i].x; minX = vertices[i].x;
+				maxY = vertices[i].y; minY = vertices[i].y;
+				maxZ = vertices[i].z; minZ = vertices[i].z;
+			}
+			for each (Face face in faces)
+			{
+				int v1 = face.GetVertexIndex(0);
+				float x1 = vertices[v1].x, y1 = vertices[v1].y, z1 = vertices[v1].z;
+				int v2 = face.GetVertexIndex(1);
+				float x2 = vertices[v2].x, y2 = vertices[v2].y, z2 = vertices[v2].z;
+				int v3 = face.GetVertexIndex(2);
+				float x3 = vertices[v3].x, y3 = vertices[v3].y, z3 = vertices[v3].z;
 
 
-			glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
-			glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
-			glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
+				glm::vec4 w1 = glm::vec4(x1, y1, z1, 1.0f);
+				glm::vec4 w2 = glm::vec4(x2, y2, z2, 1.0f);
+				glm::vec4 w3 = glm::vec4(x3, y3, z3, 1.0f);
 
-			glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
-			glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
-			glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
-			colorTriangle(p1, p2, p3, modelColor, store, face, completeTransform, scene, *model, index,normalsMap);
-			/* --------------------------------------------------------------------------------------------- */
-			/* Normal calculations */
-			handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);
+				glm::vec3 p1 = translatePointIndicesToPixels(w1, completeTransform);
+				glm::vec3 p2 = translatePointIndicesToPixels(w2, completeTransform);
+				glm::vec3 p3 = translatePointIndicesToPixels(w3, completeTransform);
+				//colorTriangle(p1, p2, p3, modelColor, store, face, completeTransform, scene, *model, index,normalsMap);
+				/* --------------------------------------------------------------------------------------------- */
+				/* Normal calculations */
+				handleFaceNormalsDrawing(whichNormal, store, face, normals, w1, p1, w2, p2, w3, p3, completeTransform, index, greenColor, blueColor);
 
-			/* Max and Min Points in the mesh */
-			maxX = getMax(x1, x2, x3, maxX); minX = getMin(x1, x2, x3, minX);
-			maxY = getMax(y1, y2, y3, maxY); minY = getMin(y1, y2, y3, minY);
-			maxZ = getMax(z1, z2, z3, maxZ); minZ = getMin(z1, z2, z3, minZ);
+				/* Max and Min Points in the mesh */
+				maxX = getMax(x1, x2, x3, maxX); minX = getMin(x1, x2, x3, minX);
+				maxY = getMax(y1, y2, y3, maxY); minY = getMin(y1, y2, y3, minY);
+				maxZ = getMax(z1, z2, z3, maxZ); minZ = getMin(z1, z2, z3, minZ);
 
+			}
+
+			handleBoundingBoxDrawing(store, index, maxX, maxY, maxZ, minX, minY, minZ, completeTransform, pinkColor);
+			model->setMaxBoundingBoxVec(completeTransform*glm::vec4(maxX, maxY, maxZ, 1.0f));
+			model->setMinBoundingBoxVec(completeTransform*glm::vec4(minX, minY, minZ, 1.0f));
 		}
-
-		handleBoundingBoxDrawing(store, index, maxX, maxY, maxZ, minX, minY, minZ, completeTransform, pinkColor);
-		model->setMaxBoundingBoxVec(completeTransform*glm::vec4(maxX, maxY, maxZ, 1.0f));
-		model->setMinBoundingBoxVec(completeTransform*glm::vec4(minX, minY, minZ, 1.0f));
 	}
 }
 

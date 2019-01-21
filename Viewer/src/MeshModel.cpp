@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 
+
 void MeshModel::updateWorldTransformation() {
 	if (isTransformUpdated == true) return;
 	worldTransform = worldRotationTransform.getTransform() * translateTransform * rotateTransform.getTransform() * scaleTransform;
@@ -31,13 +32,71 @@ MeshModel::MeshModel(std::map<int, glm::vec3>& _finalNormalPerVertex, const std:
 	worldRotationTransform = RotationMatrix(); //no rotation
 	isTransformUpdated = false;
 	updateWorldTransformation(); //set the transformation.
+	openGLInitializations();
+}
+
+void MeshModel::openGLInitializations()
+{
+
+	modelVertices.reserve(3 * faces.size());
+	for (int i = 0; i < faces.size(); i++)
+	{
+		Face currentFace = faces.at(i);
+		for (int j = 0; j < 3; ++j)
+		{
+			int vertexIndex = currentFace.GetVertexIndex(j);
+			int normalIndex = currentFace.GetNormalIndex(j);
+
+			Vertex vertex;
+			vertex.position = vertices[vertexIndex];
+			vertex.normal = normals[normalIndex];
+
+			if (textureCoords.size() > 0)
+			{
+				int textureCoordsIndex = currentFace.GetTextureIndex(j);
+				vertex.tex = textureCoords[textureCoordsIndex];
+			}
+
+			modelVertices.push_back(vertex);
+		}
+	}
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
+
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, modelVertices.size() * sizeof(Vertex), &modelVertices[0], GL_STATIC_DRAW);
+
+	// Vertex Positions
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	// Normals attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	// Vertex Texture Coords
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+
+	// unbind to make sure other code does not change it somewhere else
+	glBindVertexArray(0);
+}
+
+std::vector<Vertex> MeshModel::getModelVertices()
+{
+	return modelVertices;
 }
 
 MeshModel::MeshModel(): minBoundingBoxVec(0.0f), maxBoundingBoxVec(0.0f)
 {
+	openGLInitializations();
 }
 
-MeshModel::~MeshModel() {}
+MeshModel::~MeshModel() {
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+}
 
 
 const glm::mat4x4& MeshModel::GetWorldTransformation() {
@@ -182,6 +241,7 @@ std::map<int, glm::vec3> MeshModel::getNormalForVertices() const
 }
 
 
+
 void MeshModel::_translate(const float * const xAddition, const float * const yAddition, const float * const zAddition)
 {
 	float x = 0, y = 0, z = 0;
@@ -217,4 +277,9 @@ void MeshModel::_rotateAroundWorld(const RotationRules& rotation) {
 	worldRotationTransform.setYRotation(rotation.getAngleY(AngleUnits::RADIANS));
 	worldRotationTransform.setZRotation(rotation.getAngleZ(AngleUnits::RADIANS));
 	isTransformUpdated = false;
+}
+
+GLuint MeshModel::GetVAO() const
+{
+	return vao;
 }

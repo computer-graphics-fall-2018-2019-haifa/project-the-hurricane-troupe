@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 {
 	// Create GLFW window
 	int windowWidth = 2048, windowHeight = 1152;
-	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "Mesh Viewer");
+	GLFWwindow* window = SetupGlfwWindow(windowWidth, windowHeight, "hurricane troupe rulez xxx");
 	if (!window)
 	{
 		std::cout << "Could not open window!" << std::endl;
@@ -69,13 +69,14 @@ int main(int argc, char **argv)
 
 	// Setup ImGui
 	ImGuiIO& io = SetupDearImgui(window);
+	glEnable(GL_DEPTH_TEST);
 
 	GUIStore store = GUIStore(scene);
 
 	// Register a mouse scroll-wheel callback
 	glfwSetScrollCallback(window, ScrollCallback);
 	Camera mainCam = Camera(
-		glm::vec4(0.0f, 0.0f, 4.0f, 0.0f),
+		glm::vec4(0.0f, 0.0f, 14.0f, 0.0f),
 		glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
 		glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 	);
@@ -114,7 +115,7 @@ GLFWwindow* SetupGlfwWindow(int w, int h, const char* window_name)
 	if (!glfwInit())
 		return NULL;
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #if __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -141,7 +142,6 @@ ImGuiIO& SetupDearImgui(GLFWwindow* window)
 	// Setup style
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
-
 	return io;
 }
 
@@ -151,31 +151,51 @@ void StartFrame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 }
-
 void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& io, const GUIStore& store)
 {
 	// Render the menus
 	ImGui::Render();
 
-	// That's how you get the current width/height of the frame buffer (for example, after the window was resized)
-	int frameBufferWidth, frameBufferHeight;
-	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
+	glfwMakeContextCurrent(window);
+	// clear color buffer, zbuffer and set background color
+	glm::vec4 clearColor = GetClearColor();
+	//glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.w);
 
-	// Resize handling here... (a suggestion)
-	renderer.SetViewport(&scene, frameBufferWidth, frameBufferHeight);
-
-	// Clear the frame buffer
-	renderer.ClearColorBuffer(GetClearColor());
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render the scene
-	renderer.Render(scene, store);
-
-	// Swap buffers
-	renderer.SwapBuffers();
+	renderer.Render(scene,store);
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	glfwSwapBuffers(window);
 }
+
+//
+//void RenderFrame(GLFWwindow* window, Scene& scene, Renderer& renderer, ImGuiIO& io, const GUIStore& store)
+//{
+//	// Render the menus
+//	ImGui::Render();
+//
+//	// That's how you get the current width/height of the frame buffer (for example, after the window was resized)
+//	int frameBufferWidth, frameBufferHeight;
+//	glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
+//
+//	// Resize handling here... (a suggestion)
+//	renderer.SetViewport(&scene, frameBufferWidth, frameBufferHeight);
+//
+//	// Clear the frame buffer
+//	renderer.ClearColorBuffer(GetClearColor());
+//
+//	// Render the scene
+//	renderer.Render(scene, store);
+//
+//	// Swap buffers
+//	renderer.SwapBuffers();
+//
+//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//	glfwSwapBuffers(window);
+//
+//}
 
 void Cleanup(GLFWwindow* window)
 {

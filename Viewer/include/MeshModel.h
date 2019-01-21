@@ -7,12 +7,18 @@
 #include "RotationMatrix.h"
 #include "RotationRules.h"
 #include "AxisTypes.h"
+#include <glad/glad.h>
 
 /*
  * MeshModel class.
  * This class represents a mesh model (with faces and normals informations).
  * You can use Utils::LoadMeshModel to create instances of this class from .obj files.
  */
+struct Vertex {
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec2 tex;
+};
 
 class MeshModel
 {
@@ -22,6 +28,9 @@ protected:
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> textures;
+	std::vector<Vertex> modelVertices;
+	std::vector<glm::vec3> textureCoords;
+
 	glm::vec4 color;
 	glm::vec4 minBoundingBoxVec;
 	glm::vec4 maxBoundingBoxVec;
@@ -31,6 +40,8 @@ protected:
 	glm::mat4x4 translateTransform;
 	glm::mat4x4 scaleTransform;
 	glm::mat4x4 worldTransform;
+	GLuint vao;
+	GLuint vbo;
 	void updateWorldTransformation();
 	bool isTransformUpdated;
 	float _xScale, _yScale, _zScale;
@@ -40,7 +51,7 @@ protected:
 	void _rotate(const RotationRules& rotation);
 	void _rotateAroundWorld(const RotationRules & rotation);
 public:
-
+	
 	MeshModel(std::map<int, glm::vec3>& _finalNormalPerVertex, const std::vector<Face>& faces, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::string& modelName = "");
 	MeshModel();
 	virtual ~MeshModel();
@@ -99,4 +110,9 @@ public:
 	void setMinBoundingBoxVec(glm::vec4 min);
 	void setMaxBoundingBoxVec(glm::vec4 max);
 	std::map<int, glm::vec3> getNormalForVertices() const;
+	void openGLInitializations();
+	std::vector<Vertex> getModelVertices();
+	GLuint GetVAO() const;
+
 };
+

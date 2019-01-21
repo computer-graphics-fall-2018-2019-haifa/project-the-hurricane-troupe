@@ -1,7 +1,8 @@
 #pragma once
+#include "MeshModel.h"
 #include <glm/glm.hpp>
 #include <string>
-#include "MeshModel.h"
+
 
 /*
  * Utils class.

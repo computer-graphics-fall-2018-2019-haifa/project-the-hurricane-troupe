@@ -79,24 +79,24 @@ void Camera::setActiveProjection(const ProjectionType& type)
 }
 
 
-void Camera::_SetPerspectiveProjection(const float left, const float right, const float bottom, const float top, const float near, const float far)
+void Camera::_SetPerspectiveProjection(const float left, const float right, const float bottom, const float top, const float _near, const float _far)
 {
 	this->_projLeft = left;
 	this->_projRight = right;
 	this->_projBottom = bottom;
 	this->_projTop = top;
-	this->_projNear = near;
-	this->_projFar = far;
+	this->_projNear = _near;
+	this->_projFar = _far;
 	perspectionProjectionTransformation = glm::transpose(glm::mat4x4(
-	{ (2.0 * near) / (right - left)		,	0								,		(right + left) / (right - left)		,	0,
-		0								,	(2.0 * near) / (top - bottom)	,		 (top + bottom) / (top - bottom)	,	0,
-		0								,	0								,		-1 * (far + near) / (far - near)	,	-1 * ((2 * far * near) / (far - near)),
+	{ (2.0 * _near) / (right - left)		,	0								,		(right + left) / (right - left)		,	0,
+		0								,	(2.0 * _near) / (top - bottom)	,		 (top + bottom) / (top - bottom)	,	0,
+		0								,	0								,		-1 * (_far + _near) / (_far - _near)	,	-1 * ((2 * _far * _near) / (_far - _near)),
 		0								,	0								,	    -1									,	0
 	}));
 	setActiveProjection(ProjectionType::PERSPECTIVE);
 }
 
-void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio, const float near, const float far, AngleUnits unit)
+void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio, const float _near, const float _far, AngleUnits unit)
 {
 	float actualFovy = 0.0f;
 	switch (unit) {
@@ -113,9 +113,9 @@ void Camera::setPerspectiveProjection(const float fovy, const float aspectRatio,
 
 	if (actualFovy <= MINVIEWABLEANGLE || actualFovy >= MAXVIEWABLEANGLE) return;
 
-	float height = glm::abs(glm::tan(actualFovy / 2.0f)*near);
+	float height = glm::abs(glm::tan(actualFovy / 2.0f)*_near);
 	float width = aspectRatio * height;
-	_SetPerspectiveProjection(-width, width, -height, height, near, far);
+	_SetPerspectiveProjection(-width, width, -height, height, _near, _far);
 	this->_projFovy = fovy;
 	this->_projAspectRatio = aspectRatio;
 }
